@@ -85,9 +85,12 @@ void test(Table& table, std::string_view hash_name, std::ostream& out = std::cou
 
 template<typename HashType>
 void RunTest(std::string_view hash_name, std::ostream& out = std::cout) {
-    LondonCrimeTable<HashType> table;
-    buildTable(table);
-    test(table, hash_name);
+    {
+        LOG_DURATION(hash_name);
+        LondonCrimeTable<HashType> table;
+        buildTable(table);
+        test(table, hash_name);
+    }
     std::cout << std::endl;
 }
 
