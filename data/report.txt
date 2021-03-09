@@ -1,0 +1,261 @@
+std::hash:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1770
+max_bucket = 8
+empty buckets = 2022
+std::hash: 60479 ms
+
+boost::hash:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1727
+max_bucket = 6
+empty buckets = 1979
+boost::hash: 73325 ms
+
+CityHash32:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1744
+max_bucket = 6
+empty buckets = 1996
+CityHash32: 57386 ms
+
+CityHash64:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1731
+max_bucket = 6
+empty buckets = 1983
+CityHash64: 56011 ms
+
+CityHash64WithSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1695
+max_bucket = 6
+empty buckets = 1947
+CityHash64WithSeed: 152786 ms
+
+CityHash64WithSeeds:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1710
+max_bucket = 6
+empty buckets = 1962
+CityHash64WithSeeds: 153828 ms
+
+CityHash128:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1715
+max_bucket = 6
+empty buckets = 1967
+CityHash128: 62377 ms
+
+CityHash128WithSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1694
+max_bucket = 7
+empty buckets = 1946
+CityHash128WithSeed: 164928 ms
+
+FarmHash32:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1722
+max_bucket = 7
+empty buckets = 1974
+FarmHash32: 61944 ms
+
+FarmHash32WithSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1687
+max_bucket = 7
+empty buckets = 1939
+FarmHash32WithSeed: 178897 ms
+
+FarmHash64:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1710
+max_bucket = 6
+empty buckets = 1962
+FarmHash64: 58320 ms
+
+FarmHash64WithSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1712
+max_bucket = 7
+empty buckets = 1964
+FarmHash64WithSeed: 160554 ms
+
+FarmHash64WithSeeds:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1735
+max_bucket = 7
+empty buckets = 1987
+FarmHash64WithSeeds: 174654 ms
+
+FarmHash128:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1738
+max_bucket = 6
+empty buckets = 1990
+FarmHash128: 70410 ms
+
+FarmHash128WithSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1698
+max_bucket = 6
+empty buckets = 1950
+FarmHash128WithSeed: 182582 ms
+
+xxHash32:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1719
+max_bucket = 5
+empty buckets = 1971
+xxHash32: 167206 ms
+
+xxHash64:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1700
+max_bucket = 7
+empty buckets = 1952
+xxHash64: 163533 ms
+
+xxHash128:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1687
+max_bucket = 7
+empty buckets = 1939
+xxHash128: 169919 ms
+
+XXH3_64bits:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1714
+max_bucket = 7
+empty buckets = 1966
+XXH3_64bits: 58789 ms
+
+XXH3_64bits_withSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1704
+max_bucket = 7
+empty buckets = 1956
+XXH3_64bits_withSeed: 164969 ms
+
+XXH3_128bits:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1699
+max_bucket = 6
+empty buckets = 1951
+XXH3_128bits: 60225 ms
+
+XXH3_128bits_withSeed:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1687
+max_bucket = 7
+empty buckets = 1939
+XXH3_128bits_withSeed: 164235 ms
+
+MurmurHash1:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1719
+max_bucket = 6
+empty buckets = 1971
+MurmurHash1: 162176 ms
+
+MurmurHash1Aligned:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1719
+max_bucket = 6
+empty buckets = 1971
+MurmurHash1Aligned: 161361 ms
+
+MurmurHash2:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1719
+max_bucket = 6
+empty buckets = 1971
+MurmurHash2: 157505 ms
+
+MurmurHash2:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1719
+max_bucket = 6
+empty buckets = 1971
+MurmurHash2: 160589 ms
+
+MurmurHash64A:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1733
+max_bucket = 6
+empty buckets = 1985
+MurmurHash64A: 153166 ms
+
+MurmurHash64B:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1694
+max_bucket = 6
+empty buckets = 1946
+MurmurHash64B: 154372 ms
+
+MurmurHash3_x64_128:
+max_load_factor = 1
+load_factor = 0.950462
+bucket_count = 5087
+collisions = 1711
+max_bucket = 7
+empty buckets = 1963
+MurmurHash3_x64_128: 159150 ms
+

@@ -49,18 +49,21 @@ void buildTable(Table& table) {
     std::string lsoa_code, borough, major_category, minor_category;
     int value, year, month;
 
-    //int count_value = 0;
+    int count_value_in_csv = 0;
+    int count_value_in_hash_map = 0;
     while(in.read_row(lsoa_code, borough, major_category, minor_category, value, year, month)){
         //std::cout << lsoa_code << std::endl;
         table[lsoa_code][borough][major_category][minor_category][year][month] = value;
-        //count_value += table[lsoa_code][borough][major_category][minor_category][year][month];
+        //count_value_in_csv += value;
+        //count_value_in_hash_map += table[lsoa_code][borough][major_category][minor_category][year][month];
     }
-    //std::cout << "count_value = " << count_value << std::endl;
+    //std::cout << "count_value_in_csv = " << count_value_in_csv << std::endl;
+    //std::cout << "count_value_in_hash_map = " << count_value_in_hash_map << std::endl;
 }
 
 template <typename Table>
 void test(Table& table, std::string_view hash_name, std::ostream& out = std::cout) {
-    std::cout << hash_name << ":" << std::endl;
+    out << hash_name << ":" << std::endl;
     size_t collisions = 0, empty = 0, max_bucket = 0;
     for (auto bucket = table.bucket_count(); bucket--;) {
         if (table.bucket_size(bucket) == 0)
@@ -86,12 +89,12 @@ void test(Table& table, std::string_view hash_name, std::ostream& out = std::cou
 template<typename HashType>
 void RunTest(std::string_view hash_name, std::ostream& out = std::cout) {
     {
-        LOG_DURATION(hash_name);
+        LOG_DURATION_STREAM(hash_name, out);
         LondonCrimeTable<HashType> table;
         buildTable(table);
-        test(table, hash_name);
+        test(table, hash_name, out);
     }
-    std::cout << std::endl;
+    out << std::endl;
 }
 
 void runLondonCrimeTests();
