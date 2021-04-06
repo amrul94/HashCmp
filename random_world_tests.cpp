@@ -51,7 +51,7 @@ void TestWithRandomWords(const hash_wrappers::Hasher& hasher, const std::vector<
         ++hashes[hasher.hash_function(word)];
     }
 
-    out << CountCollisions(hashes) << std::endl;
+    out << hasher.hash_name << " collisions = " << CountCollisions(hashes) << std::endl;
     //out << random_words.size() << " / " << hashes.size() << std::endl;
     //out << static_cast<double>(random_words.size()) / static_cast<double>(hashes.size()) << std::endl;
 }
@@ -60,7 +60,7 @@ void RunConcreteRandomTest(const std::vector<hash_wrappers::Hasher>& hashes, con
                            std::ostream& out) {
     out << "words: " << words.size() << std::endl;
     for (const auto& hasher : hashes) {
-        LOG_DURATION(hasher.hash_name);
+        LOG_DURATION_STREAM(hasher.hash_name, std::cout);
         TestWithRandomWords(hasher, words, out);
     }
 }

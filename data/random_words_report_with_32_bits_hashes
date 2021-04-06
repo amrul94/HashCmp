@@ -1,34 +1,34 @@
 words: 1000
 
-0
+CityHash32 collisions = 0
 CityHash32: 11 ms
 
-0
-FarmHash32: 11 ms
+FarmHash32 collisions = 0
+FarmHash32: 10 ms
 
-0
+FarmHash32WithSeed collisions = 0
 FarmHash32WithSeed: 13 ms
 
-0
+xxHash32 collisions = 0
 xxHash32: 12 ms
 
-0
+MurmurHash1 collisions = 0
 MurmurHash1: 7 ms
 
-0
+MurmurHash1Aligned collisions = 0
 MurmurHash1Aligned: 7 ms
 
-0
+MurmurHash2 collisions = 0
 MurmurHash2: 6 ms
 
-0
-PearsonHash32: 36 ms
+PearsonHash32 collisions = 0
+PearsonHash32: 29 ms
 
-0
+Paul Hsieh's SuperFastHash collisions = 0
 Paul Hsieh's SuperFastHash: 5 ms
 
-0
-RollingHash (CyclicHash32: 31 ms
+RollingHash (CyclicHash32) collisions = 0
+RollingHash (CyclicHash32): 31 ms
 
-0
-RollingHash (RabinKarpHash32: 12804 ms
+SDBMHash32 collisions = 0
+SDBMHash32: 37 ms

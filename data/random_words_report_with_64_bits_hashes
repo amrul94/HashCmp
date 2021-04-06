@@ -1,43 +1,43 @@
 words: 1000
 
-0
-CityHash64: 8 ms
+CityHash64 collisions = 0
+CityHash64: 12 ms
 
-0
-CityHash64WithSeed: 10 ms
+CityHash64WithSeed collisions = 0
+CityHash64WithSeed: 13 ms
 
-0
-CityHash64WithSeeds: 10 ms
+CityHash64WithSeeds collisions = 0
+CityHash64WithSeeds: 11 ms
 
-0
+FarmHash64 collisions = 0
 FarmHash64: 5 ms
 
-0
-FarmHash64WithSeed: 10 ms
+FarmHash64WithSeed collisions = 0
+FarmHash64WithSeed: 11 ms
 
-0
-FarmHash64WithSeeds: 9 ms
+FarmHash64WithSeeds collisions = 0
+FarmHash64WithSeeds: 10 ms
 
-0
-xxHash64: 7 ms
+xxHash64 collisions = 0
+xxHash64: 9 ms
 
-0
-XXH3_64bits: 3 ms
+XXH3_64bits collisions = 0
+XXH3_64bits: 4 ms
 
-0
-XXH3_64bits_withSeed: 6 ms
+XXH3_64bits_withSeed collisions = 0
+XXH3_64bits_withSeed: 5 ms
 
-0
-MurmurHash64A: 4 ms
+MurmurHash64A collisions = 0
+MurmurHash64A: 5 ms
 
-0
-MurmurHash64B: 5 ms
+MurmurHash64B collisions = 0
+MurmurHash64B: 6 ms
 
-0
-PearsonHash64: 63 ms
+PearsonHash64 collisions = 0
+PearsonHash64: 48 ms
 
-0
-RollingHash (CyclicHash64: 34 ms
+RollingHash (CyclicHash64) collisions = 0
+RollingHash (CyclicHash64): 32 ms
 
-0
-RollingHash (RabinKarpHash64: 13484 ms
+SDBMHash64 collisions = 0
+SDBMHash64: 36 ms

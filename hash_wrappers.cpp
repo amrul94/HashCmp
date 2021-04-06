@@ -11,6 +11,7 @@
 #include "hashes/murmur_hash/MurmurHash2.h"
 #include "hashes/pearson/pearson.h"
 #include "hashes/super_fast_hash/super_fast_hash.h"
+#include "hashes/various_hash_functions.h"
 
 
 namespace hash_wrappers {
@@ -151,6 +152,16 @@ namespace hash_wrappers {
     }
 
 
+//------------ SDBMHash ------------
+
+    size_t SDBMHash32Wrapper::operator()(const std::string &str) const {
+        return SDBMHash32(str);
+    }
+
+    size_t SDBMHash64Wrapper::operator()(const std::string &str) const {
+        return SDBMHash64(str);
+    }
+
 //----------- BuildHashes ----------
 
     std::vector<Hasher> Build32bitsHashes() {
@@ -158,7 +169,6 @@ namespace hash_wrappers {
         std::vector<Hasher> hashes;
 
         hashes.push_back({"CityHash32", CityHash32Wrapper{}});
-
 
         hashes.push_back({"FarmHash32", FarmHash32Wrapper{}});
         hashes.push_back({"FarmHash32WithSeed", FarmHash32WithSeedWrapper{}});
@@ -175,9 +185,10 @@ namespace hash_wrappers {
 
         hashes.push_back({"Paul Hsieh's SuperFastHash", SuperFastHashWrapper{}});
 
-        hashes.push_back({"RollingHash (CyclicHash32", CyclicHash32Wrapper{}});
-        hashes.push_back({"RollingHash (RabinKarpHash32", RabinKarpHash32Wrapper{}});
+        hashes.push_back({"RollingHash (CyclicHash32)", CyclicHash32Wrapper{}});
+        //hashes.push_back({"RollingHash (RabinKarpHash32)", RabinKarpHash32Wrapper{}});
 
+        hashes.push_back({"SDBMHash32", SDBMHash32Wrapper{}});
         return hashes;
     }
 
@@ -203,9 +214,10 @@ namespace hash_wrappers {
         pearson_hash_init();
         hashes.push_back({"PearsonHash64", PearsonHash64Wrapper{}});
 
-        hashes.push_back({"RollingHash (CyclicHash64", CyclicHash64Wrapper{}});
-        hashes.push_back({"RollingHash (RabinKarpHash64", RabinKarpHash64Wrapper{}});
+        hashes.push_back({"RollingHash (CyclicHash64)", CyclicHash64Wrapper{}});
+        //hashes.push_back({"RollingHash (RabinKarpHash64)", RabinKarpHash64Wrapper{}});
 
+        hashes.push_back({"SDBMHash64", SDBMHash64Wrapper{}});
         return hashes;
     }
 }

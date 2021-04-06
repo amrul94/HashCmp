@@ -174,7 +174,17 @@ namespace hash_wrappers {
     };
 
 
+//------------ SDBMHash ------------
 
+    class SDBMHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class SDBMHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
 //----------- BuildHashes ----------
 
