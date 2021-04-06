@@ -4,4 +4,4 @@
 3. Добавил Pearson Hash, Paul Hsieh's SuperFastHash, Rolling Hash (BuzHash)
 
 Изменения 06.04.2021:
-1. Добавил SDBM Hash, t1ha hash
+1. Добавил SDBM hash, t1ha hash (заработало со второй попытки), MetroHash

@@ -173,8 +173,7 @@ namespace hash_wrappers {
         mutable KarpRabinHash<uint64_t, char> hasher_{WORD_SIZE, 64};
     };
 
-
-//------------ SDBMHash ------------
+//-------------- SDBM --------------
 
     class SDBMHash32Wrapper {
     public:
@@ -182,6 +181,50 @@ namespace hash_wrappers {
     };
 
     class SDBMHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+
+//-------------- T1HA --------------
+
+    class t1ha0_32le_wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class t1ha0_32be_wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class t1ha1_le_wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+
+    class t1ha1_be_wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+
+    class t1ha2_atonce_wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+
+
+//------------ MetroHash -----------
+
+    class MetroHash64_1_Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class MetroHash64_2_Wrapper {
     public:
         size_t operator()(const std::string &str) const;
     };

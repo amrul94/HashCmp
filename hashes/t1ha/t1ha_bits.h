@@ -49,7 +49,7 @@
 #pragma warning(disable : 4464) /* relative include path contains '..' */
 #endif                          /* 1800 */
 #endif                          /* MSVC */
-#include "../t1ha.h"
+#include "t1ha.h"
 
 #ifndef T1HA_USE_FAST_ONESHOT_READ
 /* Define it to 1 for little bit faster code.

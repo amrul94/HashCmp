@@ -12,11 +12,13 @@
 #include "hashes/pearson/pearson.h"
 #include "hashes/super_fast_hash/super_fast_hash.h"
 #include "hashes/various_hash_functions.h"
+#include "hashes/t1ha/t1ha.h"
+#include "hashes/metro_hash/metrohash64.h"
 
 
 namespace hash_wrappers {
     namespace {
-        std::pair<uint64_t, uint64_t> generateTwoSeeds() {
+        std::pair<uint64_t, uint64_t> GenerateTwoSeeds() {
             std::random_device rd;
             std::default_random_engine dre{rd()};
             std::uniform_int_distribution<uint64_t> di;
@@ -25,8 +27,8 @@ namespace hash_wrappers {
             return {seed1, seed2};
         }
 
-        uint64_t generateSeed() {
-            return generateTwoSeeds().first;
+        uint64_t GenerateSeed() {
+            return GenerateTwoSeeds().first;
         }
     }
 
@@ -41,12 +43,12 @@ namespace hash_wrappers {
     }
 
     size_t CityHash64WithSeedWrapper::operator()(const std::string &str) const {
-        return CityHash64WithSeed(str.c_str(), str.size(), generateSeed());
+        return CityHash64WithSeed(str.c_str(), str.size(), GenerateSeed());
     }
 
 
     size_t CityHash64WithSeedsWrapper::operator()(const std::string &str) const {
-        const auto[seed0, seed1] = generateTwoSeeds();
+        const auto[seed0, seed1] = GenerateTwoSeeds();
         return CityHash64WithSeeds(str.c_str(), str.size(), seed0, seed1);
     }
 
@@ -57,7 +59,7 @@ namespace hash_wrappers {
     }
 
     size_t FarmHash32WithSeedWrapper::operator()(const std::string &str) const {
-        return util::Hash32WithSeed(str, generateSeed());
+        return util::Hash32WithSeed(str, GenerateSeed());
     }
 
     size_t FarmHash64Wrapper::operator()(const std::string &str) const {
@@ -65,11 +67,11 @@ namespace hash_wrappers {
     }
 
     size_t FarmHash64WithSeedWrapper::operator()(const std::string &str) const {
-        return util::Hash64WithSeed(str, generateSeed());
+        return util::Hash64WithSeed(str, GenerateSeed());
     }
 
     size_t FarmHash64WithSeedsWrapper::operator()(const std::string &str) const {
-        const auto[seed0, seed1] = generateTwoSeeds();
+        const auto [seed0, seed1] = GenerateTwoSeeds();
         return util::Hash64WithSeeds(str, seed0, seed1);
     }
 
@@ -77,11 +79,11 @@ namespace hash_wrappers {
 //------------ xxHashes -----------
 
     size_t xxHash32Wrapper::operator()(const std::string &str) const {
-        return XXH32(str.data(), str.size(), generateSeed());
+        return XXH32(str.data(), str.size(), GenerateSeed());
     }
 
     size_t xxHash64Wrapper::operator()(const std::string &str) const {
-        return XXH64(str.data(), str.size(), generateSeed());
+        return XXH64(str.data(), str.size(), GenerateSeed());
     }
 
     size_t XXH3_64bitsWrapper::operator()(const std::string &str) const {
@@ -89,29 +91,29 @@ namespace hash_wrappers {
     }
 
     size_t XXH3_64bits_withSeedWrapper::operator()(const std::string &str) const {
-        return XXH3_64bits_withSeed(str.data(), str.size(), generateSeed());
+        return XXH3_64bits_withSeed(str.data(), str.size(), GenerateSeed());
     }
 
 //---------- MurmurHashes ---------
 
     size_t MurmurHash1Wrapper::operator()(const std::string &str) const {
-        return MurmurHash1(str.c_str(), str.size(), generateSeed());
+        return MurmurHash1(str.c_str(), str.size(), GenerateSeed());
     }
 
     size_t MurmurHash1AlignedWrapper::operator()(const std::string &str) const {
-        return MurmurHash1Aligned(str.c_str(), str.size(), generateSeed());
+        return MurmurHash1Aligned(str.c_str(), str.size(), GenerateSeed());
     }
 
     size_t MurmurHash2Wrapper::operator()(const std::string &str) const {
-        return MurmurHash2(str.c_str(), str.size(), generateSeed());
+        return MurmurHash2(str.c_str(), str.size(), GenerateSeed());
     }
 
     size_t MurmurHash64AWrapper::operator()(const std::string &str) const {
-        return MurmurHash64A(str.c_str(), str.size(), generateSeed());
+        return MurmurHash64A(str.c_str(), str.size(), GenerateSeed());
     }
 
     size_t MurmurHash64BWrapper::operator()(const std::string &str) const {
-        return MurmurHash64B(str.c_str(), str.size(), generateSeed());
+        return MurmurHash64B(str.c_str(), str.size(), GenerateSeed());
     }
 
 //---------- PearsonHashes ---------
@@ -151,8 +153,7 @@ namespace hash_wrappers {
         return hasher_.hash(str);
     }
 
-
-//------------ SDBMHash ------------
+//-------------- SDBM --------------
 
     size_t SDBMHash32Wrapper::operator()(const std::string &str) const {
         return SDBMHash32(str);
@@ -160,6 +161,49 @@ namespace hash_wrappers {
 
     size_t SDBMHash64Wrapper::operator()(const std::string &str) const {
         return SDBMHash64(str);
+    }
+
+//-------------- T1HA --------------
+
+    size_t t1ha0_32le_wrapper::operator()(const std::string &str) const {
+        return t1ha0_32le(str.data(), str.size(), GenerateSeed());
+    }
+
+    size_t t1ha0_32be_wrapper::operator()(const std::string &str) const {
+        return t1ha0_32be(str.data(), str.size(), GenerateSeed());
+    }
+
+    size_t t1ha1_le_wrapper::operator()(const std::string &str) const {
+        return t1ha1_le(str.data(), str.size(), GenerateSeed());
+    }
+
+    size_t t1ha1_be_wrapper::operator()(const std::string &str) const {
+        return t1ha1_be(str.data(), str.size(), GenerateSeed());
+    }
+
+    size_t t1ha2_atonce_wrapper::operator()(const std::string &str) const {
+        return t1ha2_atonce(str.data(), str.size(), GenerateSeed());
+    }
+
+//------------ MetroHash -----------
+
+    namespace {
+        template <typename HashFunction>
+        uint64_t MetroHashConvert(HashFunction func, const std::string &str) {
+            uint64_t hash = 0;
+            auto* hash_array =  new uint8_t[8];
+            func((uint8_t*)str.data(), str.size(), 0, hash_array);
+            memcpy(&hash, hash_array, 8);
+            return hash;
+        }
+    }
+
+    size_t MetroHash64_1_Wrapper::operator()(const std::string &str) const {
+        return MetroHashConvert(metrohash64_1, str);
+    }
+
+    size_t MetroHash64_2_Wrapper::operator()(const std::string &str) const {
+        return MetroHashConvert(metrohash64_2, str);
     }
 
 //----------- BuildHashes ----------
@@ -189,6 +233,9 @@ namespace hash_wrappers {
         //hashes.push_back({"RollingHash (RabinKarpHash32)", RabinKarpHash32Wrapper{}});
 
         hashes.push_back({"SDBMHash32", SDBMHash32Wrapper{}});
+
+        hashes.push_back({"t1ha0_32le", t1ha0_32le_wrapper{}});
+        hashes.push_back({"t1ha0_32be", t1ha0_32be_wrapper{}});
         return hashes;
     }
 
@@ -218,6 +265,13 @@ namespace hash_wrappers {
         //hashes.push_back({"RollingHash (RabinKarpHash64)", RabinKarpHash64Wrapper{}});
 
         hashes.push_back({"SDBMHash64", SDBMHash64Wrapper{}});
+
+        hashes.push_back({"t1ha1_le", t1ha1_le_wrapper{}});
+        hashes.push_back({"t1ha1_be", t1ha1_be_wrapper{}});
+        hashes.push_back({"t1ha2_atonce", t1ha2_atonce_wrapper{}});
+
+        hashes.push_back({"metrohash64_1", MetroHash64_1_Wrapper{}});
+        hashes.push_back({"metrohash64_1", MetroHash64_2_Wrapper{}});
         return hashes;
     }
 }

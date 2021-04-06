@@ -12,6 +12,9 @@
     - Pearson Hash, который взял по адресу: https://github.com/Logan007/pearson
     - Paul Hsieh's SuperFastHash, который взял по адресу: http://www.azillionmonkeys.com/qed/hash.html
     - Rolling Hash (BuzHash), который взял по адресу: https://github.com/lemire/rollinghashcpp
+    - SDBM Hash, который взял по адресу: https://www.programmingalgorithms.com/algorithm/sdbm-hash/cpp/
+    - t1ha hash, который взял по адресу: https://github.com/erthink/t1ha
+    - MetroHash, который взял по адресу: https://github.com/jandrewrogers/MetroHash
 - папка "Data" включает в себя отчет проведенного теста ("report.txt")
 - "hash_wrappers.h" и "hash_wrappers.cpp" включают в себя обертки над хеш-функциями для удобного использования с std::unordered_map или c любой другой хеш-таблицей, которая принимает хеш-функцию в виде шаблонного параметра
 - "log_duration.h" включает в себя класс и пару макросов для удобного подсчета времени выполнения интересующего блока кода
