@@ -61,7 +61,7 @@ MD5-32          0.33 GB/s    10       Ronald L. Rivest
 SHA1-32         0.28 GB/s    10
 
 Q.Score is a measure of quality of the hash function.
-It depends on successfully passing SMHasher test set.
+It depends on successfully passing SMHasher Test set.
 10 is a perfect score.
 
 Note: SMHasher's CRC32 implementation is not the fastest one.

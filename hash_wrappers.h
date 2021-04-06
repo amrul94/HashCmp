@@ -5,158 +5,181 @@
 #ifndef THESIS_WORK_HASH_WRAPPERS_H
 #define THESIS_WORK_HASH_WRAPPERS_H
 
+#include "hashes/rolling_hash/cyclichash.h"
+#include "hashes/rolling_hash/rabinkarphash.h"
+
+#include <functional>
 #include <string>
 
-class BadHash {
-public:
-    size_t operator()(const std::string& str) const;
-};
+
+namespace hash_wrappers {
+
+    constexpr int WORD_SIZE = 3'000;
+
+    struct Hasher {
+        std::string hash_name;
+        std::function<size_t(const std::string&)> hash_function;
+    };
 
 //----------- CityHashes ----------
 
-class CityHash32Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class CityHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class CityHash64Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class CityHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class CityHash64WithSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class CityHash64WithSeedWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class CityHash64WithSeedsWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-class CityHash128Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-class CityHash128WithSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class CityHash64WithSeedsWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
 //----------- FarmHashes ----------
 
-class FarmHash32Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class FarmHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class FarmHash32WithSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class FarmHash32WithSeedWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class FarmHash64Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class FarmHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class FarmHash64WithSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class FarmHash64WithSeedWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
 
-class FarmHash64WithSeedsWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-class FarmHash128Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-class FarmHash128WithSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class FarmHash64WithSeedsWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
 //------------ xxHashes -----------
 
-class xxHash32Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class xxHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class xxHash64Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class xxHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class xxHash128Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class XXH3_64bitsWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class XXH3_64bitsWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-class XXH3_64bits_withSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-/*
-class xxH3WithSecretWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};*/
-
-class XXH3_128bitsWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
-
-class XXH3_128bits_withSeedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class XXH3_64bits_withSeedWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
 //---------- MurmurHashes ---------
 
-class MurmurHash1Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class MurmurHash1Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class MurmurHash1AlignedWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class MurmurHash1AlignedWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class MurmurHash2Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class MurmurHash2Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class MurmurHash64AWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class MurmurHash64AWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class MurmurHash64BWrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+    class MurmurHash64BWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
 
-class MurmurHash3_x64_128Wrapper {
-public:
-    size_t operator()(const std::string& str) const;
-};
+//---------- PearsonHashes ---------
+
+    class PearsonHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class PearsonHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//--- Paul Hsieh's SuperFastHash ---
+
+    class SuperFastHashWrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//----- Rolling Hash (BuzHash) -----
+
+    class CyclicHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+
+    private:
+        mutable CyclicHash<uint32_t, char> hasher_{WORD_SIZE, 32};
+    };
+
+    class CyclicHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+
+    private:
+        mutable CyclicHash<uint64_t, char> hasher_{WORD_SIZE, 64};
+    };
+
+    class RabinKarpHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+
+    private:
+        mutable KarpRabinHash<uint32_t, char> hasher_{WORD_SIZE, 32};
+    };
+
+    class RabinKarpHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+
+    private:
+        mutable KarpRabinHash<uint64_t, char> hasher_{WORD_SIZE, 64};
+    };
 
 
+
+
+//----------- BuildHashes ----------
+
+    std::vector<Hasher> Build32bitsHashes();
+    std::vector<Hasher> Build64bitsHashes();
+}
 
 #endif //THESIS_WORK_HASH_WRAPPERS_H

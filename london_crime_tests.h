@@ -7,11 +7,8 @@
 
 #include <unordered_map>
 #include <utility>
-
 #include <boost/container_hash/hash.hpp>
-
 #include "csv_parser/csv.h"
-
 #include "hash_wrappers.h"
 #include "log_duration.h"
 
@@ -42,7 +39,7 @@ template<typename HashType>
 using LondonCrimeTable = StringTable<StringTable<StringTable<StringTable<IntTable<IntTable<int, std::hash<int>>, std::hash<int>>, HashType>, HashType>, HashType>, HashType>;
 
 template <typename Table>
-void buildTable(Table& table) {
+void BuildTable(Table& table) {
     io::CSVReader<7> in("data/London Crime.csv");
     in.read_header(io::ignore_extra_column, "lsoa_code", "borough","major_category","minor_category","value","year","month");
 
@@ -51,8 +48,10 @@ void buildTable(Table& table) {
 
     int count_value_in_csv = 0;
     int count_value_in_hash_map = 0;
-    while(in.read_row(lsoa_code, borough, major_category, minor_category, value, year, month)){
-        //std::cout << lsoa_code << std::endl;
+    int count = 0;
+    while(in.read_row(lsoa_code, borough, major_category, minor_category, value, year, month) && count < 1'000'000){
+        /*std::cout << ++count << " " << lsoa_code << " " << borough << " " << major_category << " " << minor_category
+                  << " " << value << " " << year << " " << month << std::endl;*/
         table[lsoa_code][borough][major_category][minor_category][year][month] = value;
         //count_value_in_csv += value;
         //count_value_in_hash_map += table[lsoa_code][borough][major_category][minor_category][year][month];
@@ -62,7 +61,7 @@ void buildTable(Table& table) {
 }
 
 template <typename Table>
-void test(Table& table, std::string_view hash_name, std::ostream& out = std::cout) {
+void Test(Table& table, std::string_view hash_name, std::ostream& out = std::cout) {
     out << hash_name << ":" << std::endl;
     size_t collisions = 0, empty = 0, max_bucket = 0;
     for (auto bucket = table.bucket_count(); bucket--;) {
@@ -91,12 +90,12 @@ void RunTest(std::string_view hash_name, std::ostream& out = std::cout) {
     {
         LOG_DURATION_STREAM(hash_name, out);
         LondonCrimeTable<HashType> table;
-        buildTable(table);
-        test(table, hash_name, out);
+        BuildTable(table);
+        Test(table, hash_name, out);
     }
     out << std::endl;
 }
 
-void runLondonCrimeTests();
+void RunLondonCrimeTests();
 
 #endif //THESIS_WORK_LONDON_CRIME_TESTS_H

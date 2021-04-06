@@ -1,0 +1,43 @@
+words: 1000
+
+0
+CityHash64: 8 ms
+
+0
+CityHash64WithSeed: 10 ms
+
+0
+CityHash64WithSeeds: 10 ms
+
+0
+FarmHash64: 5 ms
+
+0
+FarmHash64WithSeed: 10 ms
+
+0
+FarmHash64WithSeeds: 9 ms
+
+0
+xxHash64: 7 ms
+
+0
+XXH3_64bits: 3 ms
+
+0
+XXH3_64bits_withSeed: 6 ms
+
+0
+MurmurHash64A: 4 ms
+
+0
+MurmurHash64B: 5 ms
+
+0
+PearsonHash64: 63 ms
+
+0
+RollingHash (CyclicHash64: 34 ms
+
+0
+RollingHash (RabinKarpHash64: 13484 ms

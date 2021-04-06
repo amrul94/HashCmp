@@ -11779,7 +11779,7 @@ int RunTest() {
     cout << "... Unavailable\n";
     return NoteErrors();
   }
-  // Good.  The function is attempting to hash, so run the full test.
+  // Good.  The function is attempting to hash, so run the full Test.
   int errors_prior_to_test = errors;
   for ( ; i < kTestSize - 1; i++) {
     Test(i * i, i);
