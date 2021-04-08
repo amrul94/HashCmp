@@ -7,7 +7,7 @@
 #include "log_duration.h"
 #include "random_world_tests.h"
 
-constexpr int WORD_COUNT = 1'000;
+constexpr int WORD_COUNT = 1'000'000;
 constexpr int MIN_WORD_SIZE = hash_wrappers::WORD_SIZE;
 constexpr int MAX_WORD_SIZE = hash_wrappers::WORD_SIZE;
 

@@ -14,7 +14,7 @@
 
 namespace hash_wrappers {
 
-    constexpr int WORD_SIZE = 3'000;
+    constexpr int WORD_SIZE = 1000;
 
     struct Hasher {
         std::string hash_name;
@@ -141,7 +141,7 @@ namespace hash_wrappers {
 
 //----- Rolling Hash (BuzHash) -----
 
-    class CyclicHash32Wrapper {
+    class Buzhash32Wrapper {
     public:
         size_t operator()(const std::string &str) const;
 
@@ -149,28 +149,12 @@ namespace hash_wrappers {
         mutable CyclicHash<uint32_t, char> hasher_{WORD_SIZE, 32};
     };
 
-    class CyclicHash64Wrapper {
+    class Buzhash64Wrapper {
     public:
         size_t operator()(const std::string &str) const;
 
     private:
         mutable CyclicHash<uint64_t, char> hasher_{WORD_SIZE, 64};
-    };
-
-    class RabinKarpHash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-
-    private:
-        mutable KarpRabinHash<uint32_t, char> hasher_{WORD_SIZE, 32};
-    };
-
-    class RabinKarpHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-
-    private:
-        mutable KarpRabinHash<uint64_t, char> hasher_{WORD_SIZE, 64};
     };
 
 //-------------- SDBM --------------
@@ -227,6 +211,83 @@ namespace hash_wrappers {
     class MetroHash64_2_Wrapper {
     public:
         size_t operator()(const std::string &str) const;
+    };
+
+
+//------------ FastHash ------------
+    class FastHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class FastHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//----- Bernstein's hash djb2 ------
+
+    class DJB2Hash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class DJB2Hash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//------------ PJW Hash ------------
+
+    class PJWHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class PJWHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//---------- FNV-1a hash -----------
+
+    class FNV_1a_32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class FNV_1a_64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//---------- Spooky hash -----------
+
+    class SpookyHash32Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+    class SpookyHash64Wrapper {
+    public:
+        size_t operator()(const std::string &str) const;
+    };
+
+//--------- Jenkins hash -----------
+
+    class JenkinsOneTimeHashWrapper {
+    public:
+        uint32_t operator()(const std::string &str) const;
+    };
+
+    class Lookup3LittleWrapper {
+    public:
+        uint32_t operator()(const std::string &str) const;
+    };
+
+    class Lookup3BigWrapper {
+    public:
+        uint32_t operator()(const std::string &str) const;
     };
 
 //----------- BuildHashes ----------

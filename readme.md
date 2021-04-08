@@ -15,6 +15,13 @@
     - SDBM Hash, который взял по адресу: https://www.programmingalgorithms.com/algorithm/sdbm-hash/cpp/
     - t1ha hash, который взял по адресу: https://github.com/erthink/t1ha
     - MetroHash, который взял по адресу: https://github.com/jandrewrogers/MetroHash
+    - Fast-Hash, который взял по адресу: https://github.com/ztanml/fast-hash
+    - Bernstein's hash djb2, который взял по адресу: http://www.cse.yorku.ca/~oz/hash.html
+    - FNV-1a hash (32-битная версия), который взял по адресу: https://gist.github.com/hwei/1950649d523afd03285c
+    - FNV-1a hash (64-битная версия), который взял по адресу: https://github.com/povilasb/cpp-fnv
+    - Spooky hash, который взял по адресу: https://github.com/jibsen/spooky
+    - Jenkins hash (one_at_a_time), который взял по адресу: https://en.wikipedia.org/wiki/Jenkins_hash_function
+    - Jenkins hash (lookup3), который взял по адресу: https://burtleburtle.net/bob/c/lookup3.c
 - папка "Data" включает в себя отчет проведенного теста ("report.txt")
 - "hash_wrappers.h" и "hash_wrappers.cpp" включают в себя обертки над хеш-функциями для удобного использования с std::unordered_map или c любой другой хеш-таблицей, которая принимает хеш-функцию в виде шаблонного параметра
 - "log_duration.h" включает в себя класс и пару макросов для удобного подсчета времени выполнения интересующего блока кода

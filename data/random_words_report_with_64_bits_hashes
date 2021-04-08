@@ -1,58 +1,73 @@
-words: 1000
+words: 1000000
 
 CityHash64 collisions = 0
-CityHash64: 8 ms
+CityHash64: 3573 ms
 
 CityHash64WithSeed collisions = 0
-CityHash64WithSeed: 10 ms
+CityHash64WithSeed: 5288 ms
 
 CityHash64WithSeeds collisions = 0
-CityHash64WithSeeds: 13 ms
+CityHash64WithSeeds: 5342 ms
 
 FarmHash64 collisions = 0
-FarmHash64: 5 ms
+FarmHash64: 2470 ms
 
 FarmHash64WithSeed collisions = 0
-FarmHash64WithSeed: 11 ms
+FarmHash64WithSeed: 4990 ms
 
 FarmHash64WithSeeds collisions = 0
-FarmHash64WithSeeds: 9 ms
+FarmHash64WithSeeds: 4966 ms
 
 xxHash64 collisions = 0
-xxHash64: 8 ms
+xxHash64: 4385 ms
 
 XXH3_64bits collisions = 0
-XXH3_64bits: 3 ms
+XXH3_64bits: 2048 ms
 
 XXH3_64bits_withSeed collisions = 0
-XXH3_64bits_withSeed: 5 ms
+XXH3_64bits_withSeed: 3906 ms
 
 MurmurHash64A collisions = 0
-MurmurHash64A: 6 ms
+MurmurHash64A: 3515 ms
 
 MurmurHash64B collisions = 0
-MurmurHash64B: 5 ms
+MurmurHash64B: 3771 ms
 
 PearsonHash64 collisions = 0
-PearsonHash64: 47 ms
+PearsonHash64: 14514 ms
 
 RollingHash (CyclicHash64) collisions = 0
-RollingHash (CyclicHash64): 30 ms
+RollingHash (CyclicHash64): 11203 ms
 
 SDBMHash64 collisions = 0
-SDBMHash64: 33 ms
+SDBMHash64: 11598 ms
 
 t1ha1_le collisions = 0
-t1ha1_le: 3 ms
+t1ha1_le: 3648 ms
 
 t1ha1_be collisions = 0
-t1ha1_be: 3 ms
+t1ha1_be: 4184 ms
 
 t1ha2_atonce collisions = 0
-t1ha2_atonce: 3 ms
+t1ha2_atonce: 3394 ms
 
 metrohash64_1 collisions = 0
-metrohash64_1: 2 ms
+metrohash64_1: 1763 ms
 
-metrohash64_1 collisions = 0
-metrohash64_1: 2 ms
+metrohash64_2 collisions = 0
+metrohash64_2: 1843 ms
+
+fasthash64 collisions = 0
+fasthash64: 3735 ms
+
+Bernstein's hash djb2 64 collisions = 139
+Bernstein's hash djb2 64: 11215 ms
+
+PJW Hash 64 collisions = 17
+PJW Hash 64: 13123 ms
+
+FNV-1a hash 64 collisions = 0
+FNV-1a hash 64: 4743 ms
+
+Spooky hash 64 collisions = 0
+Spooky hash 64: 4662 ms
