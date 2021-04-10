@@ -29,4 +29,5 @@ add_executable(Thesis_work main.cpp log_duration.h hash_wrappers.h hash_wrappers
         hashes/metro_hash/metrohash64.h hashes/metro_hash/metrohash64.cpp hashes/metro_hash/platform.h
         hashes/fasthash/fasthash.h hashes/fasthash/fasthash.c hashes/fnv_hash_32/const_fvn_hash.h
         hashes/fnv_hash_64_128/fnv.h hashes/fnv_hash_64_128/fnv.cpp
-        hashes/spooky_hash/spooky.h hashes/spooky_hash/spooky.c hashes/jenkins_hash/lookup3.cpp hashes/jenkins_hash/lookup3.h)
+        hashes/spooky_hash/spooky.h hashes/spooky_hash/spooky.c hashes/jenkins_hash/lookup3.cpp hashes/jenkins_hash/lookup3.h
+        hashes.h hashes.cpp)

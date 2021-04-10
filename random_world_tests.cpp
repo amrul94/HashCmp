@@ -3,13 +3,13 @@
 //
 
 #include <fstream>
-#include "hash_wrappers.h"
+#include "hashes.h"
 #include "log_duration.h"
 #include "random_world_tests.h"
 
-constexpr int WORD_COUNT = 1'000'000;
-constexpr int MIN_WORD_SIZE = hash_wrappers::WORD_SIZE;
-constexpr int MAX_WORD_SIZE = hash_wrappers::WORD_SIZE;
+constexpr int WORD_COUNT = 1'000;
+constexpr int MIN_WORD_SIZE = hashes::WORD_SIZE;
+constexpr int MAX_WORD_SIZE = hashes::WORD_SIZE;
 
 std::string GenerateWord(std::mt19937& generator, int min_length, int max_length) {
     const int length = std::uniform_int_distribution(min_length, max_length)(generator);
@@ -42,26 +42,26 @@ size_t CountCollisions(const std::unordered_map<size_t, size_t>& hashes) {
     return collisions;
 }
 
-void TestWithRandomWords(const hash_wrappers::Hasher& hasher, const std::vector<std::string>& random_words,
+void TestWithRandomWords(const hashes::HashStruct& hash_struct, const std::vector<std::string>& random_words,
                          std::ostream& out) {
     out << std::endl;
-    LOG_DURATION_STREAM(hasher.hash_name, out);
+    LOG_DURATION_STREAM(hash_struct.hash_name, out);
     std::unordered_map<size_t, size_t> hashes;
     for (const std::string& word : random_words) {
-        ++hashes[hasher.hash_function(word)];
+        ++hashes[hash_struct.hash_function(word)];
     }
 
-    out << hasher.hash_name << " collisions = " << CountCollisions(hashes) << std::endl;
+    out << hash_struct.hash_name << " collisions = " << CountCollisions(hashes) << std::endl;
     //out << random_words.size() << " / " << hashes.size() << std::endl;
     //out << static_cast<double>(random_words.size()) / static_cast<double>(hashes.size()) << std::endl;
 }
 
-void RunConcreteRandomTest(const std::vector<hash_wrappers::Hasher>& hashes, const std::vector<std::string>& words,
+void RunConcreteRandomTest(const std::vector<hashes::HashStruct>& hashes, const std::vector<std::string>& words,
                            std::ostream& out) {
     out << "words: " << words.size() << std::endl;
-    for (const auto& hasher : hashes) {
-        LOG_DURATION_STREAM(hasher.hash_name, std::cout);
-        TestWithRandomWords(hasher, words, out);
+    for (const auto& hash_struct : hashes) {
+        LOG_DURATION_STREAM(hash_struct.hash_name, std::cout);
+        TestWithRandomWords(hash_struct, words, out);
     }
 }
 
@@ -79,13 +79,13 @@ void RunAllRandomTests() {
     std::cout << "Build worlds END\n\n";
 
     std::cout << "Test with 32 bits hashes START" << std::endl;
-    const auto hashes_32_bits = hash_wrappers::Build32bitsHashes();
+    const auto hashes_32_bits = hashes::Build32bitsHashes();
     std::ofstream file_report_32_hashes("data/random_words_report_with_32_bits_hashes");
     RunConcreteRandomTest(hashes_32_bits, words, file_report_32_hashes);
     std::cout << "Test with 32 bits hashes END\n" << std::endl;
 
     std::cout << "Test with 64 bits hashes START" << std::endl;
-    const auto hashes_64_bits = hash_wrappers::Build64bitsHashes();
+    const auto hashes_64_bits = hashes::Build64bitsHashes();
     std::ofstream file_report_64_hashes("data/random_words_report_with_64_bits_hashes");
     RunConcreteRandomTest(hashes_64_bits, words, file_report_64_hashes);
     std::cout << "Test with 64 bits hashes END\n" << std::endl;

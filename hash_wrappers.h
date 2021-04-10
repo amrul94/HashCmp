@@ -12,288 +12,290 @@
 #include <string>
 
 
-namespace hash_wrappers {
+namespace hashes {
 
     constexpr int WORD_SIZE = 1000;
 
-    struct Hasher {
-        std::string hash_name;
-        std::function<size_t(const std::string&)> hash_function;
+    class [[maybe_unused]] BaseHash32Wrapper {
+    public:
+        virtual uint32_t operator()(const std::string &str) const = 0;
     };
 
-//----------- CityHashes ----------
-
-    class CityHash32Wrapper {
+    class [[maybe_unused]] BaseHash64Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class CityHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class CityHash64WithSeedWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class CityHash64WithSeedsWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-//----------- FarmHashes ----------
-
-    class FarmHash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class FarmHash32WithSeedWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class FarmHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class FarmHash64WithSeedWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-
-    class FarmHash64WithSeedsWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-//------------ xxHashes -----------
-
-    class xxHash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class xxHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class XXH3_64bitsWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class XXH3_64bits_withSeedWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-//---------- MurmurHashes ---------
-
-    class MurmurHash1Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class MurmurHash1AlignedWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class MurmurHash2Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class MurmurHash64AWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class MurmurHash64BWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-//---------- PearsonHashes ---------
-
-    class PearsonHash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class PearsonHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-//--- Paul Hsieh's SuperFastHash ---
-
-    class SuperFastHashWrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-//----- Rolling Hash (BuzHash) -----
-
-    class Buzhash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-
-    private:
-        mutable CyclicHash<uint32_t, char> hasher_{WORD_SIZE, 32};
-    };
-
-    class Buzhash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-
-    private:
-        mutable CyclicHash<uint64_t, char> hasher_{WORD_SIZE, 64};
-    };
-
-//-------------- SDBM --------------
-
-    class SDBMHash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class SDBMHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-
-//-------------- T1HA --------------
-
-    class t1ha0_32le_wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class t1ha0_32be_wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class t1ha1_le_wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-
-    class t1ha1_be_wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-
-    class t1ha2_atonce_wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-
-
-//------------ MetroHash -----------
-
-    class MetroHash64_1_Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class MetroHash64_2_Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-
-//------------ FastHash ------------
-    class FastHash32Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
-    };
-
-    class FastHash64Wrapper {
-    public:
-        size_t operator()(const std::string &str) const;
+        virtual uint64_t operator()(const std::string &str) const = 0;
     };
 
 //----- Bernstein's hash djb2 ------
 
-    class DJB2Hash32Wrapper {
+    class [[maybe_unused]] DJB2Hash32Wrapper : public BaseHash32Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint32_t operator()(const std::string &str) const override;
     };
 
-    class DJB2Hash64Wrapper {
+    class [[maybe_unused]] DJB2Hash64Wrapper : public BaseHash64Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint64_t operator()(const std::string &str) const override;
     };
 
-//------------ PJW Hash ------------
+//----------- CityHashes ----------
 
-    class PJWHash32Wrapper {
+    class [[maybe_unused]] CityHash32Wrapper : public BaseHash32Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint32_t operator()(const std::string &str) const override;
     };
 
-    class PJWHash64Wrapper {
+    class [[maybe_unused]] CityHash64Wrapper : public BaseHash64Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] CityHash64WithSeedWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] CityHash64WithSeedsWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//----------- FarmHashes ----------
+
+    class [[maybe_unused]] FarmHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] FarmHash32WithSeedWrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] FarmHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] FarmHash64WithSeedWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+
+    class [[maybe_unused]] FarmHash64WithSeedsWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//------------ FastHash ------------
+
+    class [[maybe_unused]] FastHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] FastHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
     };
 
 //---------- FNV-1a hash -----------
 
-    class FNV_1a_32Wrapper {
+    class [[maybe_unused]] FNV1aHash32Wrapper : public BaseHash32Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint32_t operator()(const std::string &str) const override;
     };
 
-    class FNV_1a_64Wrapper {
+    class [[maybe_unused]] FNV1aHash64Wrapper : public BaseHash64Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+
+//--------- Jenkins hash -----------
+
+    class [[maybe_unused]] OneTimeHashWrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] Lookup3LittleWrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] Lookup3BigWrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+
+//------------ MetroHash -----------
+
+    class [[maybe_unused]] MetroHash64_1_Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] MetroHash64_2_Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//---------- MurmurHashes ---------
+
+    class [[maybe_unused]] MurmurHash1Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] MurmurHash1AlignedWrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] MurmurHash2Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] MurmurHash64AWrapper: public BaseHash64Wrapper  {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] MurmurHash64BWrapper: public BaseHash64Wrapper  {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//--- Paul Hsieh's SuperFastHash ---
+
+    class [[maybe_unused]] SuperFastHashWrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+//---------- PearsonHashes ---------
+
+    class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        PearsonHash32Wrapper() noexcept;
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] PearsonHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        PearsonHash64Wrapper() noexcept;
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//------------ PJW Hash ------------
+
+    class [[maybe_unused]] PJWHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] PJWHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//----- Rolling Hash (BuzHash) -----
+
+    class [[maybe_unused]] BuzHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        BuzHash32Wrapper() noexcept = default;
+        uint32_t operator()(const std::string &str) const override;
+
+    private:
+        mutable CyclicHash<uint32_t, char> hash_function_{WORD_SIZE, 32};
+    };
+
+    class [[maybe_unused]] BuzHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        BuzHash64Wrapper() noexcept = default;
+        uint64_t operator()(const std::string &str) const override;
+
+    private:
+        mutable CyclicHash<uint64_t, char> hash_function_{WORD_SIZE, 64};
+    };
+
+//-------------- SDBM --------------
+
+    class [[maybe_unused]] SDBMHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] SDBMHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
     };
 
 //---------- Spooky hash -----------
 
-    class SpookyHash32Wrapper {
+    class [[maybe_unused]] SpookyHash32Wrapper : public BaseHash32Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint32_t operator()(const std::string &str) const override;
     };
 
-    class SpookyHash64Wrapper {
+    class [[maybe_unused]] SpookyHash64Wrapper : public BaseHash64Wrapper {
     public:
-        size_t operator()(const std::string &str) const;
+        uint64_t operator()(const std::string &str) const override;
     };
 
-//--------- Jenkins hash -----------
+//-------------- T1HA --------------
 
-    class JenkinsOneTimeHashWrapper {
+    class [[maybe_unused]] T1HA0_32leWrapper : public BaseHash32Wrapper {
     public:
-        uint32_t operator()(const std::string &str) const;
+        uint32_t operator()(const std::string &str) const override;
     };
 
-    class Lookup3LittleWrapper {
+    class [[maybe_unused]] T1HA0_32beWrapper : public BaseHash32Wrapper {
     public:
-        uint32_t operator()(const std::string &str) const;
+        uint32_t operator()(const std::string &str) const override;
     };
 
-    class Lookup3BigWrapper {
+    class [[maybe_unused]] T1HA1LeWrapper : public BaseHash64Wrapper {
     public:
-        uint32_t operator()(const std::string &str) const;
+        uint64_t operator()(const std::string &str) const override;
     };
 
-//----------- BuildHashes ----------
+    class [[maybe_unused]] T1HA1BeWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
 
-    std::vector<Hasher> Build32bitsHashes();
-    std::vector<Hasher> Build64bitsHashes();
+
+    class [[maybe_unused]] T1HA2AtonceWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+//------------ xxHashes -----------
+
+    class [[maybe_unused]] xxHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        uint32_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] xxHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] XXH3_64BitsWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
+
+    class [[maybe_unused]] XXH3_64BitsWithSeedWrapper : public BaseHash64Wrapper {
+    public:
+        uint64_t operator()(const std::string &str) const override;
+    };
 }
 
 #endif //THESIS_WORK_HASH_WRAPPERS_H

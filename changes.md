@@ -8,4 +8,8 @@
 
 Изменения 08.04.2021:
 1. Добавил Fast-Hash, Bernstein's hash djb2, FNV-1a hash, Spooky hash, Jenkins hash (one_at_a_time, lookup3)
-2. Включил хеш-функции CityHash в namespace city, так как бл конфликто типов uint128
+2. Включил хеш-функции CityHash в namespace city, так как были конфликты типов uint128
+
+Изменения 10.04.2021:
+1. Для каждой обертки хеш-функции создал inline const/constinit глобальную переменную в hashes.h
+2. Создал родительские классы для классов-оберток и заменил size_t на более конкретные uint32_t и uint64_t

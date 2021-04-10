@@ -1,64 +1,64 @@
-words: 1000000
+words: 1000
 
-CityHash32 collisions = 106
-CityHash32: 4480 ms
+RollingHash (BuzHash32) collisions = 0
+RollingHash (BuzHash32): 10 ms
 
-FarmHash32 collisions = 108
-FarmHash32: 4448 ms
+CityHash32 collisions = 0
+CityHash32: 4 ms
 
-FarmHash32WithSeed collisions = 133
-FarmHash32WithSeed: 6183 ms
+Bernstein's hash djb2 32 collisions = 0
+Bernstein's hash djb2 32: 11 ms
 
-xxHash32 collisions = 100
-xxHash32: 5751 ms
+FarmHash32 collisions = 0
+FarmHash32: 4 ms
 
-MurmurHash1 collisions = 113
-MurmurHash1: 4281 ms
+FarmHash32WithSeed collisions = 0
+FarmHash32WithSeed: 6 ms
 
-MurmurHash1Aligned collisions = 113
-MurmurHash1Aligned: 4313 ms
+FastHash32 collisions = 0
+FastHash32: 3 ms
 
-MurmurHash2 collisions = 109
-MurmurHash2: 3877 ms
+FNV-1a hash 32 collisions = 0
+FNV-1a hash 32: 4 ms
 
-PearsonHash32 collisions = 117
-PearsonHash32: 9686 ms
+Jenkins hash (One at a time) collisions = 0
+Jenkins hash (One at a time): 7 ms
 
-Paul Hsieh's SuperFastHash collisions = 122
-Paul Hsieh's SuperFastHash: 2633 ms
+Jenkins hash (lookup3 - little) collisions = 0
+Jenkins hash (lookup3 - little): 14 ms
 
-RollingHash (CyclicHash32) collisions = 127
-RollingHash (CyclicHash32): 10625 ms
+Jenkins hash (lookup3 - big) collisions = 0
+Jenkins hash (lookup3 - big): 5 ms
 
-SDBMHash32 collisions = 127
-SDBMHash32: 11137 ms
+MurmurHash1 collisions = 0
+MurmurHash1: 4 ms
 
-t1ha0_32le collisions = 0
-t1ha0_32le: 3505 ms
+MurmurHash1Aligned collisions = 0
+MurmurHash1Aligned: 4 ms
 
-t1ha0_32be collisions = 0
-t1ha0_32be: 3499 ms
+MurmurHash2 collisions = 0
+MurmurHash2: 6 ms
 
-fasthash32 collisions = 113
-fasthash32: 3426 ms
+PearsonHash32 collisions = 0
+PearsonHash32: 11 ms
 
-Bernstein's hash djb2 32 collisions = 139
-Bernstein's hash djb2 32: 11246 ms
+PJW Hash 32 collisions = 0
+PJW Hash 32: 16 ms
 
-PJW Hash 32 collisions = 2087
-PJW Hash 32: 13640 ms
+SDBM 32 collisions = 0
+SDBM 32: 12 ms
 
-FNV-1a hash 32 collisions = 111
-FNV-1a hash 32: 4624 ms
+SuperFastHash collisions = 0
+SuperFastHash: 2 ms
 
-Spooky hash 32 collisions = 111
-Spooky hash 32: 4419 ms
+Spooky hash 32 collisions = 0
+Spooky hash 32: 4 ms
 
-Jenkins hash (One at a time) collisions = 124
-Jenkins hash (One at a time): 6349 ms
+T1HA0 32le collisions = 0
+T1HA0 32le: 3 ms
 
-Jenkins hash (lookup3 - little) collisions = 116
-Jenkins hash (lookup3 - little): 4608 ms
+T1HA0 32be collisions = 0
+T1HA0 32be: 3 ms
 
-Jenkins hash (lookup3 - big) collisions = 121
-Jenkins hash (lookup3 - big): 4952 ms
+xxHash32 collisions = 0
+xxHash32: 6 ms
