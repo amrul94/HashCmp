@@ -1,11 +1,24 @@
 #include "hashes.h"
 
 namespace hashes {
+
+    //----------- HashStructs ----------
+
+    [[maybe_unused]] Hash32Struct::Hash32Struct(std::string hash_name, const BaseHash32Wrapper& hash_function)
+            : hash_name(std::move(hash_name))
+            , hash_function(hash_function) {
+    }
+
+    [[maybe_unused]] Hash64Struct::Hash64Struct(std::string hash_name, const BaseHash64Wrapper& hash_function)
+            : hash_name(std::move(hash_name))
+            , hash_function(hash_function) {
+    }
+
     //----------- BuildHashes ----------
 
-    std::vector<HashStruct> Build32bitsHashes() {
+    std::vector<Hash32Struct> Build32bitsHashes() {
         using namespace std::literals;
-        std::vector<HashStruct> hash_functions;
+        std::vector<Hash32Struct> hash_functions;
 
         hash_functions.emplace_back("RollingHash (BuzHash32)", buz_hash_32);
         hash_functions.emplace_back("CityHash32", city_hash_32);
@@ -39,9 +52,9 @@ namespace hashes {
         return hash_functions;
     }
 
-    std::vector<HashStruct> Build64bitsHashes() {
+    std::vector<Hash64Struct> Build64bitsHashes() {
         using namespace std::literals;
-        std::vector<HashStruct> hashes;
+        std::vector<Hash64Struct> hashes;
 
         hashes.emplace_back("RollingHash (BuzHash64)", buz_hash_64);
 

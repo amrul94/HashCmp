@@ -30,4 +30,4 @@ add_executable(Thesis_work main.cpp log_duration.h hash_wrappers.h hash_wrappers
         hashes/fasthash/fasthash.h hashes/fasthash/fasthash.c hashes/fnv_hash_32/const_fvn_hash.h
         hashes/fnv_hash_64_128/fnv.h hashes/fnv_hash_64_128/fnv.cpp
         hashes/spooky_hash/spooky.h hashes/spooky_hash/spooky.c hashes/jenkins_hash/lookup3.cpp hashes/jenkins_hash/lookup3.h
-        hashes.h hashes.cpp)
+        hashes.h hashes.cpp tests_with_images.h tests_with_images.cpp tests.h tests.cpp)

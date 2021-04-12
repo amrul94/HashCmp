@@ -81,7 +81,7 @@ public:
         hashvaluetype answer(0);
         for(uint k = 0; k<c.size(); ++k) {
             fastleftshift1(answer);
-            answer ^= hasher.hashvalues[static_cast<unsigned int>(c[k])];
+            answer ^= hasher.hashvalues[static_cast<unsigned int>(static_cast<chartype>(c[k]))];
         }
         return answer;
     }
