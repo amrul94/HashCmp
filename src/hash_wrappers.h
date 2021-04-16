@@ -11,13 +11,13 @@
 #include <string>
 #include <string_view>
 
-#include "hashes/rolling_hash/cyclichash.h"
-#include "hashes/rolling_hash/rabinkarphash.h"
+#include "../hashes/rolling_hash/cyclichash.h"
+#include "../hashes/rolling_hash/rabinkarphash.h"
 
 
 namespace hashes {
 
-    constexpr int WORD_SIZE = 847565;
+    constexpr int WORD_SIZE = 1000;
 
     class [[maybe_unused]] BaseHashWrapper {
     protected:

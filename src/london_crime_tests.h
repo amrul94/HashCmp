@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <utility>
 #include <boost/container_hash/hash.hpp>
-#include "csv_parser/csv.h"
+#include "../csv_parser/csv.h"
 #include "hashes.h"
 #include "log_duration.h"
 

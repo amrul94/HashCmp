@@ -4,7 +4,7 @@
 
 
 void RunAllImagesTests() {
-    std::filesystem::path directory("data/images/look.com.ua_2015.02-111-1366x768");
+    std::filesystem::path directory("data/images/look.com.ua_2015.09-111-1920x1080");
 
     std::cout << "Test with 32 bits hashes START" << std::endl;
     const auto hashes_32_bits = hashes::Build32bitsHashes();

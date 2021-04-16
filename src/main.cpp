@@ -25,8 +25,8 @@ std::string ReadFile() {
 
 
 int main() {
-    //RunAllRandomTests();
-    RunAllImagesTests();
+    RunAllRandomTests();
+    //RunAllImagesTests();
     /*auto dir = std::filesystem::path("data/images/look.com.ua_2015.02-111-1366x768");
     int size = 0;
     for (const auto& dir_entry: std::filesystem::directory_iterator(dir)) {
