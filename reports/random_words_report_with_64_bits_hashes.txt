@@ -1,73 +1,73 @@
-words: 1000
+words: 100000
 
 RollingHash (BuzHash64) collisions = 0
-RollingHash (BuzHash64): 10 ms
+RollingHash (BuzHash64): 9822 ms
 
 CityHash64 collisions = 0
-CityHash64: 3 ms
+CityHash64: 3820 ms
 
 CityHash64WithSeed collisions = 0
-CityHash64WithSeed: 5 ms
+CityHash64WithSeed: 3945 ms
 
 CityHash64WithSeeds collisions = 0
-CityHash64WithSeeds: 6 ms
+CityHash64WithSeeds: 3716 ms
 
 Bernstein's hash djb2 64 collisions = 0
-Bernstein's hash djb2 64: 12 ms
+Bernstein's hash djb2 64: 3287 ms
 
 FarmHash64 collisions = 0
-FarmHash64: 2 ms
+FarmHash64: 2077 ms
 
 FarmHash64WithSeed collisions = 0
-FarmHash64WithSeed: 5 ms
+FarmHash64WithSeed: 3448 ms
 
 FarmHash64WithSeeds collisions = 0
-FarmHash64WithSeeds: 5 ms
+FarmHash64WithSeeds: 3390 ms
 
 FastHash64 collisions = 0
-FastHash64: 3 ms
+FastHash64: 1188 ms
 
 FNV-1a hash 64 collisions = 0
-FNV-1a hash 64: 4 ms
+FNV-1a hash 64: 5622 ms
 
 MetroHash64_1 collisions = 0
-MetroHash64_1: 1 ms
+MetroHash64_1: 1074 ms
 
 MetroHash64_2 collisions = 0
-MetroHash64_2: 1 ms
+MetroHash64_2: 1067 ms
 
 MurmurHash64A collisions = 0
-MurmurHash64A: 3 ms
+MurmurHash64A: 1479 ms
 
 MurmurHash64B collisions = 0
-MurmurHash64B: 3 ms
+MurmurHash64B: 1992 ms
 
 PJW Hash 64 collisions = 0
-PJW Hash 64: 14 ms
+PJW Hash 64: 8898 ms
 
 PearsonHash64 collisions = 0
-PearsonHash64: 16 ms
+PearsonHash64: 22730 ms
 
 SDBMHash64 collisions = 0
-SDBMHash64: 12 ms
+SDBMHash64: 3986 ms
 
 Spooky hash 64 collisions = 0
-Spooky hash 64: 4 ms
+Spooky hash 64: 2332 ms
 
 T1HA1 le collisions = 0
-T1HA1 le: 3 ms
+T1HA1 le: 893 ms
 
 T1HA1 be collisions = 0
-T1HA1 be: 4 ms
+T1HA1 be: 929 ms
 
 T1HA2 atonce collisions = 0
-T1HA2 atonce: 3 ms
+T1HA2 atonce: 1034 ms
 
 xxHash64 collisions = 0
-xxHash64: 4 ms
+xxHash64: 2622 ms
 
 XXH3_64bits collisions = 0
-XXH3_64bits: 1 ms
+XXH3_64bits: 1389 ms
 
 XXH3_64bits_withSeed collisions = 0
-XXH3_64bits_withSeed: 4 ms
+XXH3_64bits_withSeed: 1583 ms

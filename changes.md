@@ -32,5 +32,6 @@
 3. Подключил библиотку LibJPEG
 4. Заменил в обертках хеш-функций метод Hash(const string&) на Hash(string_view)
 5. Сделал новую цель сборки - images_tests
-
-!!! Нужно доделать 2 цели - London Crime и images_tests.cpp
+6. В базовых классах-оболочках сделал методы operator()(const Image& image)
+7. Удалил main.cpp и тесты связанные с "London crime.csv"
+8. Немного переделал random_worlds_test.cpp и images_tests.cpp

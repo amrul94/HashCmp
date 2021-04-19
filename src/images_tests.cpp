@@ -14,14 +14,11 @@ using namespace img;
 
 template <typename HashStruct>
 [[maybe_unused]] void TestImagesInDir(const HashStruct& hash_struct, const std::filesystem::path& p, std::ostream& report) {
-    std::filesystem::path hash_report_path("reports_/"s + hash_struct.hash_name);
-    std::ofstream hash_report_file(hash_report_path);
     std::unordered_map<size_t, size_t> hashes;
     for (const auto& dir_entry: std::filesystem::directory_iterator(p)) {
         Image image = LoadJPEG(dir_entry.path());
         auto hash = hash_struct.hash_function(image);
         ++hashes[hash];
-        hash_report_file << dir_entry.path().filename().string() << ": " << hash << std::endl;
     }
 
     report << hash_struct.hash_name << " collisions = " << CountCollisions(hashes) << std::endl;
@@ -35,11 +32,7 @@ void TestImages(const std::vector<HashStruct>& hashes, const std::filesystem::pa
     }
 }
 
-[[maybe_unused]] void RunAllImagesTests();
-
-int main(int argc, const char** argv) {
-    filesystem::path image_dir = "/general/Amrulla/Programming/C++/Дипломная работа/Thesis work/data/images";
-
+void RunTests(const filesystem::path& image_dir) {
     std::cout << "Test with 32 bits hashes START" << std::endl;
     const auto hashes_32_bits = hashes::Build32bitsHashes();
     std::ofstream file_report_32_hashes("reports/test_with_images_with_32_bits_hashes.txt");
@@ -51,5 +44,14 @@ int main(int argc, const char** argv) {
     std::ofstream file_report_64_hashes("reports/test_with_images_with_64_bits_hashes.txt");
     TestImages(hashes_64_bits, image_dir, file_report_64_hashes);
     std::cout << "Test with 64 bits hashes END\n" << std::endl;
+}
 
+int main(int argc, const char** argv) {
+    if (argc != 2) {
+        cerr << "Usage: "sv << argv[0] << " <folder with images>"sv << endl;
+        return 1;
+    }
+
+    filesystem::path image_dir = argv[1];
+    RunTests(image_dir);
 }
