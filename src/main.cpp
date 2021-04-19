@@ -38,7 +38,7 @@ int main() {
     std::string image = ReadFile();
     assert(!image.empty());
     //std::string image  = "image.jpg";
-    const auto hashes32 = hashes::Build32bitsHashes();
+    const auto hashes32 = HashLib::Build32bitsHashes();
     for (const auto& [name, hash] : hashes32 ) {
         std::cout << std::endl;
         LOG_DURATION_STREAM("time", std::cout);
@@ -47,7 +47,7 @@ int main() {
     }
     std::cout << std::endl;
 
-    const auto hashes64 = hashes::Build64bitsHashes();
+    const auto hashes64 = HashLib::Build64bitsHashes();
     for (const auto& [name, hash] : hashes64) {
         std::cout << std::endl;
         LOG_DURATION_STREAM("time", std::cout);
