@@ -1,4 +1,5 @@
-#pragma once
+#ifndef THESIS_WORK_IMG_H
+#define THESIS_WORK_IMG_H
 
 #include <array>
 #include <cassert>
@@ -22,14 +23,10 @@ namespace img {
 
     class Image {
     public:
-        // создаёт пустое изображение
         Image() = default;
-
-        // создаёт изображение заданного размера, заполняя его заданным цветом
         Image(int w, int h, Color fill);
 
-        // геттеры для отдельного пикселя изображения
-        Color GetPixel(int x, int y) const {
+        [[nodiscard]] Color GetPixel(int x, int y) const {
             return const_cast<Image*>(this)->GetPixel(x, y);
         }
         Color& GetPixel(int x, int y) {
@@ -39,17 +36,12 @@ namespace img {
 
         // геттер для заданной строки изображения
         Color* GetLine(int y);
-        const Color* GetLine(int y) const;
+        [[nodiscard]] const Color* GetLine(int y) const;
 
-        int GetWidth() const;
-        int GetHeight() const;
+        [[nodiscard]] int GetWidth() const;
+        [[nodiscard]] int GetHeight() const;
+        [[nodiscard]] int GetStep() const;
 
-        // шаг задаёт смещение соседних строк изображения
-        // он обычно совпадает с шириной, но может быть больше неё
-        int GetStep() const;
-
-        // будем считать изображение корректным, если
-        // его площадь положительна
         explicit operator bool() const {
             return GetWidth() > 0 && GetHeight() > 0;
         }
@@ -61,9 +53,11 @@ namespace img {
     private:
         int width_ = 0;
         int height_ = 0;
-        int step_;
+        int step_ = 0;
 
         std::vector<Color> pixels_;
     };
 
 }  // namespace img
+
+#endif // THESIS_WORK_IMG_H

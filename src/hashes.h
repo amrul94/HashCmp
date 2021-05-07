@@ -48,6 +48,9 @@ namespace hashes {
     [[maybe_unused]] inline constinit DJB2Hash32Wrapper djb2_hash_32;
     [[maybe_unused]] inline constinit DJB2Hash64Wrapper djb2_hash_64;
 
+    inline const char* DJB2_HASH_32_NAME = "Bernstein's hash djb2 32";
+    inline const char* DJB2_HASH_64_NAME = "Bernstein's hash djb2 64";
+
     [[maybe_unused]] inline constinit FarmHash32Wrapper farm_hash_32;
     [[maybe_unused]] inline constinit FarmHash32WithSeedWrapper farm_hash_32_with_seed;
     [[maybe_unused]] inline constinit FarmHash64Wrapper farm_hash_64;
@@ -80,10 +83,18 @@ namespace hashes {
     [[maybe_unused]] inline constinit PJWHash32Wrapper pjw_hash_32;
     [[maybe_unused]] inline constinit PJWHash64Wrapper pjw_hash_64;
 
+    inline const char* PJW_HASH_32_NAME = "PJW Hash 32";
+    inline const char* PJW_HASH_64_NAME = "PJW Hash 64";
+
     [[maybe_unused]] inline constinit SuperFastHashWrapper super_fast_hash;
+
+    inline const char* SUPER_FAST_HASH_NAME = "SuperFastHash";
 
     [[maybe_unused]] inline constinit SDBMHash32Wrapper sdbm_hash_32;
     [[maybe_unused]] inline constinit SDBMHash64Wrapper sdbm_hash_64;
+
+    inline const char* SDBM_HASH_32_NAME = "SDBM Hash 32";
+    inline const char* SDBM_HASH_64_NAME = "SDBM hash 64";
 
     [[maybe_unused]] inline constinit SpookyHash32Wrapper spooky_hash_32;
     [[maybe_unused]] inline constinit SpookyHash64Wrapper spooky_hash_64;

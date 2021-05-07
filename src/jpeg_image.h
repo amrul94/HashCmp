@@ -1,4 +1,6 @@
-#pragma once
+#ifndef THESIS_WORK_JPEG_IMAGE_H
+#define THESIS_WORK_JPEG_IMAGE_H
+
 #include "img.h"
 
 #include <filesystem>
@@ -10,3 +12,5 @@ namespace img {
     Image LoadJPEG(const Path& file);
 
 } // of namespace img
+
+#endif //THESIS_WORK_JPEG_IMAGE_H

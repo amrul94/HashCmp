@@ -13,9 +13,7 @@
 #include <super_fast_hash/super_fast_hash.h>
 #include <t1ha/t1ha.h>
 #include <metro_hash/metrohash64.h>
-
 #include <spooky_hash/spooky.h>
-
 #include <xx_hash/xxhash.h>
 #include <other_hash_functions.h>
 

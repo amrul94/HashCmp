@@ -22,7 +22,7 @@ namespace hashes {
 
         hash_functions.emplace_back("RollingHash (BuzHash32)", buz_hash_32);
         hash_functions.emplace_back("CityHash32", city_hash_32);
-        hash_functions.emplace_back("Bernstein's hash djb2 32", djb2_hash_32);
+        hash_functions.emplace_back(DJB2_HASH_32_NAME, djb2_hash_32);
 
         hash_functions.emplace_back("FarmHash32", farm_hash_32);
         hash_functions.emplace_back("FarmHash32WithSeed", farm_hash_32_with_seed);
@@ -39,9 +39,9 @@ namespace hashes {
         hash_functions.emplace_back("MurmurHash2", murmur_hash2);
 
         hash_functions.emplace_back("PearsonHash32", pearson_hash_32);
-        hash_functions.emplace_back("PJW Hash 32", pjw_hash_32);
-        hash_functions.emplace_back("SDBM 32", sdbm_hash_32);
-        hash_functions.emplace_back("SuperFastHash", super_fast_hash);
+        hash_functions.emplace_back(PJW_HASH_32_NAME, pjw_hash_32);
+        hash_functions.emplace_back(SDBM_HASH_32_NAME, sdbm_hash_32);
+        hash_functions.emplace_back(SUPER_FAST_HASH_NAME, super_fast_hash);
         hash_functions.emplace_back("Spooky hash 32", spooky_hash_32);
 
         hash_functions.emplace_back("T1HA0 32le", t1ha0_32le_hash);
@@ -62,7 +62,7 @@ namespace hashes {
         hashes.emplace_back("CityHash64WithSeed", city_hash_64_with_seed);
         hashes.emplace_back("CityHash64WithSeeds", city_hash_64_with_seeds);
 
-        hashes.emplace_back("Bernstein's hash djb2 64", djb2_hash_64);
+        hashes.emplace_back(DJB2_HASH_64_NAME, djb2_hash_64);
 
         hashes.emplace_back("FarmHash64", farm_hash_64);
         hashes.emplace_back("FarmHash64WithSeed", farm_hash_64_with_seed);
@@ -77,9 +77,9 @@ namespace hashes {
         hashes.emplace_back("MurmurHash64A", murmur_hash_64a);
         hashes.emplace_back("MurmurHash64B", murmur_hash_64b);
 
-        hashes.emplace_back("PJW Hash 64", pjw_hash_64);
+        hashes.emplace_back(PJW_HASH_64_NAME, pjw_hash_64);
         hashes.emplace_back("PearsonHash64", pearson_hash_64);
-        hashes.emplace_back("SDBMHash64", sdbm_hash_64);
+        hashes.emplace_back(SDBM_HASH_64_NAME, sdbm_hash_64);
         hashes.emplace_back("Spooky hash 64", spooky_hash_64);
 
         hashes.emplace_back("T1HA1 le", t1ha1_le_hash);

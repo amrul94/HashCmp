@@ -1,0 +1,39 @@
+
+Bernstein's hash djb2 32 collisions = 944452
+Bernstein's hash djb2 32: 3324 ms
+
+Bernstein's hash djb2 32 collisions = 982175
+Bernstein's hash djb2 32: 2451 ms
+
+Bernstein's hash djb2 32 collisions = 964615
+Bernstein's hash djb2 32: 3017 ms
+
+Bernstein's hash djb2 32 collisions = 906796
+Bernstein's hash djb2 32: 4896 ms
+
+Bernstein's hash djb2 64 collisions = 944452
+Bernstein's hash djb2 64: 4056 ms
+
+Bernstein's hash djb2 64 collisions = 982175
+Bernstein's hash djb2 64: 3461 ms
+
+Bernstein's hash djb2 64 collisions = 964615
+Bernstein's hash djb2 64: 3410 ms
+
+Bernstein's hash djb2 64 collisions = 906796
+Bernstein's hash djb2 64: 5161 ms
+
+PJW Hash 32 collisions = 996087
+PJW Hash 32: 2460 ms
+
+PJW Hash 64 collisions = 0
+PJW Hash 64: 2224 ms
+
+SuperFastHash collisions = 967984
+SuperFastHash: 3292 ms
+
+SuperFastHash collisions = 964089
+SuperFastHash: 3205 ms
+
+SuperFastHash collisions = 991945
+SuperFastHash: 2393 ms

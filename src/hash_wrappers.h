@@ -20,6 +20,9 @@ namespace hashes {
     constexpr int WORD_SIZE = 1000;
 
     class [[maybe_unused]] BaseHashWrapper {
+    public:
+        virtual ~BaseHashWrapper() = default;
+
     protected:
         [[maybe_unused]] static std::string ReadFile(ifstream& file);
 

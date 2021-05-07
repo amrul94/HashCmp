@@ -1,4 +1,5 @@
-#pragma once
+#ifndef THESIS_WORK_LOG_DURATION_H
+#define THESIS_WORK_LOG_DURATION_H
 
 #include <chrono>
 #include <iostream>
@@ -32,3 +33,5 @@ private:
     const Clock::time_point start_time_ = Clock::now();
     std::ostream& out_;
 };
+
+#endif // THESIS_WORK_LOG_DURATION_H

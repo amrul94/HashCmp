@@ -14,7 +14,7 @@
 1. Для каждой обертки хеш-функции создал inline const/constinit глобальную переменную в hashes.h
 2. Создал родительские классы для классов-оберток и заменил size_t на более конкретные uint32_t и uint64_t
 3. Сделал две структуры: Hash32Struct и Hash64Struct и заменил ими HashStruct в тестах. 
-4. Сделал функции TestWithRandomWords и RunConcreteRandomTest шаблонными
+4. Сделал функции TestWithWords и TestsWithWords шаблонными
 
 Изменения 12.04.2021:
 1. Поменял структуру классов-оболочек: 
@@ -35,3 +35,7 @@
 6. В базовых классах-оболочках сделал методы operator()(const Image& image)
 7. Удалил main.cpp и тесты связанные с "London crime.csv"
 8. Немного переделал random_worlds_test.cpp и images_tests.cpp
+
+Изменения 07.05.2021:
+1. Сделал тесты с английскими словами
+2. Сделал генераторы, которые сломали следующие хеши: DJB2 32,  DJB2 64, PJW 32 и SuperFastHash

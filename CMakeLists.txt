@@ -17,11 +17,11 @@ set(IMG_FILES src/img.h src/img.cpp src/jpeg_image.h src/jpeg_image.cpp)
 
 set(GENERAL_FILES ${TESTS} ${UTILITIES} ${WRAPPERS} ${IMG_FILES})
 
-set(RANDOM_WORD_TEST_MAIN src/random_words_test.cpp )
-add_executable(random_words_test ${RANDOM_WORD_TEST_MAIN} ${GENERATORS} ${GENERAL_FILES})
-target_include_directories(random_words_test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/HashLib" "${LIBJPEG_DIR}/include")
-target_link_directories(random_words_test INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
-target_link_libraries(random_words_test HashLib jpeg)
+set(WORDS_TEST_MAIN src/words_test.cpp)
+add_executable(words_test ${WORDS_TEST_MAIN} ${GENERATORS} ${GENERAL_FILES})
+target_include_directories(words_test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/HashLib" "${LIBJPEG_DIR}/include")
+target_link_directories(words_test INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
+target_link_libraries(words_test HashLib jpeg)
 
 set(IMAGES_TESTS_MAIN src/images_tests.cpp)
 add_executable(images_tests ${IMAGES_TESTS_MAIN} ${GENERAL_FILES})
