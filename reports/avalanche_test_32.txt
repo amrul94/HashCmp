@@ -1,0 +1,21 @@
+RollingHash (BuzHash32)	
+CityHash32	8	20	15.3438
+Bernstein's hash djb2 32	9 	23	14.6562
+FarmHash32	10	21	15.9375
+FarmHash32WithSeed	12	21	16.3438
+FastHash32	11	23	16.4375
+FNV-1a hash 32	10	18	14.0312
+Jenkins hash (One at a time)	10	25	16.3438
+Jenkins hash (lookup3 - little)	12	22	15.75
+Jenkins hash (lookup3 - big)	10	20	15.75
+MurmurHash1	12 	22 	16.625
+MurmurHash1Aligned	12	 22 	16.625
+MurmurHash2	11	24	15.875
+PearsonHash32	11	21	15.9062
+PJW Hash 32	7 	14	 9.625
+SDBM Hash 32	11	 23 	15.125
+SuperFastHash	11 	23 	16.125
+Spooky hash 32	11 	22 	16.2188
+T1HA0 32le	10 	23	 16.5312
+T1HA0 32be	11	 21	 15.7188
+xxHash32	11 	24 	16.3125

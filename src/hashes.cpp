@@ -21,7 +21,7 @@ namespace hashes {
         std::vector<Hash32Struct> hash_functions;
 
         hash_functions.emplace_back("RollingHash (BuzHash32)", buz_hash_32);
-        hash_functions.emplace_back("CityHash32", city_hash_32);
+        hash_functions.emplace_back(CITY_HASH_32_NAME, city_hash_32);
         hash_functions.emplace_back(DJB2_HASH_32_NAME, djb2_hash_32);
 
         hash_functions.emplace_back("FarmHash32", farm_hash_32);

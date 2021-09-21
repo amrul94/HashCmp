@@ -45,6 +45,8 @@ namespace hashes {
     [[maybe_unused]] inline constinit CityHash64WithSeedWrapper city_hash_64_with_seed;
     [[maybe_unused]] inline constinit CityHash64WithSeedsWrapper city_hash_64_with_seeds;
 
+    inline const char* CITY_HASH_32_NAME = "CityHash32";
+
     [[maybe_unused]] inline constinit DJB2Hash32Wrapper djb2_hash_32;
     [[maybe_unused]] inline constinit DJB2Hash64Wrapper djb2_hash_64;
 

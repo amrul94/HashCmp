@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 
+#include <bitset>
+#include <fstream>
+
 #include "count_collisions.h"
 #include "generators.h"
 #include "hashes.h"
@@ -14,12 +17,14 @@ constexpr uint64_t CRASH_DJB2_NUMBER_2 = 8447;
 constexpr uint64_t CRASH_DJB2_NUMBER_3 = 1107165184;
 constexpr uint64_t CRASH_DJB2_NUMBER_4 = 555753471;
 
+constexpr uint64_t CRASH_SDBM_32_NUMBER = 8899172169191;
+
 constexpr uint64_t CRASH_PJW_32_NUMBER = 4095;
+constexpr uint64_t CRASH_PJW_64_NUMBER = 1125899906842628;
 
 constexpr uint64_t CRASH_SFH_NUMBER_1 = 34342961144;
 constexpr uint64_t CRASH_SFH_NUMBER_2 = 34376515576;
 constexpr uint64_t CRASH_SFH_NUMBER_3 = 68753031152;
-
 
 template <typename HashStruct>
 void CreateDir(const string& path, const std::vector<HashStruct>& hashes) {
@@ -113,7 +118,10 @@ void TestsWithRandomWorlds(int word_count, int min_word_size, int max_word_size)
         return GenerateRandomWords(generator, word_count, min_word_size, max_word_size);
     };
 
-    TestsWithWordsImpl(lambda, "random_words");
+    string test_name = "random_"s + to_string(word_count) + "_words_("s + to_string(min_word_size) + "-" +
+            to_string(max_word_size) + "_world_size)";
+
+    TestsWithWordsImpl(lambda, test_name);
 }
 
 void TestAvalancheEffect(char ch, int word_size) {
@@ -166,7 +174,7 @@ void RunCyclesCrashes(int word_count) {
     std::cout << "Run Cycles Crashes START" << std::endl;
 
     std::ofstream out("reports/report_cycles_crashes");
-    RunCyclesCrashes32(djb2_hash_32, DJB2_HASH_32_NAME, word_count, CRASH_DJB2_NUMBER_1, out);
+/*    RunCyclesCrashes32(djb2_hash_32, DJB2_HASH_32_NAME, word_count, CRASH_DJB2_NUMBER_1, out);
     RunCyclesCrashes32(djb2_hash_32, DJB2_HASH_32_NAME, word_count, CRASH_DJB2_NUMBER_2, out);
     RunCyclesCrashes32(djb2_hash_32, DJB2_HASH_32_NAME, word_count, CRASH_DJB2_NUMBER_3, out);
     RunCyclesCrashes32(djb2_hash_32, DJB2_HASH_32_NAME, word_count, CRASH_DJB2_NUMBER_4, out);
@@ -177,29 +185,107 @@ void RunCyclesCrashes(int word_count) {
     RunCyclesCrashes64(djb2_hash_64, DJB2_HASH_64_NAME, word_count, CRASH_DJB2_NUMBER_4, out);
 
     RunCyclesCrashes32(pjw_hash_32, PJW_HASH_32_NAME, word_count, CRASH_PJW_32_NUMBER, out);
+    RunCyclesCrashes64(pjw_hash_64, PJW_HASH_64_NAME, word_count, CRASH_PJW_64_NUMBER, out);
 
     RunCyclesCrashes32(super_fast_hash, SUPER_FAST_HASH_NAME, word_count, CRASH_SFH_NUMBER_1, out);
     RunCyclesCrashes32(super_fast_hash, SUPER_FAST_HASH_NAME, word_count, CRASH_SFH_NUMBER_2, out);
     RunCyclesCrashes32(super_fast_hash, SUPER_FAST_HASH_NAME, word_count, CRASH_SFH_NUMBER_3, out);
 
-    std::cout << "Run Cycles Crashes END\n\n";
+    RunCyclesCrashes32(sdbm_hash_32, SDBM_HASH_32_NAME, word_count, CRASH_SDBM_32_NUMBER, out);
+*/
+    //RunCyclesCrashes32(city_hash_32, CITY_HASH_32_NAME, word_count, CRASH_CITY_HASH_32, out);
+
+    std::cout << "Run Cycles Crashes END\n";
+}
+
+
+
+template<size_t N, typename HashContainer>
+void NewAvalancheTestImpl(const string& str_bits, const vector<string>& test_words,
+                          const HashContainer& hash_container, ostream& out) {
+    for (auto& current_hash : hash_container) {
+        out << current_hash.hash_name << '\t';
+        bitset<N> hash_bits = current_hash.hash_function(str_bits);
+
+        vector<int> different_bits;
+        for (const string& word : test_words) {
+            bitset<N> current_bits = current_hash.hash_function(word);
+            int current_different_bits = 0;
+            for (int i = 0; i < hash_bits.size(); ++i) {
+                if (hash_bits[i] != current_bits[i]) {
+                    ++current_different_bits;
+                }
+            }
+            different_bits.push_back(current_different_bits);
+        }
+        auto min_different = min_element(different_bits.begin(), different_bits.end());
+        auto max_different = max_element(different_bits.begin(), different_bits.end());
+        double average = accumulate(different_bits.begin(), different_bits.end(), 0) / static_cast<double>(different_bits.size());
+        out << *min_different << ' ' << *max_different << ' ' << average << endl;
+    }
+}
+
+template<size_t N>
+void NewAvalancheTest() {
+    bitset<N> bits{};
+    for (size_t i = 0; i < bits.size(); i+=2) {
+        bits.flip(i);
+    }
+    cout << bits << endl;
+    uint32_t uint_bits = bits.to_ulong();
+    string str_bits(reinterpret_cast<char*>(&uint_bits), 32);
+
+    vector<string> test_words;
+    test_words.reserve(N);
+
+
+    for (int i = 0; i < bits.size(); ++i) {
+        bitset<32> copy_bits = bits;
+        copy_bits.flip(i);
+        uint32_t uint_copy_bits = copy_bits.to_ulong();
+        string str_copy_bits(reinterpret_cast<char*>(&uint_copy_bits), 32);
+        test_words.push_back(str_copy_bits);
+    }
+
+    ofstream out_32 ("reports/avalanche_test_32.txt");
+    auto hash_32_tests = hashes::Build32bitsHashes();
+    NewAvalancheTestImpl<32>(str_bits, test_words, hash_32_tests, out_32);
+
+    ofstream out_64 ("reports/avalanche_test_64.txt");
+    auto hash_64_tests = hashes::Build64bitsHashes();
+    NewAvalancheTestImpl<64>(str_bits, test_words, hash_64_tests, out_64);
 }
 
 int main(int argc, const char** argv) {
-    int word_count = 1'000'000;
-    int min_word_size = 100;
-    int max_word_size = 100;
+    int max_bytes = 1'000'000'000;
+    int max_word_count = 5'000'000;
+    //int word_count = 1'000'000;
+    //int number_of_tests;
+    vector<int> min_word_sizes = {500, 1000, 1000, 5000};
+    vector<int> max_word_sizes = {1500, 1000, 3000, 15000};
+    //vector<int> min_word_sizes = {1000};
+    //vector<int> max_word_sizes = {1000};
 
     CreateDirs("reports/local_reports");
 
-    assert(word_count * max_word_size < GIGABYTE);
-    //TestWithEnglishWords("data/english_words.txt");
-    //TestsWithRandomWorlds(word_count, min_word_size, max_word_size);
+    /*assert(min_word_sizes.size() == max_word_sizes.size());
+    for (size_t i = 0; i < min_word_sizes.size(); ++i) {
+        int average_word_size = (min_word_sizes[i] + max_word_sizes[i]) / 2;
+        int word_count = max_bytes / average_word_size;
+        word_count = (word_count < max_word_count) ? word_count : max_word_count;
+        assert(word_count * average_word_size < GIGABYTE);
 
-    //TestAvalancheEffect('a', max_word_size);
+        TestsWithRandomWorlds(word_count, min_word_sizes[i], max_word_sizes[i]);
+    }*/
+
+    //TestWithEnglishWords("data/english_words.txt");
+    //TestAvalancheEffect('a', max_word_sizes[max_word_sizes.size() - 1]);
     //TestCrashPJW('a', max_word_size);
     //TestCrashDJB2(word_count, CRASH_DJB2_NUMBER_1);
 
-    RunCyclesCrashes(word_count);
+    //RunCyclesCrashes(word_count);
+
+    NewAvalancheTest<32>();
+
 }
 

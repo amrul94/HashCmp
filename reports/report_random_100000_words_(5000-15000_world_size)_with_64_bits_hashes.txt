@@ -1,0 +1,73 @@
+words: 100000
+
+RollingHash (BuzHash64) collisions = 0
+RollingHash (BuzHash64): 8988 ms
+
+CityHash64 collisions = 0
+CityHash64: 3131 ms
+
+CityHash64WithSeed collisions = 0
+CityHash64WithSeed: 3322 ms
+
+CityHash64WithSeeds collisions = 0
+CityHash64WithSeeds: 3497 ms
+
+Bernstein's hash djb2 64 collisions = 2
+Bernstein's hash djb2 64: 2940 ms
+
+FarmHash64 collisions = 0
+FarmHash64: 2036 ms
+
+FarmHash64WithSeed collisions = 0
+FarmHash64WithSeed: 3240 ms
+
+FarmHash64WithSeeds collisions = 0
+FarmHash64WithSeeds: 3362 ms
+
+FastHash64 collisions = 0
+FastHash64: 1393 ms
+
+FNV-1a hash 64 collisions = 0
+FNV-1a hash 64: 4705 ms
+
+MetroHash64_1 collisions = 0
+MetroHash64_1: 3238 ms
+
+MetroHash64_2 collisions = 0
+MetroHash64_2: 1899 ms
+
+MurmurHash64A collisions = 0
+MurmurHash64A: 1306 ms
+
+MurmurHash64B collisions = 0
+MurmurHash64B: 1686 ms
+
+PJW Hash 64 collisions = 0
+PJW Hash 64: 7093 ms
+
+PearsonHash64 collisions = 0
+PearsonHash64: 19108 ms
+
+SDBM hash 64 collisions = 0
+SDBM hash 64: 3579 ms
+
+Spooky hash 64 collisions = 0
+Spooky hash 64: 2183 ms
+
+T1HA1 le collisions = 0
+T1HA1 le: 1045 ms
+
+T1HA1 be collisions = 0
+T1HA1 be: 1069 ms
+
+T1HA2 atonce collisions = 0
+T1HA2 atonce: 1308 ms
+
+xxHash64 collisions = 0
+xxHash64: 2455 ms
+
+XXH3_64bits collisions = 0
+XXH3_64bits: 1510 ms
+
+XXH3_64bits_withSeed collisions = 0
+XXH3_64bits_withSeed: 1673 ms

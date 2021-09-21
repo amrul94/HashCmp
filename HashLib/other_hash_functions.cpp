@@ -26,7 +26,7 @@ uint32_t DJB2Hash32(std::string_view str) {
     return hash;
 }
 uint64_t DJB2Hash64(std::string_view str) {
-    uint32_t hash = 5381;
+    uint64_t hash = 5381;
     for (auto c : str) {
         hash = (hash << 5) + hash + c; /* hash * 33 + c */
     }

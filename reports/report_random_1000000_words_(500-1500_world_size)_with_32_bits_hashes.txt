@@ -1,0 +1,64 @@
+words: 1000000
+
+RollingHash (BuzHash32) collisions = 118
+RollingHash (BuzHash32): 11411 ms
+
+CityHash32 collisions = 112
+CityHash32: 7047 ms
+
+Bernstein's hash djb2 32 collisions = 127
+Bernstein's hash djb2 32: 5521 ms
+
+FarmHash32 collisions = 122
+FarmHash32: 6729 ms
+
+FarmHash32WithSeed collisions = 92
+FarmHash32WithSeed: 9111 ms
+
+FastHash32 collisions = 112
+FastHash32: 6049 ms
+
+FNV-1a hash 32 collisions = 125
+FNV-1a hash 32: 7340 ms
+
+Jenkins hash (One at a time) collisions = 109
+Jenkins hash (One at a time): 9360 ms
+
+Jenkins hash (lookup3 - little) collisions = 115
+Jenkins hash (lookup3 - little): 7188 ms
+
+Jenkins hash (lookup3 - big) collisions = 117
+Jenkins hash (lookup3 - big): 7864 ms
+
+MurmurHash1 collisions = 121
+MurmurHash1: 6936 ms
+
+MurmurHash1Aligned collisions = 121
+MurmurHash1Aligned: 6527 ms
+
+MurmurHash2 collisions = 128
+MurmurHash2: 6365 ms
+
+PearsonHash32 collisions = 138
+PearsonHash32: 13905 ms
+
+PJW Hash 32 collisions = 2048
+PJW Hash 32: 10510 ms
+
+SDBM Hash 32 collisions = 121
+SDBM Hash 32: 6037 ms
+
+SuperFastHash collisions = 117
+SuperFastHash: 4750 ms
+
+Spooky hash 32 collisions = 89
+Spooky hash 32: 6801 ms
+
+T1HA0 32le collisions = 96
+T1HA0 32le: 5914 ms
+
+T1HA0 32be collisions = 109
+T1HA0 32be: 6141 ms
+
+xxHash32 collisions = 122
+xxHash32: 8531 ms

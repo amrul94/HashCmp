@@ -2,6 +2,9 @@
 
 #include <cassert>
 #include <cstring>
+#include <set>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 std::string GenerateRandomWord(std::mt19937& generator, int min_length, int max_length) {
     const int length = std::uniform_int_distribution(min_length, max_length)(generator);
@@ -47,10 +50,15 @@ std::vector<std::string> PJWCrash(char ch, int length) {
 }
 
 std::vector<std::string> CrashDJB2(int word_count, uint64_t crash_word) {
-    std::vector<std::string> words;
-    uint64_t number = 0;
+    std::set<std::string> words;
+    boost::multiprecision::uint1024_t number = 0;
+    const int char_in_uint64_t = 8;
     for (int i = 0; i < word_count; ++i, number += crash_word) {
-        words.emplace_back(reinterpret_cast<char*>(&number), 8);
+        const auto backend = number.backend();
+        const auto data = reinterpret_cast<const char*>(backend.limbs());
+        const auto size = backend.size() * char_in_uint64_t;
+        words.emplace(data, size);
+        //words.emplace(reinterpret_cast<char*>(&number), 128);
     }
-    return words;
+    return {words.begin(), words.end()};
 }
