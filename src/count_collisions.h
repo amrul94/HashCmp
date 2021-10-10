@@ -12,8 +12,8 @@ struct CollisionsInfo {
     std::set<std::string_view> words;
 };
 
-using CollisionsMap = std::map<size_t, CollisionsInfo>;
+using CollisionsMap = std::map<uint64_t, uint32_t>;
 
-size_t CountCollisions(const CollisionsMap& hashes, std::ostream& out);
+uint64_t CountCollisions(const CollisionsMap& hashes);
 
 #endif //THESIS_WORK_COUNT_COLLISIONS_H

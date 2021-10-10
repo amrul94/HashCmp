@@ -484,7 +484,7 @@ T1HA_API int t1ha_selfcheck__t1ha0_ia32aes_avx2(void);
  *    - Portable and extremely efficiency on modern 64-bit CPUs.
  *      Designed for 64-bit little-endian platforms,
  *      in other cases will runs slowly.
- *    - Great quality of hashing and still faster than other non-t1ha HashLib.
+ *    - Great quality of hashing and still faster than other non-t1ha hashes.
  *      Provides streaming mode and 128-bit result.
  *
  * Note: Due performance reason 64- and 128-bit results are completely

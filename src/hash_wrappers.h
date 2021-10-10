@@ -5,6 +5,7 @@
 #ifndef THESIS_WORK_HASH_WRAPPERS_H
 #define THESIS_WORK_HASH_WRAPPERS_H
 
+#include <cstring>
 #include <fstream>
 #include <filesystem>
 #include <functional>
@@ -15,40 +16,103 @@
 
 #include "img.h"
 
-namespace hashes {
 
-    constexpr int WORD_SIZE = 1000;
+// HFL = Hash function library
+namespace hfl {
 
-    class [[maybe_unused]] BaseHashWrapper {
+    std::string ReadFile(ifstream& file);
+
+    template<class Type>
+    std::string WriteToString(Type source) {
+        auto size = sizeof(Type);
+        string str;
+        str.resize(size);
+        memcpy(str.data(), &source, size);
+        return str;
+    }
+
+    template<typename HashType>
+    class BaseHashWrapper {
     public:
+        HashType operator()(std::string_view str) const {
+            return Hash(str);
+        }
+
+        HashType operator()(ifstream& file) const {
+            std::string binary_file = ReadFile(file);
+            assert(!binary_file.empty());
+            return Hash(binary_file);
+        }
+
+        HashType operator()(const img::Image& image) const {
+
+            // Возможно стоит сделать так:
+            // const char* bytes = reinterpret_cast<const char*>(image.GetLine(0);
+            // const size_t size = image.GetHeight() * image.GetWidth();
+            // const std::string_view str(bytes, size);
+            // return Hash(str);
+
+            const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
+            return Hash(bytes);
+        }
+
+        HashType operator()(int8_t number) const {
+            uint8_t number8 = number;
+            uint64_t number64 = number8;
+            return operator()(number64);
+        }
+
+        HashType operator()(int16_t number) const {
+            uint64_t number64 = number;
+            return operator()(number64);
+        }
+
+        HashType operator()(int32_t number) const {
+            uint64_t number64 = number;
+            return operator()(number64);
+        }
+
+        HashType operator()(int64_t number) const {
+            uint64_t number64 = number;
+            return operator()(number64);
+        }
+
+
+        HashType operator()(uint8_t number) const {
+            uint64_t number64 = number;
+            return operator()(number64);
+        }
+
+        HashType operator()(uint16_t number) const {
+            uint64_t number64 = number;
+            return operator()(number64);
+        }
+
+        HashType operator()(uint32_t number) const {
+            uint64_t number64 = number;
+            return operator()(number64);
+        }
+
+        HashType operator()(uint64_t number) const {
+            return Hash(WriteToString<uint64_t>(number));
+        }
+
         virtual ~BaseHashWrapper() = default;
 
-    protected:
-        [[maybe_unused]] static std::string ReadFile(ifstream& file);
-
-    };
-
-    class [[maybe_unused]] BaseHash32Wrapper : BaseHashWrapper {
-    public:
-        uint32_t operator()(std::string_view str) const;
-        uint32_t operator()(ifstream& file) const;
-        uint32_t operator()(const img::Image& image) const;
-
     private:
-        [[nodiscard]] virtual uint32_t Hash(std::string_view str) const = 0;
+        [[nodiscard]] virtual HashType Hash(std::string_view str) const = 0;
     };
 
-    class [[maybe_unused]] BaseHash64Wrapper : BaseHashWrapper {
-    public:
-        uint64_t operator()(std::string_view str) const;
-        uint64_t operator()(ifstream& file) const;
-        uint64_t operator()(const img::Image& image) const;
+    using BaseHash16Wrapper = BaseHashWrapper<uint16_t>;
+    using BaseHash32Wrapper = BaseHashWrapper<uint32_t>;
+    using BaseHash64Wrapper = BaseHashWrapper<uint64_t>;
 
+//----- Bernstein's hash DJB2 ------
+
+    class [[maybe_unused]] DJB2Hash16Wrapper : public BaseHash16Wrapper {
     private:
-        [[nodiscard]] virtual uint64_t Hash(std::string_view str) const = 0;
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
     };
-
-//----- Bernstein's hash djb2 ------
 
     class [[maybe_unused]] DJB2Hash32Wrapper : public BaseHash32Wrapper {
     private:
@@ -72,16 +136,6 @@ namespace hashes {
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
-    class [[maybe_unused]] CityHash64WithSeedWrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] CityHash64WithSeedsWrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
-
 //----------- FarmHashes ----------
 
     class [[maybe_unused]] FarmHash32Wrapper : public BaseHash32Wrapper {
@@ -89,23 +143,7 @@ namespace hashes {
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
-    class [[maybe_unused]] FarmHash32WithSeedWrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
     class [[maybe_unused]] FarmHash64Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] FarmHash64WithSeedWrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
-
-
-    class [[maybe_unused]] FarmHash64WithSeedsWrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
@@ -137,9 +175,19 @@ namespace hashes {
 
 //--------- Jenkins hash -----------
 
-    class [[maybe_unused]] OneTimeHashWrapper : public BaseHash32Wrapper {
+    class [[maybe_unused]] OneTimeHash16Wrapper : public BaseHash16Wrapper {
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] OneTimeHash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] OneTimeHash64Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
     class [[maybe_unused]] Lookup3LittleWrapper : public BaseHash32Wrapper {
@@ -150,6 +198,21 @@ namespace hashes {
     class [[maybe_unused]] Lookup3BigWrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] SpookyHash16Wrapper : public BaseHash16Wrapper {
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] SpookyHash32Wrapper : public BaseHash32Wrapper {
+    private:
+        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] SpookyHash64Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
 
@@ -172,12 +235,11 @@ namespace hashes {
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
-    class [[maybe_unused]] MurmurHash1AlignedWrapper : public BaseHash32Wrapper {
+    class [[maybe_unused]] MurmurHash2Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
-
-    class [[maybe_unused]] MurmurHash2Wrapper : public BaseHash32Wrapper {
+    class [[maybe_unused]] MurmurHash2AWrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
@@ -187,9 +249,9 @@ namespace hashes {
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
-    class [[maybe_unused]] MurmurHash64BWrapper: public BaseHash64Wrapper  {
+    class [[maybe_unused]] MurmurHash3Wrapper: public BaseHash32Wrapper  {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
 //--- Paul Hsieh's SuperFastHash ---
@@ -200,6 +262,14 @@ namespace hashes {
     };
 
 //---------- PearsonHashes ---------
+
+    class [[maybe_unused]] PearsonHash16Wrapper : public BaseHash16Wrapper {
+    public:
+        PearsonHash16Wrapper() noexcept;
+
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
 
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
     public:
@@ -219,6 +289,11 @@ namespace hashes {
 
 //------------ PJW Hash ------------
 
+    class [[maybe_unused]] PJWHash16Wrapper : public BaseHash16Wrapper {
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
     class [[maybe_unused]] PJWHash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
@@ -231,6 +306,16 @@ namespace hashes {
 
 //----- Rolling Hash (BuzHash) -----
 
+    class [[maybe_unused]] BuzHash16Wrapper : public BaseHash16Wrapper {
+    public:
+        BuzHash16Wrapper() noexcept = default;
+
+    private:
+        uint16_t Hash(std::string_view str) const override;
+
+        mutable CyclicHash<uint16_t, unsigned char> hasher_{1024, 16};
+    };
+
     class [[maybe_unused]] BuzHash32Wrapper : public BaseHash32Wrapper {
     public:
         BuzHash32Wrapper() noexcept = default;
@@ -238,7 +323,7 @@ namespace hashes {
     private:
         uint32_t Hash(std::string_view str) const override;
 
-        mutable CyclicHash<uint32_t, unsigned char> hasher_{WORD_SIZE, 32};
+        mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 32};
     };
 
     class [[maybe_unused]] BuzHash64Wrapper : public BaseHash64Wrapper {
@@ -248,10 +333,15 @@ namespace hashes {
     private:
         uint64_t Hash(std::string_view str) const override;
 
-        mutable CyclicHash<uint64_t, unsigned char> hash_function_{WORD_SIZE, 64};
+        mutable CyclicHash<uint64_t, unsigned char> hasher_{1024, 64};
     };
 
 //-------------- SDBM --------------
+
+    class [[maybe_unused]] SDBMHash16Wrapper : public BaseHash16Wrapper {
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
 
     class [[maybe_unused]] SDBMHash32Wrapper : public BaseHash32Wrapper {
     private:
@@ -259,18 +349,6 @@ namespace hashes {
     };
 
     class [[maybe_unused]] SDBMHash64Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
-
-//---------- Spooky hash -----------
-
-    class [[maybe_unused]] SpookyHash32Wrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] SpookyHash64Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };

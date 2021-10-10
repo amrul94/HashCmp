@@ -5,59 +5,42 @@
 
 #include "hash_wrappers.h"
 
-namespace hashes {
+// HFL = Hash function library
+namespace hfl {
 
     //----------- HashStructs ----------
 
-    struct [[maybe_unused]] HashStruct {
-        template<typename HashType>
-        HashStruct(std::string hash_name, HashType hash_function)
-            : hash_name(std::move(hash_name))
-            , hash_function(hash_function) {
+    template<typename HashType>
+    struct HashStruct {
+        using HashFunction = const BaseHashWrapper<HashType>&;
+        HashStruct(std::string hash_name, HashFunction hash_function)
+                : hash_name(std::move(hash_name))
+                , hash_function(hash_function) {
         }
 
         std::string hash_name;
-        std::function<size_t(const std::string&)> hash_function;
+        HashFunction hash_function;
     };
 
-    struct Hash32Struct {
-        [[maybe_unused]] Hash32Struct(std::string hash_name, const BaseHash32Wrapper& hash_function);
-
-        std::string hash_name;
-        const BaseHash32Wrapper& hash_function;
-    };
-
-    struct Hash64Struct {
-        [[maybe_unused]] Hash64Struct(std::string hash_name, const BaseHash64Wrapper& hash_function);
-
-        std::string hash_name;
-        const BaseHash64Wrapper& hash_function;
-    };
+    using Hash16Struct = HashStruct<uint16_t>;
+    using Hash32Struct = HashStruct<uint32_t>;
+    using Hash64Struct = HashStruct<uint64_t>;
 
 
     // Hashes
-
+    [[maybe_unused]] inline const BuzHash16Wrapper buz_hash_16;
     [[maybe_unused]] inline const BuzHash32Wrapper buz_hash_32;
     [[maybe_unused]] inline const BuzHash64Wrapper buz_hash_64;
 
     [[maybe_unused]] inline constinit CityHash32Wrapper city_hash_32;
     [[maybe_unused]] inline constinit CityHash64Wrapper city_hash_64;
-    [[maybe_unused]] inline constinit CityHash64WithSeedWrapper city_hash_64_with_seed;
-    [[maybe_unused]] inline constinit CityHash64WithSeedsWrapper city_hash_64_with_seeds;
 
-    inline const char* CITY_HASH_32_NAME = "CityHash32";
-
+    [[maybe_unused]] inline constinit DJB2Hash16Wrapper djb2_hash_16;
     [[maybe_unused]] inline constinit DJB2Hash32Wrapper djb2_hash_32;
     [[maybe_unused]] inline constinit DJB2Hash64Wrapper djb2_hash_64;
 
-    inline const char* DJB2_HASH_32_NAME = "Bernstein's hash djb2 32";
-    inline const char* DJB2_HASH_64_NAME = "Bernstein's hash djb2 64";
-
     [[maybe_unused]] inline constinit FarmHash32Wrapper farm_hash_32;
-    [[maybe_unused]] inline constinit FarmHash32WithSeedWrapper farm_hash_32_with_seed;
     [[maybe_unused]] inline constinit FarmHash64Wrapper farm_hash_64;
-    [[maybe_unused]] inline constinit FarmHash64WithSeedWrapper farm_hash_64_with_seed;
-    [[maybe_unused]] inline constinit FarmHash64WithSeedsWrapper farm_hash_64_with_seeds;
 
     [[maybe_unused]] inline constinit FastHash32Wrapper fast_hash_32;
     [[maybe_unused]] inline constinit FastHash64Wrapper fast_hash_64;
@@ -72,32 +55,30 @@ namespace hashes {
     [[maybe_unused]] inline constinit MetroHash64_2_Wrapper metro_hash_64_2;
 
     [[maybe_unused]] inline constinit MurmurHash1Wrapper murmur_hash1;
-    [[maybe_unused]] inline constinit MurmurHash1AlignedWrapper murmur_hash1_aligned;
-    [[maybe_unused]] inline constinit MurmurHash2Wrapper murmur_hash2;
-    [[maybe_unused]] inline constinit MurmurHash64AWrapper murmur_hash_64a;
-    [[maybe_unused]] inline constinit MurmurHash64BWrapper murmur_hash_64b;
+    [[maybe_unused]] inline constinit MurmurHash2Wrapper murmur_hash2_32;
+    [[maybe_unused]] inline constinit MurmurHash2AWrapper murmur_hash2a_32;
+    [[maybe_unused]] inline constinit MurmurHash64AWrapper murmur_hash2_64;
+    [[maybe_unused]] inline constinit MurmurHash3Wrapper murmur_hash3;
 
-    [[maybe_unused]] inline constinit OneTimeHashWrapper one_at_a_time_hash;
+    [[maybe_unused]] inline constinit OneTimeHash16Wrapper one_at_a_time_hash_16;
+    [[maybe_unused]] inline constinit OneTimeHash32Wrapper one_at_a_time_hash_32;
+    [[maybe_unused]] inline constinit OneTimeHash64Wrapper one_at_a_time_hash_64;
 
+    [[maybe_unused]] inline const PearsonHash16Wrapper pearson_hash_16;
     [[maybe_unused]] inline const PearsonHash32Wrapper pearson_hash_32;
     [[maybe_unused]] inline const PearsonHash64Wrapper pearson_hash_64;
 
+    [[maybe_unused]] inline constinit PJWHash16Wrapper pjw_hash_16;
     [[maybe_unused]] inline constinit PJWHash32Wrapper pjw_hash_32;
     [[maybe_unused]] inline constinit PJWHash64Wrapper pjw_hash_64;
 
-    inline const char* PJW_HASH_32_NAME = "PJW Hash 32";
-    inline const char* PJW_HASH_64_NAME = "PJW Hash 64";
-
     [[maybe_unused]] inline constinit SuperFastHashWrapper super_fast_hash;
 
-    inline const char* SUPER_FAST_HASH_NAME = "SuperFastHash";
-
+    [[maybe_unused]] inline constinit SDBMHash16Wrapper sdbm_hash_16;
     [[maybe_unused]] inline constinit SDBMHash32Wrapper sdbm_hash_32;
     [[maybe_unused]] inline constinit SDBMHash64Wrapper sdbm_hash_64;
 
-    inline const char* SDBM_HASH_32_NAME = "SDBM Hash 32";
-    inline const char* SDBM_HASH_64_NAME = "SDBM hash 64";
-
+    [[maybe_unused]] inline constinit SpookyHash16Wrapper spooky_hash_16;
     [[maybe_unused]] inline constinit SpookyHash32Wrapper spooky_hash_32;
     [[maybe_unused]] inline constinit SpookyHash64Wrapper spooky_hash_64;
 
@@ -110,10 +91,10 @@ namespace hashes {
     [[maybe_unused]] inline constinit xxHash32Wrapper xx_hash_32;
     [[maybe_unused]] inline constinit xxHash64Wrapper xx_hash_64;
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
-    [[maybe_unused]] inline constinit XXH3_64BitsWithSeedWrapper xxh3_64bits_with_seed;
-
 
     //----------- BuildHashes ----------
+
+    std::vector<Hash16Struct> Build16bitsHashes();
     std::vector<Hash32Struct> Build32bitsHashes();
     std::vector<Hash64Struct> Build64bitsHashes();
 

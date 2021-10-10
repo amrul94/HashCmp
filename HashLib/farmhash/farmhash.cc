@@ -1856,7 +1856,7 @@ uint128_t CityHash128WithSeed(const char *s, size_t len, uint128_t seed) {
   }
   // At this point our 56 bytes of state should contain more than
   // enough information for a strong 128-bit hash.  We use two
-  // different 56-byte-to-8-byte HashLib to get a 16-byte final result.
+  // different 56-byte-to-8-byte hashes to get a 16-byte final result.
   x = HashLen16(x, v.first);
   y = HashLen16(y + z, w.first);
   return Uint128(HashLen16(x + v.second, w.second) + y,
@@ -3512,7 +3512,7 @@ uint32_t expected[] = {
 1423491227u, 2103067918u, 2291777410u, 1097943000u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -4408,7 +4408,7 @@ uint32_t expected[] = {
 3929965401u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -5662,7 +5662,7 @@ uint32_t expected[] = {
 4166253320u, 2747410691u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -6556,7 +6556,7 @@ uint32_t expected[] = {
 918315064u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -7448,7 +7448,7 @@ uint32_t expected[] = {
 1515163433u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -8340,7 +8340,7 @@ uint32_t expected[] = {
 1461025478u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -9594,7 +9594,7 @@ uint32_t expected[] = {
 2677675207u, 918315064u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -10488,7 +10488,7 @@ uint32_t expected[] = {
 151909546u, 2384458112u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive
@@ -11742,7 +11742,7 @@ uint32_t expected[] = {
 151909546u, 2384458112u,
 };
 
-// Return false only if offset is -1 and a spot check of 3 HashLib all yield 0.
+// Return false only if offset is -1 and a spot check of 3 hashes all yield 0.
 bool Test(int offset, int len = 0) {
 #undef Check
 #undef IsAlive

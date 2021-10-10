@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-std::string GenerateRandomWord(std::mt19937& generator, int min_length, int max_length);
+std::string GenerateRandomWord(std::mt19937& generator, uint32_t min_length, uint32_t max_length);
 
 std::vector<std::string> GenerateRandomWords(std::mt19937& generator, int word_count, int min_length, int max_length);
 

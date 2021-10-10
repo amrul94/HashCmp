@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.17)
 project(HashLib)
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS -pthread)
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -maes")
+set(CMAKE_CXX_FLAGS "-pthread -Wdeprecated-enum-enum-conversion")
+set(CMAKE_C_FLAGS "-pthread -maes ")
 
 set(CITY_HASH cityhash/city.h cityhash/city.cc cityhash/config.h)
 set(FARM_HASH farmhash/farmhash.h farmhash/farmhash.cc)

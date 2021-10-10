@@ -35,7 +35,7 @@
  * on new Intel boxes.  MD4 and MD5 also have similar specs, but they are orders
  * of magnitude slower.  CRCs are two or more times slower, but unlike 
  * SpookyHash, they have nice math for combining the CRCs of pieces to form 
- * the CRCs of wholes.  There are also cryptographic HashLib, but those are even
+ * the CRCs of wholes.  There are also cryptographic hashes, but those are even
  * slower than MD5.
  */
 

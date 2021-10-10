@@ -1,94 +1,86 @@
 #include "hashes.h"
 
-namespace hashes {
-
-    //----------- HashStructs ----------
-
-    [[maybe_unused]] Hash32Struct::Hash32Struct(std::string hash_name, const BaseHash32Wrapper& hash_function)
-            : hash_name(std::move(hash_name))
-            , hash_function(hash_function) {
-    }
-
-    [[maybe_unused]] Hash64Struct::Hash64Struct(std::string hash_name, const BaseHash64Wrapper& hash_function)
-            : hash_name(std::move(hash_name))
-            , hash_function(hash_function) {
-    }
+// HFL = Hash function library
+namespace hfl {
 
     //----------- BuildHashes ----------
 
+    std::vector<Hash16Struct> Build16bitsHashes() {
+        using namespace std::literals;
+        std::vector<Hash16Struct> hashes;
+
+        hashes.emplace_back("PearsonHash"s, pearson_hash_16);
+        hashes.emplace_back("DJB2"s, djb2_hash_16);
+        hashes.emplace_back("SDBM"s, sdbm_hash_16);
+        hashes.emplace_back("PJW"s, pjw_hash_16);
+
+        hashes.emplace_back("BuzHash"s, buz_hash_16);
+
+        hashes.emplace_back("One at a time"s, one_at_a_time_hash_16);
+        hashes.emplace_back("SpookyHash"s, spooky_hash_16);
+        return hashes;
+    }
+
     std::vector<Hash32Struct> Build32bitsHashes() {
         using namespace std::literals;
-        std::vector<Hash32Struct> hash_functions;
+        std::vector<Hash32Struct> hashes;
+/*
+        hashes.emplace_back("PearsonHash"s, pearson_hash_32);
+        hashes.emplace_back("FNV-1a"s, fnv_1a_hash_32);
+        hashes.emplace_back("DJB2"s, djb2_hash_32);
+        hashes.emplace_back("SDBM"s, sdbm_hash_32);
+        hashes.emplace_back("PJW"s, pjw_hash_32);
 
-        hash_functions.emplace_back("RollingHash (BuzHash32)", buz_hash_32);
-        hash_functions.emplace_back(CITY_HASH_32_NAME, city_hash_32);
-        hash_functions.emplace_back(DJB2_HASH_32_NAME, djb2_hash_32);
+        hashes.emplace_back("BuzHash"s, buz_hash_32);
 
-        hash_functions.emplace_back("FarmHash32", farm_hash_32);
-        hash_functions.emplace_back("FarmHash32WithSeed", farm_hash_32_with_seed);
+        hashes.emplace_back("One at a time"s, one_at_a_time_hash_32);
+        hashes.emplace_back("lookup3 (little)"s, lookup3_little_hash);*/
+        hashes.emplace_back("lookup3 (big)"s, lookup_big_hash); // потом не забыть включить, так как эту функцию я не тестировал
+        hashes.emplace_back("SpookyHash"s, spooky_hash_32);
+        hashes.emplace_back("SuperFastHash"s, super_fast_hash);
 
-        hash_functions.emplace_back("FastHash32", fast_hash_32);
-        hash_functions.emplace_back("FNV-1a hash 32", fnv_1a_hash_32);
+        hashes.emplace_back("MurmurHash1"s, murmur_hash1);
+        hashes.emplace_back("MurmurHash2"s, murmur_hash2_32);
+        hashes.emplace_back("MurmurHash2A"s, murmur_hash2a_32);
+        hashes.emplace_back("MurmurHash3"s, murmur_hash3);
+        hashes.emplace_back("Fast-Hash"s, fast_hash_32);
+        //hashes.emplace_back("CityHash"s, city_hash_32);
+        hashes.emplace_back("FarmHash"s, farm_hash_32);
 
-        hash_functions.emplace_back("Jenkins hash (One at a time)", one_at_a_time_hash);
-        hash_functions.emplace_back("Jenkins hash (lookup3 - little)", lookup3_little_hash);
-        hash_functions.emplace_back("Jenkins hash (lookup3 - big)", lookup_big_hash);
+        hashes.emplace_back("T1HA0 32le"s, t1ha0_32le_hash);
+        hashes.emplace_back("T1HA0 32be"s, t1ha0_32be_hash);
+        hashes.emplace_back("xxHash"s, xx_hash_32);
 
-        hash_functions.emplace_back("MurmurHash1", murmur_hash1);
-        hash_functions.emplace_back("MurmurHash1Aligned", murmur_hash1_aligned);
-        hash_functions.emplace_back("MurmurHash2", murmur_hash2);
-
-        hash_functions.emplace_back("PearsonHash32", pearson_hash_32);
-        hash_functions.emplace_back(PJW_HASH_32_NAME, pjw_hash_32);
-        hash_functions.emplace_back(SDBM_HASH_32_NAME, sdbm_hash_32);
-        hash_functions.emplace_back(SUPER_FAST_HASH_NAME, super_fast_hash);
-        hash_functions.emplace_back("Spooky hash 32", spooky_hash_32);
-
-        hash_functions.emplace_back("T1HA0 32le", t1ha0_32le_hash);
-        hash_functions.emplace_back("T1HA0 32be", t1ha0_32be_hash);
-
-        hash_functions.emplace_back("xxHash32", xx_hash_32);
-
-        return hash_functions;
+        return hashes;
     }
 
     std::vector<Hash64Struct> Build64bitsHashes() {
         using namespace std::literals;
         std::vector<Hash64Struct> hashes;
+/*
+        hashes.emplace_back("PearsonHash"s, pearson_hash_64);
+        hashes.emplace_back("FNV-1a"s, fnv_1a_hash_64);
+        hashes.emplace_back("DJB2"s, djb2_hash_64);
+        hashes.emplace_back("SDBM"s, sdbm_hash_64);
+        hashes.emplace_back("PJW"s, pjw_hash_64);
 
-        hashes.emplace_back("RollingHash (BuzHash64)", buz_hash_64);
+        hashes.emplace_back("BuzHash64"s, buz_hash_64);
 
-        hashes.emplace_back("CityHash64", city_hash_64);
-        hashes.emplace_back("CityHash64WithSeed", city_hash_64_with_seed);
-        hashes.emplace_back("CityHash64WithSeeds", city_hash_64_with_seeds);
+        hashes.emplace_back("One at a time"s, one_at_a_time_hash_64);
+        hashes.emplace_back("SpookyHash"s, spooky_hash_64);
 
-        hashes.emplace_back(DJB2_HASH_64_NAME, djb2_hash_64);
-
-        hashes.emplace_back("FarmHash64", farm_hash_64);
-        hashes.emplace_back("FarmHash64WithSeed", farm_hash_64_with_seed);
-        hashes.emplace_back("FarmHash64WithSeeds", farm_hash_64_with_seeds);
-
-        hashes.emplace_back("FastHash64", fast_hash_64);
-        hashes.emplace_back("FNV-1a hash 64", fnv_1a_hash_64);
-
-        hashes.emplace_back("MetroHash64_1", metro_hash_64_1);
-        hashes.emplace_back("MetroHash64_2", metro_hash_64_2);
-
-        hashes.emplace_back("MurmurHash64A", murmur_hash_64a);
-        hashes.emplace_back("MurmurHash64B", murmur_hash_64b);
-
-        hashes.emplace_back(PJW_HASH_64_NAME, pjw_hash_64);
-        hashes.emplace_back("PearsonHash64", pearson_hash_64);
-        hashes.emplace_back(SDBM_HASH_64_NAME, sdbm_hash_64);
-        hashes.emplace_back("Spooky hash 64", spooky_hash_64);
+        hashes.emplace_back("MurmurHash2"s, murmur_hash2_64);
+        hashes.emplace_back("Fast-Hash"s, fast_hash_64);
+        hashes.emplace_back("CityHash"s, city_hash_64);
+        hashes.emplace_back("FarmHash"s, farm_hash_64);
+        hashes.emplace_back("MetroHash64_1"s, metro_hash_64_1);
+        hashes.emplace_back("MetroHash64_2"s, metro_hash_64_2); */
 
         hashes.emplace_back("T1HA1 le", t1ha1_le_hash);
         hashes.emplace_back("T1HA1 be", t1ha1_be_hash);
         hashes.emplace_back("T1HA2 atonce", t1ha2_atonce_hash);
-
-        hashes.emplace_back("xxHash64", xx_hash_64);
-        hashes.emplace_back("XXH3_64bits", xxh3_64bits);
-        hashes.emplace_back("XXH3_64bits_withSeed", xxh3_64bits_with_seed);
+        hashes.emplace_back("xxHash", xx_hash_64);
+        hashes.emplace_back("XXH3", xxh3_64bits);
 
         return hashes;
     }

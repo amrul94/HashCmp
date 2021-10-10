@@ -9,6 +9,7 @@
 #include <jenkins_hash/lookup3.h>
 #include <murmur_hash/MurmurHash1.h>
 #include <murmur_hash/MurmurHash2.h>
+#include <murmur_hash/MurmurHash3.h>
 #include <pearson/pearson.h>
 #include <super_fast_hash/super_fast_hash.h>
 #include <t1ha/t1ha.h>
@@ -20,7 +21,7 @@
 #include "hash_wrappers.h"
 
 
-namespace hashes {
+namespace hfl {
     namespace {
         std::pair<uint64_t, uint64_t> GenerateTwoSeeds() {
             std::random_device rd;
@@ -34,50 +35,20 @@ namespace hashes {
         uint64_t GenerateSeed() {
             return GenerateTwoSeeds().first;
         }
-    }
 
-    [[maybe_unused]] std::string BaseHashWrapper::ReadFile(ifstream& file) {
-        std::string result;
-        size_t source_size = 0;
-        do {
-            char buff[1024];
-            file.read(buff, sizeof buff);
-            size_t read_size = file.gcount();
-            source_size += read_size;
-            result.append(buff, read_size);
-        } while (file);
-        return result;
+        std::string ReadFile(ifstream& file) {
+            std::string result;
+            size_t source_size = 0;
+            do {
+                char buff[1024];
+                file.read(buff, sizeof buff);
+                size_t read_size = file.gcount();
+                source_size += read_size;
+                result.append(buff, read_size);
+            } while (file);
+            return result;
+        }
     }
-
-    uint32_t BaseHash32Wrapper::operator()(std::string_view str) const {
-        return Hash(str);
-    }
-
-    uint32_t BaseHash32Wrapper::operator()(ifstream& file) const {
-        std::string binary_file = ReadFile(file);
-        assert(!binary_file.empty());
-        return Hash(binary_file);
-    }
-
-    uint32_t BaseHash32Wrapper::operator()(const img::Image &image) const {
-        const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
-        return Hash(bytes);
-    }
-
-    uint64_t BaseHash64Wrapper::operator()(std::string_view str) const {
-        return Hash(str);
-    }
-    uint64_t BaseHash64Wrapper::operator()(ifstream& file) const {
-        std::string binary_file = ReadFile(file);
-        assert(!binary_file.empty());
-        return Hash(binary_file);
-    }
-
-    uint64_t BaseHash64Wrapper::operator()(const img::Image &image) const {
-        const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
-        return Hash(bytes);
-    }
-
 
 //----------- CityHashes ----------
 
@@ -89,23 +60,18 @@ namespace hashes {
         return city::CityHash64(str.data(), str.size());
     }
 
-    uint64_t CityHash64WithSeedWrapper::Hash(std::string_view str) const {
-        return city::CityHash64WithSeed(str.data(), str.size(), GenerateSeed());
-    }
-
-    uint64_t CityHash64WithSeedsWrapper::Hash(std::string_view str) const {
-        const auto [seed0, seed1] = GenerateTwoSeeds();
-        return city::CityHash64WithSeeds(str.data(), str.size(), seed0, seed1);
-    }
-
 //----- Bernstein's hash djb2 ------
 
+    uint16_t DJB2Hash16Wrapper::Hash(std::string_view str) const {
+        return DJB2Hash<uint16_t>(str);
+    }
+
     uint32_t DJB2Hash32Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash32(str);
+        return DJB2Hash<uint32_t>(str);
     }
 
     uint64_t DJB2Hash64Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash64(str);
+        return DJB2Hash<uint64_t>(str);
     }
 
 //----------- FarmHashes ----------
@@ -114,21 +80,8 @@ namespace hashes {
         return util::Hash32(str);
     }
 
-    uint32_t FarmHash32WithSeedWrapper::Hash(std::string_view str) const {
-        return util::Hash32WithSeed(str, GenerateSeed());
-    }
-
     uint64_t FarmHash64Wrapper::Hash(std::string_view str) const {
         return util::Hash64(str);
-    }
-
-    uint64_t FarmHash64WithSeedWrapper::Hash(std::string_view str) const {
-        return util::Hash64WithSeed(str, GenerateSeed());
-    }
-
-    uint64_t FarmHash64WithSeedsWrapper::Hash(std::string_view str) const {
-        const auto [seed0, seed1] = GenerateTwoSeeds();
-        return util::Hash64WithSeeds(str, seed0, seed1);
     }
 
 //------------ FastHash ------------
@@ -153,8 +106,16 @@ namespace hashes {
 
 //--------- Jenkins hash -----------
 
-    uint32_t OneTimeHashWrapper::Hash(std::string_view str) const {
-        return jenkins_one_at_a_time_hash(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+    uint16_t OneTimeHash16Wrapper::Hash(std::string_view str) const {
+        return one_at_a_time_hash<uint16_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+    }
+
+    uint32_t OneTimeHash32Wrapper::Hash(std::string_view str) const {
+        return one_at_a_time_hash<uint32_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+    }
+
+    uint64_t OneTimeHash64Wrapper::Hash(std::string_view str) const {
+        return one_at_a_time_hash<uint64_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
     }
 
     uint32_t Lookup3LittleWrapper::Hash(std::string_view str) const {
@@ -174,6 +135,7 @@ namespace hashes {
             auto* hash_array =  new uint8_t[8];
             func(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0, hash_array);
             memcpy(&hash, hash_array, 8);
+            delete[] hash_array;
             return hash;
         }
     }
@@ -189,23 +151,25 @@ namespace hashes {
 //---------- MurmurHashes ---------
 
     uint32_t MurmurHash1Wrapper::Hash(std::string_view str) const {
-        return MurmurHash1(str.data(), static_cast<int>(str.size()), GenerateSeed());
-    }
-
-    uint32_t MurmurHash1AlignedWrapper::Hash(std::string_view str) const {
-        return MurmurHash1Aligned(str.data(), static_cast<int>(str.size()), GenerateSeed());
+        return MurmurHash1(str.data(), static_cast<int>(str.size()), 0);
     }
 
     uint32_t MurmurHash2Wrapper::Hash(std::string_view str) const {
-        return MurmurHash2(str.data(), static_cast<int>(str.size()), GenerateSeed());
+        return MurmurHash2(str.data(), static_cast<int>(str.size()), 0);
+    }
+
+    uint32_t MurmurHash2AWrapper::Hash(std::string_view str) const {
+        return MurmurHash2A(str.data(), static_cast<int>(str.size()), 0);
     }
 
     uint64_t MurmurHash64AWrapper::Hash(std::string_view str) const {
-        return MurmurHash64A(str.data(), static_cast<int>(str.size()), GenerateSeed());
+        return MurmurHash64A(str.data(), static_cast<int>(str.size()), 0);
     }
 
-    uint64_t MurmurHash64BWrapper::Hash(std::string_view str) const {
-        return MurmurHash64B(str.data(), static_cast<int>(str.size()), GenerateSeed());
+    uint32_t MurmurHash3Wrapper::Hash(std::string_view str) const {
+        uint32_t hash = 0;
+        MurmurHash3_x86_32(str.data(), static_cast<int>(str.size()), 0, &hash);
+        return hash;
     }
 
 //--- Paul Hsieh's SuperFastHash ---
@@ -215,6 +179,15 @@ namespace hashes {
     }
 
 //---------- PearsonHashes ---------
+
+    PearsonHash16Wrapper::PearsonHash16Wrapper() noexcept{
+        pearson_hash_init();
+    }
+
+    uint16_t PearsonHash16Wrapper::Hash(std::string_view str) const {
+        auto hash = pearson_hash_32(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
+        return static_cast<uint16_t>(hash);
+    }
 
     PearsonHash32Wrapper::PearsonHash32Wrapper() noexcept{
         pearson_hash_init();
@@ -234,42 +207,59 @@ namespace hashes {
 
 //------------ PJW Hash ------------
 
+    uint16_t PJWHash16Wrapper::Hash(std::string_view str) const {
+        return PJWHash<uint16_t>(str);
+    }
+
     uint32_t PJWHash32Wrapper::Hash(std::string_view str) const {
-        return PJWHash32(str);
+        return PJWHash<uint32_t>(str);
     }
 
     uint64_t PJWHash64Wrapper::Hash(std::string_view str) const {
-        return PJWHash64(str);
+        return PJWHash<uint64_t>(str);
     }
 
 //----- Rolling Hash (BuzHash) -----
+
+    uint16_t BuzHash16Wrapper::Hash(std::string_view str) const {
+        return hasher_.hash(str);
+    }
 
     uint32_t BuzHash32Wrapper::Hash(std::string_view str) const {
         return hasher_.hash(str);
     }
 
     uint64_t BuzHash64Wrapper::Hash(std::string_view str) const {
-        return hash_function_.hash(str);
+        return hasher_.hash(str);
     }
 
 //-------------- SDBM --------------
 
+    uint16_t SDBMHash16Wrapper::Hash(std::string_view str) const {
+        return SDBMHash<uint16_t>(str);
+    }
+
     uint32_t SDBMHash32Wrapper::Hash(std::string_view str) const {
-        return SDBMHash32(str);
+        return SDBMHash<uint32_t>(str);
     }
 
     uint64_t SDBMHash64Wrapper::Hash(std::string_view str) const {
-        return SDBMHash64(str);
+        return SDBMHash<uint64_t>(str);
     }
 
 //---------- Spooky hash -----------
 
+    uint16_t SpookyHash16Wrapper::Hash(std::string_view str) const {
+        auto hash = spooky_hash32(str.data(), str.size(), 0);
+        return static_cast<uint32_t>(hash);
+    }
+
     uint32_t SpookyHash32Wrapper::Hash(std::string_view str) const {
-        return spooky_hash32(str.data(), str.size(), GenerateSeed());
+        return spooky_hash32(str.data(), str.size(), 0);
     }
 
     uint64_t SpookyHash64Wrapper::Hash(std::string_view str) const {
-        return spooky_hash64(str.data(), str.size(), GenerateSeed());
+        return spooky_hash64(str.data(), str.size(), 0);
     }
 
 //-------------- T1HA --------------

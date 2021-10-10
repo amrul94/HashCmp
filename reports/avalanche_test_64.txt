@@ -1,24 +1,24 @@
-RollingHash (BuzHash64)	24	42	31.875
-CityHash64	22	40	32.0625
-CityHash64WithSeed	25	42	33.125
-CityHash64WithSeeds	26	44	33.5312
-Bernstein's hash djb2 64	19	41	31.4062
-FarmHash64	19	41	31.5312
-FarmHash64WithSeed	24	41	32.2188
-FarmHash64WithSeeds	24	39 	32.5312
-FastHash64	27 	42	 32.2812
-FNV-1a hash 64	23 	39	 31.1562
-MetroHash64_1	22 	42	 32.1875
-MetroHash64_2	26 	40	 34.125
-MurmurHash64A	25 	40 	31.0938
-MurmurHash64B	25	 44	 32.9062
-PJW Hash 64	16 	30 	17.9062
-PearsonHash64	26 	40 	31.6562
-SDBM hash 64	26 	39 	31.0625
-Spooky hash 64	25 	41 	32.1875
-T1HA1 le	23 	40 	31.3438
-T1HA1 be	26 	43 	32.0938
-T1HA2 atonce	22 	41 	34.0938
-xxHash64	25 	41 	31.6875
-XXH3_64bits	22 	40 	32.4062
-XXH3_64bits_withSeed	26 	38 	32.1562
+RollingHash (BuzHash64)	25 39 32.4375
+CityHash64	22 40 32.0625
+CityHash64WithSeed	23 39 31.0625
+CityHash64WithSeeds	26 40 31.9375
+Bernstein's hash djb2 64	19 42 31.6562
+FarmHash64	19 41 31.5312
+FarmHash64WithSeed	26 41 32.25
+FarmHash64WithSeeds	20 44 30.9688
+FastHash64	23 41 31.4062
+FNV-1a hash 64	23 39 31.1562
+MetroHash64_1	22 42 32.1875
+MetroHash64_2	26 40 34.125
+MurmurHash64A	25 38 31.9062
+MurmurHash64B	22 39 32.1562
+PJW Hash 64	16 30 17.9062
+PearsonHash64	26 40 31.6562
+SDBM hash 64	26 39 31.0625
+Spooky hash 64	26 39 32.6562
+T1HA1 le	23 39 32.125
+T1HA1 be	22 40 32.2188
+T1HA2 atonce	23 43 31.9688
+xxHash64	18 39 30.625
+XXH3_64bits	22 40 32.4062
+XXH3_64bits_withSeed	21 39 32.4062

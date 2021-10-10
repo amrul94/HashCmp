@@ -29,7 +29,11 @@ target_include_directories(images_tests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Hash
 target_link_directories(images_tests INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
 target_link_libraries(images_tests HashLib jpeg)
 
-
+set(CHECK_DIST_MAIN src/check_distribution.cpp)
+add_executable(check_distribution ${CHECK_DIST_MAIN} ${GENERATORS} ${GENERAL_FILES})
+target_include_directories(check_distribution PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/HashLib" "${LIBJPEG_DIR}/include")
+target_link_directories(check_distribution INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
+target_link_libraries(check_distribution HashLib jpeg)
 
 
 

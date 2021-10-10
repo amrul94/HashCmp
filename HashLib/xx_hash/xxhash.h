@@ -777,7 +777,7 @@ XXH_PUBLIC_API XXH64_hash_t  XXH3_64bits_digest (const XXH3_state_t* statePtr);
 ************************************************************************/
 
 /*!
- * @brief The return value from 128-bit HashLib.
+ * @brief The return value from 128-bit hashes.
  *
  * Stored in little endian order, although the fields themselves are in native
  * endianness.
@@ -3484,12 +3484,12 @@ XXH3_len_0to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXH64_
 
 /*
  * DISCLAIMER: There are known *seed-dependent* multicollisions here due to
- * multiplication by zero, affecting HashLib of lengths 17 to 240.
+ * multiplication by zero, affecting hashes of lengths 17 to 240.
  *
  * However, they are very unlikely.
  *
  * Keep this in mind when using the unseeded XXH3_64bits() variant: As with all
- * unseeded non-cryptographic HashLib, it does not attempt to defend itself
+ * unseeded non-cryptographic hashes, it does not attempt to defend itself
  * against specially crafted inputs, only random inputs.
  *
  * Compared to classic UMAC where a 1 in 2^31 chance of 4 consecutive bytes
@@ -3673,7 +3673,7 @@ XXH_FORCE_INLINE void XXH_writeLE64(void* dst, xxh_u64 v64)
  * cross-pollination, as otherwise the upper and lower halves would be
  * essentially independent.
  *
- * This doesn't matter on 64-bit HashLib since they all get merged together in
+ * This doesn't matter on 64-bit hashes since they all get merged together in
  * the end, so we skip the extra step.
  *
  * Both XXH3_64bits and XXH3_128bits use this subroutine.
@@ -4908,7 +4908,7 @@ XXH3_generateSecret(void* secretBuffer, const void* customSeed, size_t customSee
  * in 17-240 byte inputs (See XXH3_mix16B and XXH128_mix32B).
  *
  * This strength naturally comes at the cost of some speed, especially on short
- * lengths. Note that longer HashLib are about as fast as the 64-bit version
+ * lengths. Note that longer hashes are about as fast as the 64-bit version
  * due to it using only a slight modification of the 64-bit loop.
  *
  * XXH128 is also more oriented towards 64-bit machines. It is still extremely

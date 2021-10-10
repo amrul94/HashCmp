@@ -499,7 +499,7 @@ namespace city {
         }
         // At this point our 56 bytes of state should contain more than
         // enough information for a strong 128-bit hash.  We use two
-        // different 56-byte-to-8-byte HashLib to get a 16-byte final result.
+        // different 56-byte-to-8-byte hashes to get a 16-byte final result.
         x = HashLen16(x, v.first);
         y = HashLen16(y + z, w.first);
         return uint128(HashLen16(x + v.second, w.second) + y,

@@ -56,7 +56,7 @@
 // bug reports are welcome.
 //
 // By the way, for some hash functions, given strings a and b, the hash
-// of a+b is easily derived from the HashLib of a and b.  This property
+// of a+b is easily derived from the hashes of a and b.  This property
 // doesn't hold for any hash functions in this file.
 
 #ifndef CITY_HASH_H_

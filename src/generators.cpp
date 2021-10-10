@@ -6,8 +6,8 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-std::string GenerateRandomWord(std::mt19937& generator, int min_length, int max_length) {
-    const int length = std::uniform_int_distribution(min_length, max_length)(generator);
+std::string GenerateRandomWord(std::mt19937& generator, uint32_t min_length, uint32_t max_length) {
+    const uint32_t length = std::uniform_int_distribution(min_length, max_length)(generator);
     std::string word;
     word.reserve(length);
     for (int i = 0; i < length; ++i) {

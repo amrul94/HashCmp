@@ -1,6 +1,6 @@
 // C++ 32bit FNV-1a string hashing.
 // Support both compile-time and runtime calulations.
-// This implementation also HashLib '\0' terminator.
+// This implementation also hashes '\0' terminator.
 // Requires a compiler with C++11 support.
 // See main for examples.
 
