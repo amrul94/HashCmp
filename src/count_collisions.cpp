@@ -9,7 +9,7 @@
 
 uint64_t CountCollisions(const CollisionsMap& hashes) {
     uint64_t collisions = 0;
-    for (const auto& [hash, count] : hashes) {
+    for (const auto& count : hashes) {
         if (count > 1) {
             collisions += (count - 1);
         }

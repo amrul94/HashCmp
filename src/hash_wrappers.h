@@ -31,81 +31,84 @@ namespace hfl {
         return str;
     }
 
-    template<typename HashType>
-    class BaseHashWrapper {
-    public:
-        HashType operator()(std::string_view str) const {
-            return Hash(str);
-        }
+    namespace detail {
+        template<typename HashType>
+        class BaseHashWrapper {
+        public:
+            HashType operator()(std::string_view str) const {
+                return Hash(str);
+            }
 
-        HashType operator()(ifstream& file) const {
-            std::string binary_file = ReadFile(file);
-            assert(!binary_file.empty());
-            return Hash(binary_file);
-        }
+            HashType operator()(ifstream& file) const {
+                std::string binary_file = ReadFile(file);
+                assert(!binary_file.empty());
+                return Hash(binary_file);
+            }
 
-        HashType operator()(const img::Image& image) const {
+            HashType operator()(const img::Image& image) const {
 
-            // Возможно стоит сделать так:
-            // const char* bytes = reinterpret_cast<const char*>(image.GetLine(0);
-            // const size_t size = image.GetHeight() * image.GetWidth();
-            // const std::string_view str(bytes, size);
-            // return Hash(str);
+                // Возможно стоит сделать так:
+                // const char* bytes = reinterpret_cast<const char*>(image.GetLine(0);
+                // const size_t size = image.GetHeight() * image.GetWidth();
+                // const std::string_view str(bytes, size);
+                // return Hash(str);
 
-            const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
-            return Hash(bytes);
-        }
+                const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
+                return Hash(bytes);
+            }
 
-        HashType operator()(int8_t number) const {
-            uint8_t number8 = number;
-            uint64_t number64 = number8;
-            return operator()(number64);
-        }
+            HashType operator()(int8_t number) const {
+                uint8_t number8 = number;
+                uint64_t number64 = number8;
+                return operator()(number64);
+            }
 
-        HashType operator()(int16_t number) const {
-            uint64_t number64 = number;
-            return operator()(number64);
-        }
+            HashType operator()(int16_t number) const {
+                uint64_t number64 = number;
+                return operator()(number64);
+            }
 
-        HashType operator()(int32_t number) const {
-            uint64_t number64 = number;
-            return operator()(number64);
-        }
+            HashType operator()(int32_t number) const {
+                uint64_t number64 = number;
+                return operator()(number64);
+            }
 
-        HashType operator()(int64_t number) const {
-            uint64_t number64 = number;
-            return operator()(number64);
-        }
+            HashType operator()(int64_t number) const {
+                uint64_t number64 = number;
+                return operator()(number64);
+            }
 
 
-        HashType operator()(uint8_t number) const {
-            uint64_t number64 = number;
-            return operator()(number64);
-        }
+            HashType operator()(uint8_t number) const {
+                uint64_t number64 = number;
+                return operator()(number64);
+            }
 
-        HashType operator()(uint16_t number) const {
-            uint64_t number64 = number;
-            return operator()(number64);
-        }
+            HashType operator()(uint16_t number) const {
+                uint64_t number64 = number;
+                return operator()(number64);
+            }
 
-        HashType operator()(uint32_t number) const {
-            uint64_t number64 = number;
-            return operator()(number64);
-        }
+            HashType operator()(uint32_t number) const {
+                uint64_t number64 = number;
+                return operator()(number64);
+            }
 
-        HashType operator()(uint64_t number) const {
-            return Hash(WriteToString<uint64_t>(number));
-        }
+            HashType operator()(uint64_t number) const {
+                return Hash(WriteToString<uint64_t>(number));
+            }
 
-        virtual ~BaseHashWrapper() = default;
+            virtual ~BaseHashWrapper() = default;
 
-    private:
-        [[nodiscard]] virtual HashType Hash(std::string_view str) const = 0;
-    };
+        private:
+            [[nodiscard]] virtual HashType Hash(std::string_view str) const = 0;
+        };
+    }
 
-    using BaseHash16Wrapper = BaseHashWrapper<uint16_t>;
-    using BaseHash32Wrapper = BaseHashWrapper<uint32_t>;
-    using BaseHash64Wrapper = BaseHashWrapper<uint64_t>;
+
+    using BaseHash16Wrapper = detail::BaseHashWrapper<uint16_t>;
+    using BaseHash32Wrapper = detail::BaseHashWrapper<uint32_t>;
+    using BaseHash64Wrapper = detail::BaseHashWrapper<uint64_t>;
 
 //----- Bernstein's hash DJB2 ------
 
@@ -218,12 +221,7 @@ namespace hfl {
 
 //------------ MetroHash -----------
 
-    class [[maybe_unused]] MetroHash64_1_Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] MetroHash64_2_Wrapper : public BaseHash64Wrapper {
+    class [[maybe_unused]] MetroHash64_Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };

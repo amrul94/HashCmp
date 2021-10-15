@@ -28,7 +28,7 @@ struct CheckParameters {
     }
 
 private:
-    static const uint16_t DIVIDER_FOR_32 = 8;
+    static const uint16_t DIVIDER_FOR_32 = 8; // попробовать 5
     static const uint16_t DIVIDER_FOR_64 = DIVIDER_FOR_32 + 32;
     static const uint32_t SBC_32_64 = 1'048'576;
     static const uint32_t BBC_32_64 = 16'777'216;
@@ -66,7 +66,7 @@ private:
 
 
 
-string CurrentTime() {
+/*string CurrentTime() {
     std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
     std::string ts = std::ctime(&t);
@@ -74,7 +74,7 @@ string CurrentTime() {
     ts.replace(ts.find(':'), 1, ".");
     ts.replace(ts.find(':'), 1, ".");
     return ts;
-}
+}*/
 
 
 void PrintReports(const std::vector<uint32_t>& buckets, uint64_t divisor, const std::string& hash_name,

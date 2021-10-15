@@ -16,7 +16,7 @@
 #include <metro_hash/metrohash64.h>
 #include <spooky_hash/spooky.h>
 #include <xx_hash/xxhash.h>
-#include <other_hash_functions.h>
+#include <hash_functions.h>
 
 #include "hash_wrappers.h"
 
@@ -140,12 +140,12 @@ namespace hfl {
         }
     }
 
-    uint64_t MetroHash64_1_Wrapper::Hash(std::string_view str) const {
-        return MetroHashConvert(metrohash64_1, str);
-    }
-
-    uint64_t MetroHash64_2_Wrapper::Hash(std::string_view str) const {
-        return MetroHashConvert(metrohash64_2, str);
+    uint64_t MetroHash64_Wrapper::Hash(std::string_view str) const {
+        uint64_t hash = 0;
+        std::vector<uint8_t> hash_array(8, 0);
+        MetroHash64::Hash(reinterpret_cast<const uint8_t*>(str.data()), str.size(), hash_array.data(), 0);
+        memcpy(&hash, hash_array.data(), 8);
+        return hash;
     }
 
 //---------- MurmurHashes ---------

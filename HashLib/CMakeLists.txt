@@ -27,7 +27,7 @@ set(T1HA_HASH t1ha/t1ha.h t1ha/t1ha0.c t1ha/t1ha0_ia32aes_a.h t1ha/t1ha0_ia32aes
         t1ha/t1ha2.c t1ha/t1ha2_selfcheck.c t1ha/t1ha_bits.h t1ha/t1ha_selfcheck.c
         t1ha/t1ha_selfcheck.h t1ha/t1ha_selfcheck_all.c)
 set(XX_HASH xx_hash/xxhash.h xx_hash/xxhash.c xx_hash/xxh3.h)
-set(OTHERS_HASH other_hash_functions.h other_hash_functions.cpp)
+set(OTHERS_HASH hash_functions.h hash_functions.cpp)
 
 add_library(HashLib STATIC ${CITY_HASH} ${FARM_HASH} ${FAST_HASH} ${FNV_HASH} ${JENKINS_HASH} ${METRO_HASH} ${MURMUR_HASH}
         ${PEARSON_HASH} ${ROLLING_HASH} ${SUPER_FAST_HASH} ${T1HA_HASH} ${XX_HASH} ${OTHERS_HASH})

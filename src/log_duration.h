@@ -34,4 +34,14 @@ private:
     std::ostream& out_;
 };
 
+inline std::string CurrentTime() {
+    std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+    std::time_t t = std::chrono::system_clock::to_time_t(tp);
+    std::string ts = std::ctime(&t);
+    ts.resize(ts.size() - 1);
+    ts.replace(ts.find(':'), 1, ".");
+    ts.replace(ts.find(':'), 1, ".");
+    return ts;
+}
+
 #endif // THESIS_WORK_LOG_DURATION_H

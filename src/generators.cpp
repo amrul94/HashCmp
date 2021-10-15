@@ -6,6 +6,14 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+std::string UintToString(uint64_t src, uint64_t size) {
+    std::string dest;
+    dest.resize(size);
+    memcpy(dest.data(), &src, size);
+    return dest;
+};
+
+
 std::string GenerateRandomWord(std::mt19937& generator, uint32_t min_length, uint32_t max_length) {
     const uint32_t length = std::uniform_int_distribution(min_length, max_length)(generator);
     std::string word;

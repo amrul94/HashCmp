@@ -7,15 +7,23 @@
 #include "log_duration.h"
 #include "hashes.h"
 
-constexpr int GIGABYTE = 1'073'741'824;
-constexpr int KILOBYTE = 1024;
-constexpr int FOUR_KILOBYTES = KILOBYTE * 4;
-constexpr int EIGHT_KILOBYTES = KILOBYTE * 8;
+#include <boost/multiprecision/cpp_int.hpp>
+
+
+#include <cstdint>
+using uint24_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<24, 24,
+                                                    boost::multiprecision::unsigned_magnitude,
+                                                    boost::multiprecision::unchecked, void>>;
+#define __INT24_TYPE__
+
+//using uint24_t = boost::multiprecision::cpp_int_backend<24, 24, boost::multiprecision::cpp_integer_type::signed_magnitude.
+
+
 
 
 struct WordsParameters {
     uint16_t hash_bits{};
-    uint64_t word_counts{};
+    uint64_t words_count{};
     uint32_t min_length{};
     uint32_t max_length{};
 
@@ -23,14 +31,14 @@ struct WordsParameters {
 
     explicit WordsParameters(uint16_t hash_bits, uint64_t word_counts, uint32_t min_length, uint32_t max_length)
             : hash_bits(hash_bits)
-            , word_counts(word_counts)
+            , words_count(word_counts)
             , min_length(min_length)
             , max_length(max_length) {
     }
 };
 
 
-
+/*
 string CurrentTime() {
     std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
@@ -39,7 +47,7 @@ string CurrentTime() {
     ts.replace(ts.find(':'), 1, ".");
     ts.replace(ts.find(':'), 1, ".");
     return ts;
-}
+}*/
 
 
 void PrintReports(const std::vector<uint32_t>& buckets, int divisor, const std::string& hash_name,
@@ -55,42 +63,15 @@ void PrintReports(const std::vector<uint32_t>& buckets, int divisor, const std::
 }
 
 
-template<typename HashStruct>
-void WordsTestForHash(const HashStruct& hash_struct, const WordsParameters& wp, ostream& out, std::mt19937 generator) {
-    LOG_DURATION_STREAM(hash_struct.hash_name, cout);
-
-
-
-    std::map<uint64_t, uint32_t> hashes;
-
-    for (uint64_t i = 0; i < wp.word_counts; ++i) {
-        std::string str = GenerateRandomWord(generator, wp.min_length, wp.max_length);
-        auto hash = hash_struct.hash_function(str);
-        ++hashes[hash];
-    }
-
-
-
-    out << hash_struct.hash_name << "\t" << CountCollisions(hashes)<< endl;
-}
-
-template<typename HashVector>
-void TestsWithWords(const HashVector& hash_vec, const WordsParameters& wp, std::mt19937 generator) {
-    std::cout << "start "  << wp.hash_bits << " bits" << endl;
-    string file_name = "reports/Words Test/"s + to_string(wp.hash_bits) + " bits "s + CurrentTime() + ".txt"s;
-    std::ofstream out(file_name);
-    for (const auto& current_hash : hash_vec) {
-        std::mt19937 copy_gen = generator;
-        //std::cout << "generator" << " -> " << GenerateRandomWord(copy_gen, wp.min_length, wp.max_length) << endl;
-        WordsTestForHash(current_hash, wp, out, copy_gen);
-    }
-    std::cout << "end " << wp.hash_bits << " bits" << endl << endl;
-}
 
 int main() {
+    uint24_t u24 = 3;
+    cout << u24 << endl;
+    cout << numeric_limits<uint24_t>::max() << endl;
+
     std::random_device rd;
     std::mt19937 base_generator{rd()};
-    uint64_t word_counts = std::numeric_limits<uint32_t>::max() + 1ull;
+    auto word_counts = static_cast<uint64_t>(pow(2, 16));
     uint32_t min_length = FOUR_KILOBYTES;
     uint32_t max_length = min_length;
 
@@ -114,4 +95,5 @@ int main() {
     jthread jt64 {TestsWithWords<std::vector<hfl::Hash64Struct>>, hashes64, wp64, generator64};
     //std::cout << "generator" << " -> " << GenerateRandomWord(generator64, min_length, max_length) << endl;
     //CheckDist(hashes64, cp64);
+
 }

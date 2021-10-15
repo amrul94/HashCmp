@@ -17,7 +17,7 @@ set(IMG_FILES src/img.h src/img.cpp src/jpeg_image.h src/jpeg_image.cpp)
 
 set(GENERAL_FILES ${TESTS} ${UTILITIES} ${WRAPPERS} ${IMG_FILES})
 
-set(WORDS_TEST_MAIN src/words_test.cpp)
+set(WORDS_TEST_MAIN src/words_test_.cpp)
 add_executable(words_test ${WORDS_TEST_MAIN} ${GENERATORS} ${GENERAL_FILES})
 target_include_directories(words_test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/HashLib" "${LIBJPEG_DIR}/include")
 target_link_directories(words_test INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
@@ -29,11 +29,17 @@ target_include_directories(images_tests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Hash
 target_link_directories(images_tests INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
 target_link_libraries(images_tests HashLib jpeg)
 
-set(CHECK_DIST_MAIN src/check_distribution.cpp)
+set(CHECK_DIST_MAIN src/check_distribution.cpp src/words_tests.h src/words_tests.cpp src/log_duration.cpp)
 add_executable(check_distribution ${CHECK_DIST_MAIN} ${GENERATORS} ${GENERAL_FILES})
 target_include_directories(check_distribution PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/HashLib" "${LIBJPEG_DIR}/include")
 target_link_directories(check_distribution INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
 target_link_libraries(check_distribution HashLib jpeg)
+
+set(MAIN src/main.cpp src/words_tests.h src/words_tests.cpp)
+add_executable(tests ${MAIN} ${GENERATORS} ${GENERAL_FILES})
+target_include_directories(tests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/HashLib" "${LIBJPEG_DIR}/include")
+target_link_directories(tests INTERFACE "${LIBJPEG_DIR}/lib/$<IF:$<CONFIG:Debug>,Debug,Release>")
+target_link_libraries(tests HashLib jpeg)
 
 
 

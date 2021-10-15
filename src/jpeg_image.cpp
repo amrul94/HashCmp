@@ -8,8 +8,6 @@
 
 #include "jpeg_image.h"
 
-using namespace std;
-
 namespace img {
     struct my_error_mgr {
         struct jpeg_error_mgr pub;
@@ -29,7 +27,7 @@ namespace img {
         Color* line = image.GetLine(y);
         for (int x = 0; x < image.GetWidth(); ++x) {
             const JSAMPLE* pixel = row + x * 3;
-            line[x] = Color{byte{pixel[0]}, byte{pixel[1]}, byte{pixel[2]}, byte{255}};
+            line[x] = Color{std::byte{pixel[0]}, std::byte{pixel[1]}, std::byte{pixel[2]}, std::byte{255}};
         }
     }
 
@@ -86,7 +84,7 @@ namespace img {
         Color* line = out_image.GetLine(y);
         for (int x = 0; x < out_image.GetWidth(); ++x) {
             const JSAMPLE* pixel = row + x * 3;
-            line[x] = Color{byte{pixel[0]}, byte{pixel[1]}, byte{pixel[2]}, byte{255}};
+            line[x] = Color{std::byte{pixel[0]}, std::byte{pixel[1]}, std::byte{pixel[2]}, std::byte{255}};
         }
     }
 

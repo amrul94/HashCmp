@@ -49,3 +49,14 @@
 6. Добавил 16-битные хеш-функции для DJB2, Pearson Hash, One at a time
 7. Добавил MurmurHash2A и MurmurHash3
 8. Переделал тестирование слов
+
+Изменения 14.10.2021 - 16.10.2021
+1. Переименовал others_hash_functions в hash_functions и немного изменил исходники функций внутри данных файлов
+2. Добавил uint24_t и uint48_t с использованием шаблона из Boost
+3. Удалил metrohash64_1 и metrohash64_2. Взамен добавил MetroHash64::Hash
+4. Добавил новую цель tests (main.cpp) - заготовка на будущее
+5. Переместил базовые HashWrapper и HashStruct в namespace nfl::detail
+6. Создал шаблонный класс ConvertUint и несколько лямбда от него 
+7. Создал новый генератор строк
+8. Перенес CurrentTime() в log_duration
+9. Переписал тестирование слов и перенес его в цель tests

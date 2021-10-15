@@ -1,31 +1,23 @@
 #ifndef THESIS_WORK_HASHES_H
 #define THESIS_WORK_HASHES_H
 
+#include <concepts>
 #include <utility>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "hash_wrappers.h"
 
 // HFL = Hash function library
 namespace hfl {
 
-    //----------- HashStructs ----------
+    using uint24_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<24, 24,
+            boost::multiprecision::unsigned_magnitude,
+            boost::multiprecision::unchecked, void>>;
 
-    template<typename HashType>
-    struct HashStruct {
-        using HashFunction = const BaseHashWrapper<HashType>&;
-        HashStruct(std::string hash_name, HashFunction hash_function)
-                : hash_name(std::move(hash_name))
-                , hash_function(hash_function) {
-        }
-
-        std::string hash_name;
-        HashFunction hash_function;
-    };
-
-    using Hash16Struct = HashStruct<uint16_t>;
-    using Hash32Struct = HashStruct<uint32_t>;
-    using Hash64Struct = HashStruct<uint64_t>;
-
+    using uint48_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<48, 48,
+            boost::multiprecision::unsigned_magnitude,
+            boost::multiprecision::unchecked, void>>;
 
     // Hashes
     [[maybe_unused]] inline const BuzHash16Wrapper buz_hash_16;
@@ -51,8 +43,7 @@ namespace hfl {
     [[maybe_unused]] inline constinit Lookup3LittleWrapper lookup3_little_hash;
     [[maybe_unused]] inline constinit Lookup3BigWrapper lookup_big_hash;
 
-    [[maybe_unused]] inline constinit MetroHash64_1_Wrapper metro_hash_64_1;
-    [[maybe_unused]] inline constinit MetroHash64_2_Wrapper metro_hash_64_2;
+    [[maybe_unused]] inline constinit MetroHash64_Wrapper metro_hash_64;
 
     [[maybe_unused]] inline constinit MurmurHash1Wrapper murmur_hash1;
     [[maybe_unused]] inline constinit MurmurHash2Wrapper murmur_hash2_32;
@@ -91,6 +82,36 @@ namespace hfl {
     [[maybe_unused]] inline constinit xxHash32Wrapper xx_hash_32;
     [[maybe_unused]] inline constinit xxHash64Wrapper xx_hash_64;
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
+
+    namespace detail {
+        template<typename HashType>
+        struct HashStruct {
+            using HashFunction = const BaseHashWrapper<HashType>&;
+            HashStruct(std::string hash_name, HashFunction hash_function)
+                    : hash_name(std::move(hash_name))
+                    , hash_function(hash_function) {
+            }
+
+            std::string hash_name;
+            HashFunction hash_function;
+        };
+
+        template<typename SourceUintT, typename DestUintT>
+        DestUintT ConvertUint(SourceUintT source) {
+            return static_cast<DestUintT>(source);
+        }
+    }
+
+    using Hash16Struct = detail::HashStruct<uint16_t>;
+    using Hash32Struct = detail::HashStruct<uint32_t>;
+    using Hash64Struct = detail::HashStruct<uint64_t>;
+
+    inline const auto Uint64ToUint32 = [](uint64_t source) { return detail::ConvertUint<uint64_t, uint32_t>(source); };
+    inline const auto Uint64ToUint24 = [](uint64_t source) { return detail::ConvertUint<uint64_t, hfl::uint24_t>(source); };
+    inline const auto Uint64ToUint16 = [](uint64_t source) { return detail::ConvertUint<uint64_t, uint16_t>(source); };
+    inline const auto Uint32ToUint24 = [](uint32_t source) { return detail::ConvertUint<uint32_t, hfl::uint24_t>(source); };
+    inline const auto Uint32ToUint16 = [](uint32_t source) { return detail::ConvertUint<uint32_t, uint16_t>(source); };
+
 
     //----------- BuildHashes ----------
 
