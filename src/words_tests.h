@@ -8,6 +8,7 @@
 #include "count_collisions.h"
 #include "generators.h"
 #include "hashes.h"
+#include "helper_structs.h"
 #include "log_duration.h"
 
 constexpr int GIGABYTE = 1'073'741'824;
@@ -15,22 +16,12 @@ constexpr int KILOBYTE = 1024;
 constexpr int FOUR_KILOBYTES = KILOBYTE * 4;
 constexpr int EIGHT_KILOBYTES = KILOBYTE * 8;
 
-struct WordsParameters {
-    uint16_t hash_bits{};
-    uint64_t words_count{};
-    uint32_t words_length{};
-    uint64_t mod{};
-
-    explicit WordsParameters(uint16_t hash_bits, uint64_t word_counts, uint32_t length, uint64_t mod);
-
-};
-
 template<typename Generator, typename HashStruct>
 void WordsTestForHash(Generator& generator, const HashStruct& hs, const WordsParameters& wp, std::ostream& out) {
     LOG_DURATION_STREAM(hs.hash_name, std::cout);
 
     std::vector<uint32_t> hashes(wp.mod, 0);
-    for (uint64_t i = 0; i < wp.words_count; ++i) {
+    for (uint64_t i = 0; i < wp.key_counts; ++i) {
         std::string str = GenerateRandomWord(generator, wp.words_length);
         auto hash = hs.hash_function(str) % wp.mod;
         ++hashes[hash];

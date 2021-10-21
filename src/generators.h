@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+
+// в будущем объединю эту функцию с WriteToHash из hash_wrappers
 std::string UintToString(uint64_t src, uint64_t size);
 
 template<typename Generator>
@@ -28,6 +30,7 @@ std::string GenerateRandomWord(Generator& generator, uint64_t length) {
 }
 
 // Старая версия
+// удалю в будущем нижеописанные функции
 std::string GenerateRandomWord(std::mt19937& generator, uint32_t min_length, uint32_t max_length);
 
 std::vector<std::string> GenerateRandomWords(std::mt19937& generator, int word_count, int min_length, int max_length);

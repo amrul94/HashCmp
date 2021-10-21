@@ -5,12 +5,15 @@
 #ifndef THESIS_WORK_HASH_WRAPPERS_H
 #define THESIS_WORK_HASH_WRAPPERS_H
 
+#include <array>
 #include <cstring>
 #include <fstream>
 #include <filesystem>
 #include <functional>
 #include <string>
 #include <string_view>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include <rolling_hash/cyclichash.h>
 
@@ -19,6 +22,15 @@
 
 // HFL = Hash function library
 namespace hfl {
+
+    using uint24_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<24, 24,
+            boost::multiprecision::unsigned_magnitude,
+            boost::multiprecision::unchecked, void>>;
+
+    using uint48_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<48, 48,
+            boost::multiprecision::unsigned_magnitude,
+            boost::multiprecision::unchecked, void>>;
+
 
     std::string ReadFile(ifstream& file);
 
@@ -107,6 +119,7 @@ namespace hfl {
 
 
     using BaseHash16Wrapper = detail::BaseHashWrapper<uint16_t>;
+    using BaseHash24Wrapper = detail::BaseHashWrapper<uint24_t>;
     using BaseHash32Wrapper = detail::BaseHashWrapper<uint32_t>;
     using BaseHash64Wrapper = detail::BaseHashWrapper<uint64_t>;
 
@@ -117,6 +130,11 @@ namespace hfl {
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
     };
 
+    class [[maybe_unused]] DJB2Hash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+    };
+
     class [[maybe_unused]] DJB2Hash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
@@ -125,6 +143,48 @@ namespace hfl {
     class [[maybe_unused]] DJB2Hash64Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+//----- Rolling Hash (BuzHash) -----
+
+    class [[maybe_unused]] BuzHash16Wrapper : public BaseHash16Wrapper {
+    public:
+        BuzHash16Wrapper() noexcept = default;
+
+    private:
+        uint16_t Hash(std::string_view str) const override;
+
+        mutable CyclicHash<uint16_t, unsigned char> hasher_{1024, 16};
+    };
+
+    class [[maybe_unused]] BuzHash24Wrapper : public BaseHash24Wrapper {
+    public:
+        BuzHash24Wrapper() noexcept = default;
+
+    private:
+        uint24_t Hash(std::string_view str) const override;
+
+        mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 24};
+    };
+
+    class [[maybe_unused]] BuzHash32Wrapper : public BaseHash32Wrapper {
+    public:
+        BuzHash32Wrapper() noexcept = default;
+
+    private:
+        uint32_t Hash(std::string_view str) const override;
+
+        mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 32};
+    };
+
+    class [[maybe_unused]] BuzHash64Wrapper : public BaseHash64Wrapper {
+    public:
+        BuzHash64Wrapper() noexcept = default;
+
+    private:
+        uint64_t Hash(std::string_view str) const override;
+
+        mutable CyclicHash<uint64_t, unsigned char> hasher_{1024, 64};
     };
 
 //----------- CityHashes ----------
@@ -153,6 +213,16 @@ namespace hfl {
 
 //------------ FastHash ------------
 
+    class [[maybe_unused]] FastHash16Wrapper : public BaseHash16Wrapper {
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] FastHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+    };
+
     class [[maybe_unused]] FastHash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
@@ -164,6 +234,16 @@ namespace hfl {
     };
 
 //---------- FNV-1a hash -----------
+
+    class [[maybe_unused]] FNV1aHash16Wrapper : public BaseHash16Wrapper {
+    private:
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] FNV1aHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+    };
 
     class [[maybe_unused]] FNV1aHash32Wrapper : public BaseHash32Wrapper {
     private:
@@ -181,6 +261,11 @@ namespace hfl {
     class [[maybe_unused]] OneTimeHash16Wrapper : public BaseHash16Wrapper {
     private:
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] OneTimeHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
     };
 
     class [[maybe_unused]] OneTimeHash32Wrapper : public BaseHash32Wrapper {
@@ -206,6 +291,11 @@ namespace hfl {
     class [[maybe_unused]] SpookyHash16Wrapper : public BaseHash16Wrapper {
     private:
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] SpookyHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
     };
 
     class [[maybe_unused]] SpookyHash32Wrapper : public BaseHash32Wrapper {
@@ -266,9 +356,22 @@ namespace hfl {
         PearsonHash16Wrapper() noexcept;
 
     private:
+        void FillT16();
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+
+        std::array<uint16_t, 65536> t16{};
     };
 
+    class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
+    public:
+        PearsonHash24Wrapper() noexcept;
+
+    private:
+        void FillT24();
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+
+        std::array<uint24_t, 16'777'216> t24{};
+    };
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
     public:
         PearsonHash32Wrapper() noexcept;
@@ -292,6 +395,11 @@ namespace hfl {
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
     };
 
+    class [[maybe_unused]] PJWHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+    };
+
     class [[maybe_unused]] PJWHash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
@@ -302,43 +410,16 @@ namespace hfl {
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
-//----- Rolling Hash (BuzHash) -----
-
-    class [[maybe_unused]] BuzHash16Wrapper : public BaseHash16Wrapper {
-    public:
-        BuzHash16Wrapper() noexcept = default;
-
-    private:
-        uint16_t Hash(std::string_view str) const override;
-
-        mutable CyclicHash<uint16_t, unsigned char> hasher_{1024, 16};
-    };
-
-    class [[maybe_unused]] BuzHash32Wrapper : public BaseHash32Wrapper {
-    public:
-        BuzHash32Wrapper() noexcept = default;
-
-    private:
-        uint32_t Hash(std::string_view str) const override;
-
-        mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 32};
-    };
-
-    class [[maybe_unused]] BuzHash64Wrapper : public BaseHash64Wrapper {
-    public:
-        BuzHash64Wrapper() noexcept = default;
-
-    private:
-        uint64_t Hash(std::string_view str) const override;
-
-        mutable CyclicHash<uint64_t, unsigned char> hasher_{1024, 64};
-    };
-
 //-------------- SDBM --------------
 
     class [[maybe_unused]] SDBMHash16Wrapper : public BaseHash16Wrapper {
     private:
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] SDBMHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
     };
 
     class [[maybe_unused]] SDBMHash32Wrapper : public BaseHash32Wrapper {
