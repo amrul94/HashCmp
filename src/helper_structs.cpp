@@ -60,9 +60,10 @@ void CheckParameters::SetBuckets_32_64() {
     big_buckets_count = BBC_32_64;
 }
 
-WordsParameters::WordsParameters(uint16_t hash_bits, uint64_t word_counts, uint32_t length, uint64_t mod)
+WordsParameters::WordsParameters(uint16_t hash_bits, uint64_t word_counts, uint32_t length, uint64_t mod, uint16_t test_bits)
         : TestParameters(hash_bits, word_counts)
         , words_length(length)
-        , mod(mod) {
+        , mod(mod)
+        , test_bits(test_bits) {
 }
 

@@ -36,8 +36,9 @@ private:
 struct WordsParameters : TestParameters {
     uint32_t words_length{};
     uint64_t mod{};
+    uint16_t test_bits{};
 
-    explicit WordsParameters(uint16_t hash_bits, uint64_t word_counts, uint32_t length, uint64_t mod);
+    explicit WordsParameters(uint16_t hash_bits, uint64_t word_counts, uint32_t length, uint64_t mod, uint16_t test_bits);
 };
 
 

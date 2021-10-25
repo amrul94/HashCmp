@@ -117,13 +117,16 @@ namespace hfl {
     inline const auto Uint32ToUint24 = [](uint32_t source) { return detail::ConvertUint<uint32_t, hfl::uint24_t>(source); };
     inline const auto Uint32ToUint16 = [](uint32_t source) { return detail::ConvertUint<uint32_t, uint16_t>(source); };
 
-
+    enum class BuildFlag {
+        All,
+        RandomWordsTest
+    };
     //----------- BuildHashes ----------
 
-    std::vector<Hash16Struct> Build16bitsHashes();
-    std::vector<Hash24Struct> Build24bitsHashes();
-    std::vector<Hash32Struct> Build32bitsHashes();
-    std::vector<Hash64Struct> Build64bitsHashes();
+    std::vector<Hash16Struct> Build16bitsHashes(BuildFlag bf = BuildFlag::All);
+    std::vector<Hash24Struct> Build24bitsHashes(BuildFlag bf = BuildFlag::All);
+    std::vector<Hash32Struct> Build32bitsHashes(BuildFlag bf = BuildFlag::All);
+    std::vector<Hash64Struct> Build64bitsHashes(BuildFlag bf = BuildFlag::All);
 
 }
 

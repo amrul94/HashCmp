@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(ThesisWork)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-pthread -Wdeprecated-enum-enum-conversion")
+set(CMAKE_CXX_FLAGS "-pthread -lboost_json")
 
 add_subdirectory(HashLib HashLibBuildDir)
 #add_subdirectory(RandLib RandLibBuildDir)
