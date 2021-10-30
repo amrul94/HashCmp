@@ -6,8 +6,6 @@
 
 #include "characterhash.h"
 
-using namespace std;
-
 enum {NOPRECOMP,FULLPRECOMP};
 
 /**

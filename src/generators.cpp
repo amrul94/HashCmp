@@ -1,6 +1,5 @@
 #include "generators.h"
 
-#include <cassert>
 #include <cstring>
 #include <set>
 

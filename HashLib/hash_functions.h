@@ -10,6 +10,26 @@
 
 //=============================================================================
 
+// https://github.com/rurban/smhasher/blob/master/Hashes.cpp
+uint32_t FNV32a(const void *key, int len, uint32_t seed);
+uint64_t FNV64a(const char *key, int len, uint64_t seed);
+
+template<typename UintT>
+UintT one_at_a_time_hash(const uint8_t* key, size_t length) {
+    size_t i = 0;
+    UintT hash = 0;
+    while (i != length) {
+        hash += key[i++];
+        hash += hash << 10;
+        hash ^= hash >> 6;
+    }
+    hash += hash << 3;
+    hash ^= hash >> 11;
+    hash += hash << 15;
+    return hash;
+}
+
+
 // http://www.cse.yorku.ca/~oz/hash.html
 template<typename UintT>
 UintT DJB2Hash(std::string_view str) {
@@ -36,33 +56,18 @@ UintT PJWHash(std::string_view str) {
     const auto BitsInUnsignedInt = static_cast<UintT>(sizeof(UintT) * 8);
     const auto ThreeQuarters     = static_cast<UintT>((BitsInUnsignedInt  * 3) / 4);
     const auto OneEighth         = static_cast<UintT>(BitsInUnsignedInt / 8);
-    const UintT HighBits  = static_cast<UintT>(0xFFFFFFFF) << (BitsInUnsignedInt - OneEighth);
+    const auto MaxUintT = std::numeric_limits<UintT>::max();
+    const UintT HighBits  = MaxUintT << (uint64_t)(BitsInUnsignedInt - OneEighth);
     UintT hash = 0;
     UintT test = 0;
 
     for (char c : str) {
-        hash = (hash << OneEighth) + c;
+        hash = (hash << (uint64_t)OneEighth) + c;
         if ((test = hash & HighBits) != 0) {
-            hash = (( hash ^ (test >> ThreeQuarters)) & (~HighBits));
+            hash = ((hash ^ (test >> (uint64_t)ThreeQuarters)) & (~HighBits));
         }
     }
 
-    return hash;
-}
-
-// https://en.wikipedia.org/wiki/Jenkins_hash_function
-template<typename UintT>
-UintT one_at_a_time_hash(const uint8_t* key, size_t length) {
-    size_t i = 0;
-    UintT hash = 0;
-    while (i != length) {
-        hash += key[i++];
-        hash += hash << 10;
-        hash ^= hash >> 6;
-    }
-    hash += hash << 3;
-    hash ^= hash >> 11;
-    hash += hash << 15;
     return hash;
 }
 

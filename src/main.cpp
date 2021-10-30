@@ -3,39 +3,56 @@
 
 #include <pcg_random.hpp>
 
-#include <random>
-
 void TempTests() {
     pcg64 gen{};
     pcg64 gen2{gen};
-    std::uniform_int_distribution<uint64_t> ud{};
-    for (int i = 0; i < 100; ++i) {
-        std::cout << ud(gen) << std::endl;
+/*
+    uint64_t count = 8'589'934'592;
+    while (true) {
+        try {
+            vector<uint64_t> vec(count, 0);
+            std::cout << "Allocate " << count  << ": OK" << std::endl;
+            std::generate(std::execution::par, vec.begin(),  vec.end(), gen);
+            std::cout << "Generate " << vec.size()  << ": OK" << std::endl;
+            std::sort(std::execution::par, vec.begin(), vec.end());
+            auto last = std::unique(std::execution::par, vec.begin(), vec.end());
+            vec.erase(last, vec.end());
+            std::cout << "Unique: " << vec.size() << std::endl;
+            break;
+        }
+        catch(std::exception& e) {
+            std::cerr << "Allocate " << count << ": " << e.what() << std::endl;
+            count /= 2;
+        }
     }
-
-    std::cout << std::endl;
-    std::uniform_int_distribution<uint64_t> ud2{};
-    for (int i = 0; i < 100; ++i) {
-        std::cout << gen2() << std::endl;
-    }
+*/
+    std::cout << 0xFFFFFFFF << std::endl;
+    std::cout << UINT32_MAX << std::endl;
 
 }
 
 void RunTests() {
-    int test_number = 2;
+    std::vector test_numbers{3};
 
-    while(true) {
+    for (int test_number : test_numbers) {
         switch (test_number) {
             case 1:
+                std::cout << "start CheckDist" << std::endl;
                 RunCheckDist();
-                return;
+                std::cout << "end CheckDist" << std::endl;
+                break;
             case 2:
-                //RunTestsWithGeneratedBlocks(16);
+                std::cout << "start WordsTest 1" << std::endl;
+                RunTestsWithGeneratedBlocks(16);
+                std::cout << "start WordsTest 2" << std::endl;
                 RunTestsWithGeneratedBlocks(FOUR_KILOBYTES);
-                return;
+                std::cout << "end WordsTests" << std::endl;
+                break;
+            case 3:
+
             default:
                 TempTests();
-                return;
+                break;
         }
     }
 

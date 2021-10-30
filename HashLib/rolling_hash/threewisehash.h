@@ -5,8 +5,6 @@
 #include <vector>
 #include "characterhash.h"
 
-using namespace std;
-
 
 /**
 * Each instance is a rolling hash function meant to hash streams of characters.

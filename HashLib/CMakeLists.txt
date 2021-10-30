@@ -3,13 +3,12 @@ cmake_minimum_required(VERSION 3.17)
 project(HashLib)
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS "-pthread -Wdeprecated-enum-enum-conversion")
-set(CMAKE_C_FLAGS "-pthread -maes ")
+set(CMAKE_CXX_FLAGS "-pthread -Wno-deprecated-enum-enum-conversion -Woverflow -Wdeprecated-enum-enum-conversion")
+set(CMAKE_C_FLAGS "-pthread -maes")
 
 set(CITY_HASH cityhash/city.h cityhash/city.cc cityhash/config.h)
 set(FARM_HASH farmhash/farmhash.h farmhash/farmhash.cc)
 set(FAST_HASH fasthash/fasthash.h fasthash/fasthash.c)
-set(FNV_HASH fnv_hash_32/const_fvn_hash.h fnv_hash_64_128/fnv.h fnv_hash_64_128/fnv.cpp)
 set(JENKINS_HASH spooky_hash/spooky.h spooky_hash/spooky.c jenkins_hash/lookup3.cpp
         jenkins_hash/lookup3.h)
 set(METRO_HASH metro_hash/metrohash64.h metro_hash/metrohash64.cpp metro_hash/platform.h)
@@ -29,5 +28,5 @@ set(T1HA_HASH t1ha/t1ha.h t1ha/t1ha0.c t1ha/t1ha0_ia32aes_a.h t1ha/t1ha0_ia32aes
 set(XX_HASH xx_hash/xxhash.h xx_hash/xxhash.c xx_hash/xxh3.h)
 set(OTHERS_HASH hash_functions.h hash_functions.cpp)
 
-add_library(HashLib STATIC ${CITY_HASH} ${FARM_HASH} ${FAST_HASH} ${FNV_HASH} ${JENKINS_HASH} ${METRO_HASH} ${MURMUR_HASH}
+add_library(HashLib STATIC ${CITY_HASH} ${FARM_HASH} ${FAST_HASH} ${JENKINS_HASH} ${METRO_HASH} ${MURMUR_HASH}
         ${PEARSON_HASH} ${ROLLING_HASH} ${SUPER_FAST_HASH} ${T1HA_HASH} ${XX_HASH} ${OTHERS_HASH})

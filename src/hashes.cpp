@@ -41,7 +41,7 @@ namespace hfl {
         using namespace std::literals;
         std::vector<Hash32Struct> hashes;
 
-        if (bf == BuildFlag::All) {
+        if (bf == BuildFlag::ALL) {
             hashes.emplace_back("PearsonHash"s, pearson_hash_32);
             hashes.emplace_back("FNV-1a"s, fnv_1a_hash_32);
             hashes.emplace_back("DJB2"s, djb2_hash_32);
@@ -53,7 +53,7 @@ namespace hfl {
             hashes.emplace_back("Fast-Hash"s, fast_hash_32);
         }
 
-        hashes.emplace_back("SuperFastHash"s, super_fast_hash);
+       hashes.emplace_back("SuperFastHash"s, super_fast_hash);
         hashes.emplace_back("MurmurHash1"s, murmur_hash1);
         hashes.emplace_back("MurmurHash2"s, murmur_hash2_32);
         hashes.emplace_back("MurmurHash2A"s, murmur_hash2a_32);
@@ -71,7 +71,7 @@ namespace hfl {
         using namespace std::literals;
         std::vector<Hash64Struct> hashes;
 
-        if (bf == BuildFlag::All) {
+        if (bf == BuildFlag::ALL) {
             hashes.emplace_back("PearsonHash"s, pearson_hash_64);
             hashes.emplace_back("FNV-1a"s, fnv_1a_hash_64);
             hashes.emplace_back("DJB2"s, djb2_hash_64);

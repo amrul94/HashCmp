@@ -4,8 +4,6 @@
 #include <concepts>
 #include <utility>
 
-
-
 #include "hash_wrappers.h"
 
 // HFL = Hash function library
@@ -118,16 +116,17 @@ namespace hfl {
     inline const auto Uint32ToUint16 = [](uint32_t source) { return detail::ConvertUint<uint32_t, uint16_t>(source); };
 
     enum class BuildFlag {
-        All,
-        RandomWordsTest
+        ALL,
+        MASK
     };
     //----------- BuildHashes ----------
 
-    std::vector<Hash16Struct> Build16bitsHashes(BuildFlag bf = BuildFlag::All);
-    std::vector<Hash24Struct> Build24bitsHashes(BuildFlag bf = BuildFlag::All);
-    std::vector<Hash32Struct> Build32bitsHashes(BuildFlag bf = BuildFlag::All);
-    std::vector<Hash64Struct> Build64bitsHashes(BuildFlag bf = BuildFlag::All);
+    std::vector<Hash16Struct> Build16bitsHashes(BuildFlag bf = BuildFlag::ALL);
+    std::vector<Hash24Struct> Build24bitsHashes(BuildFlag bf = BuildFlag::ALL);
+    std::vector<Hash32Struct> Build32bitsHashes(BuildFlag bf = BuildFlag::ALL);
+    std::vector<Hash64Struct> Build64bitsHashes(BuildFlag bf = BuildFlag::ALL);
 
+    uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
 }
 
 #endif //THESIS_WORK_HASHES_H

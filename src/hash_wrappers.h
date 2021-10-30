@@ -1,7 +1,3 @@
-//
-// Created by amrulla on 02.03.2021.
-//
-
 #ifndef THESIS_WORK_HASH_WRAPPERS_H
 #define THESIS_WORK_HASH_WRAPPERS_H
 
@@ -27,23 +23,25 @@ namespace hfl {
             boost::multiprecision::unsigned_magnitude,
             boost::multiprecision::unchecked, void>>;
 
-    using uint48_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<48, 48,
-            boost::multiprecision::unsigned_magnitude,
-            boost::multiprecision::unchecked, void>>;
+
+    class [[maybe_unused]] bitfield24 {
+    private:
+        uint32_t value : 24;
+    };
 
 
-    std::string ReadFile(ifstream& file);
-
-    template<class Type>
-    std::string WriteToString(Type source) {
-        auto size = sizeof(Type);
-        string str;
-        str.resize(size);
-        memcpy(str.data(), &source, size);
-        return str;
-    }
+    std::string ReadFile(std::ifstream& file);
 
     namespace detail {
+        template<class Type>
+        std::string WriteToString(Type source) {
+            auto size = sizeof(Type);
+            std::string str;
+            str.resize(size);
+            memcpy(str.data(), &source, size);
+            return str;
+        }
+
         template<typename HashType>
         class BaseHashWrapper {
         public:
@@ -51,7 +49,7 @@ namespace hfl {
                 return Hash(str);
             }
 
-            HashType operator()(ifstream& file) const {
+            HashType operator()(std::ifstream& file) const {
                 std::string binary_file = ReadFile(file);
                 assert(!binary_file.empty());
                 return Hash(binary_file);
@@ -107,7 +105,10 @@ namespace hfl {
             }
 
             HashType operator()(uint64_t number) const {
-                return Hash(WriteToString<uint64_t>(number));
+                std::string bytes = WriteToString<uint64_t>(number);
+                assert(sizeof(bytes[0]) == 1);
+                assert((&bytes[1] - &bytes[0]) == 1);
+                return Hash(bytes);
             }
 
             virtual ~BaseHashWrapper() = default;
@@ -356,10 +357,9 @@ namespace hfl {
         PearsonHash16Wrapper() noexcept;
 
     private:
-        void FillT16();
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
 
-        std::array<uint16_t, 65536> t16{};
+        mutable std::vector<uint16_t> t16;
     };
 
     class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
@@ -367,10 +367,9 @@ namespace hfl {
         PearsonHash24Wrapper() noexcept;
 
     private:
-        void FillT24();
         [[nodiscard]] uint24_t Hash(std::string_view str) const override;
 
-        std::array<uint24_t, 16'777'216> t24{};
+        mutable std::vector<uint32_t> t24;
     };
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
     public:

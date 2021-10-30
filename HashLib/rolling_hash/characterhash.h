@@ -10,11 +10,6 @@ typedef unsigned int uint;
 #include <stdexcept>
 #include "mersennetwister.h"
 
-using namespace std;
-
-
-
-
 class mersenneRNG {
 public:
     mersenneRNG(uint32 maxval) : mtr(),n(maxval) {};
@@ -60,7 +55,7 @@ public:
             for(size_t k =0; k<nbrofchars; ++k)
                 hashvalues[k] = static_cast<hashvaluetype>(randomgeneratorbase())
                                 | (static_cast<hashvaluetype>(randomgenerator()) << 32);
-        } else throw runtime_error("unsupported hash value type");
+        } else throw std::runtime_error("unsupported hash value type");
     }
 
     CharacterHash(hashvaluetype maxval, uint32 seed1, uint32 seed2) {
@@ -77,7 +72,7 @@ public:
             for(size_t k =0; k<nbrofchars; ++k)
                 hashvalues[k] = static_cast<hashvaluetype>(randomgeneratorbase())
                                 | (static_cast<hashvaluetype>(randomgenerator()) << 32);
-        } else throw runtime_error("unsupported hash value type");
+        } else throw std::runtime_error("unsupported hash value type");
     }
 
     enum {nbrofchars = 1 << ( sizeof(chartype)*8 )};
