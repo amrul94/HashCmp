@@ -8,17 +8,17 @@
 #include <vector>
 
 #include "hashes.h"
-#include "helper_structs.h"
+#include "test_parameters.h"
 #include "log_duration.h"
 
 #define RUN_THREAD_CHECK_DIST(THREAD_NUMBER, LAMBDA, START, STEP)   \
     std::jthread jt##THREAD_NUMBER{LAMBDA, START, START + STEP};    \
-    START += STEP;
+    START += STEP
 
 void PrintReports(const std::vector<uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name);
 
 template<typename HashStruct>
-void CheckDistForHash(const HashStruct& hs, const CheckParameters& cp, std::ostream& log = std::cout) {
+void HashDistTest(const HashStruct& hs, const CheckParameters& cp, std::ostream& log) {
     LOG_DURATION_STREAM(hs.hash_name, log);
 
     std::vector<uint32_t> buckets(cp.buckets_count, 0);
@@ -33,7 +33,6 @@ void CheckDistForHash(const HashStruct& hs, const CheckParameters& cp, std::ostr
     };
 
     {
-        LOG_DURATION_STREAM(hs.hash_name + " loops", log);
         uint64_t start = 0;
         uint64_t step = cp.key_count / 4;
         RUN_THREAD_CHECK_DIST(1, lambda, start, step);
@@ -49,20 +48,18 @@ void CheckDistForHash(const HashStruct& hs, const CheckParameters& cp, std::ostr
 }
 
 template<typename HashStructs>
-void CheckDist(const HashStructs& hash_vec, const CheckParameters& cp, std::ostream& log = std::cout) {
+void DistributionTest(const HashStructs& funcs, const CheckParameters& cp, std::ostream& log) {
     log << "start " << cp.hash_bits << " bits" << std::endl;
-    for (const auto& current_hash : hash_vec) {
-        CheckDistForHash(current_hash, cp, log);
+    for (const auto& current_hash : funcs) {
+        HashDistTest(current_hash, cp, log);
     }
     log << "end " << cp.hash_bits << " bits" << std::endl << std::endl;
 }
 
-void RunCheckDistNormalMode(std::ostream& log = std::cout);
-void RunCheckDistBinsMode(std::ostream& log = std::cout);
-void RunCheckDistMaskMode(std::ostream& log = std::cout);
+void RunDistTestNormal(std::ostream& log = std::cout);
+void RunDistTestWithBins(std::ostream& log = std::cout);
+void RunDistTestWithMask(std::ostream& log = std::cout);
 
-void RunCheckDist();
-
-
+void RunDistributionTests();
 
 #endif //THESIS_WORK_CHECK_DISTRIBUTION_H

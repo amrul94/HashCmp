@@ -1,15 +1,15 @@
-#include "helper_structs.h"
+#include "test_parameters.h"
 
 #include <cmath>
 #include <limits>
 
-std::string ModeToString(ModeFlag mode) {
+std::string TestFlagToString(TestFlag mode) {
     switch (mode) {
-        case ModeFlag::NORMAL:
+        case TestFlag::NORMAL:
             return "Normal";
-        case ModeFlag::BINS:
+        case TestFlag::BINS:
             return "Bins";
-        case ModeFlag::MASK:
+        case TestFlag::MASK:
             return "Mask";
     }
 }
@@ -19,11 +19,11 @@ uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift) {
     return (src >> shift) & mask;
 }
 
-TestParameters::TestParameters(uint16_t hash_bits, uint16_t test_bits, ModeFlag mode)
+TestParameters::TestParameters(uint16_t hash_bits, uint16_t test_bits, TestFlag mode)
         : TestParameters(hash_bits, test_bits, 0, mode) {
 }
 
-TestParameters::TestParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t key_counts, ModeFlag mode)
+TestParameters::TestParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t key_counts, TestFlag mode)
         : hash_bits(hash_bits)
         , test_bits(test_bits)
         , key_count(key_counts)
@@ -34,20 +34,20 @@ uint64_t TestParameters::GiveDivisor(uint16_t degree) {
     return static_cast<uint64_t>(std::pow(2, degree));
 }
 
-CheckParameters::CheckParameters(uint16_t hash_bits, uint16_t test_bits, ModeFlag mode)
+CheckParameters::CheckParameters(uint16_t hash_bits, uint16_t test_bits, TestFlag mode)
         : TestParameters(hash_bits, test_bits, mode) {
     SetParameters();
 }
 
 void CheckParameters::SetParameters() {
     switch (mode) {
-        case ModeFlag::NORMAL:
+        case TestFlag::NORMAL:
             SetNormalMode();
             break;
-        case ModeFlag::BINS:
+        case TestFlag::BINS:
             SetBinsMode();
             break;
-        case ModeFlag::MASK:
+        case TestFlag::MASK:
             SetMaskMode();
             break;
         default:
@@ -90,18 +90,18 @@ void CheckParameters::SetMaskMode() {
     SetNormalMode();
 }
 
-WordsParameters::WordsParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t word_counts, uint32_t length, ModeFlag mode)
+WordsParameters::WordsParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t word_counts, uint32_t length, TestFlag mode)
         : TestParameters(hash_bits, test_bits, word_counts, mode)
         , words_length(length){
 }
 
 uint64_t ModifyHash(const TestParameters& tp, uint64_t hash) {
     switch (tp.mode) {
-        case ModeFlag::NORMAL:
+        case TestFlag::NORMAL:
             return hash;
-        case ModeFlag::MASK:
+        case TestFlag::MASK:
             return MaskShift(hash, tp.test_bits);
-        case ModeFlag::BINS:
+        case TestFlag::BINS:
             const auto& cp = dynamic_cast<const CheckParameters&>(tp);
             return hash / cp.divisor;
     }

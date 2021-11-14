@@ -1,5 +1,5 @@
-#include "check_distribution.h"
-#include "words_tests.h"
+#include "distribution_tests.h"
+#include "collision_tests.h"
 
 #include <pcg_random.hpp>
 
@@ -37,19 +37,22 @@ void RunTests() {
     for (int test_number : test_numbers) {
         switch (test_number) {
             case 1:
-                std::cout << "start CheckDist" << std::endl;
-                RunCheckDist();
-                std::cout << "end CheckDist" << std::endl;
+                std::cout << "start DistributionTest" << std::endl;
+                RunDistributionTests();
+                std::cout << "end DistributionTest" << std::endl;
                 break;
             case 2:
                 std::cout << "start WordsTest 1" << std::endl;
-                RunTestsWithGeneratedBlocks(16);
+                RunTestWithGeneratedBlocks(16);
                 std::cout << "start WordsTest 2" << std::endl;
-                RunTestsWithGeneratedBlocks(FOUR_KILOBYTES);
-                std::cout << "end WordsTests" << std::endl;
+                RunTestWithGeneratedBlocks(FOUR_KILOBYTES);
+                std::cout << "end WordsTests 1 and 2" << std::endl;
                 break;
             case 3:
-
+                std::cout << "start WordsTest 3" << std::endl;
+                RunTestWithEnglishWords();
+                std::cout << "end WordsTests 3" << std::endl;
+                break;
             default:
                 TempTests();
                 break;

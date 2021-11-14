@@ -53,7 +53,7 @@ namespace hfl {
             hashes.emplace_back("Fast-Hash"s, fast_hash_32);
         }
 
-       hashes.emplace_back("SuperFastHash"s, super_fast_hash);
+        hashes.emplace_back("SuperFastHash"s, super_fast_hash);
         hashes.emplace_back("MurmurHash1"s, murmur_hash1);
         hashes.emplace_back("MurmurHash2"s, murmur_hash2_32);
         hashes.emplace_back("MurmurHash2A"s, murmur_hash2a_32);

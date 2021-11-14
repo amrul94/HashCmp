@@ -1,4 +1,4 @@
-#include "check_distribution.h"
+#include "distribution_tests.h"
 
 #include <span>
 
@@ -19,7 +19,7 @@ namespace {
     json_obj ProcessingStatistics(const std::vector<uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name) {
         boost::json::object result;
         result["Test name"] = "Test Check Distribution";
-        result["Mode"] = ModeToString(cp.mode);
+        result["Mode"] = TestFlagToString(cp.mode);
         result["Bits"] = cp.hash_bits;
         result["Hash name"] = hash_name;
         uint32_t bar_count = 16;
@@ -70,7 +70,7 @@ namespace {
 void PrintReports(const std::vector<uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name) {
     using namespace std::literals;
     std::string file_name = "reports/check_dist/"s + std::to_string(cp.hash_bits) + "/"s +
-                            hash_name + " with "s + ModeToString(cp.mode) + " mode " + CurrentTime() + ".json"s;
+                            hash_name + " with "s + TestFlagToString(cp.mode) + " mode " + CurrentTime() + ".json"s;
 
     std::ofstream hash_out(file_name);
     assert(hash_out);
@@ -79,39 +79,39 @@ void PrintReports(const std::vector<uint32_t>& buckets, const CheckParameters& c
 
 }
 
-void RunCheckDistNormalMode(std::ostream& log) {
+void RunDistTestNormal(std::ostream& log) {
     const auto hashes16 = hfl::Build16bitsHashes();
-    const CheckParameters cp16{16, 16, ModeFlag::NORMAL};
-    CheckDist(hashes16, cp16, log);
+    const CheckParameters cp16{16, 16, TestFlag::NORMAL};
+    DistributionTest(hashes16, cp16, log);
 
     const auto hashes24 = hfl::Build24bitsHashes();
-    const CheckParameters cp24{24, 24, ModeFlag::NORMAL};
-    CheckDist(hashes24, cp24, log);
+    const CheckParameters cp24{24, 24, TestFlag::NORMAL};
+    DistributionTest(hashes24, cp24, log);
 }
 
-void RunCheckDistBinsMode(std::ostream& log) {
+void RunDistTestWithBins(std::ostream& log) {
     const auto hashes32 = hfl::Build32bitsHashes();
-    const CheckParameters cp32{32, 32, ModeFlag::BINS};
-    CheckDist(hashes32, cp32, log);
+    const CheckParameters cp32{32, 32, TestFlag::BINS};
+    DistributionTest(hashes32, cp32, log);
 
     const auto hashes64 = hfl::Build64bitsHashes();
-    const CheckParameters cp64{64, 64, ModeFlag::BINS};
-    CheckDist(hashes64, cp64, log);
+    const CheckParameters cp64{64, 64, TestFlag::BINS};
+    DistributionTest(hashes64, cp64, log);
 }
 
-void RunCheckDistMaskMode(std::ostream& log) {
+void RunDistTestWithMask(std::ostream& log) {
     const auto hashes32 = hfl::Build32bitsHashes(hfl::BuildFlag::MASK);
-    const CheckParameters cp32{32, 24, ModeFlag::MASK};
-    CheckDist(hashes32, cp32, log);
+    const CheckParameters cp32{32, 24, TestFlag::MASK};
+    DistributionTest(hashes32, cp32, log);
 
     const auto hashes64 = hfl::Build64bitsHashes(hfl::BuildFlag::MASK);
-    const CheckParameters cp64{64, 24, ModeFlag::MASK};
-    CheckDist(hashes64, cp64, log);
+    const CheckParameters cp64{64, 24, TestFlag::MASK};
+    DistributionTest(hashes64, cp64, log);
 }
 
-void RunCheckDist() {
+void RunDistributionTests() {
     std::ofstream log("reports/Log Check Dist " + CurrentTime() + ".txt");
-    RunCheckDistNormalMode(std::cout);
-    RunCheckDistBinsMode(std::cout);
-    RunCheckDistMaskMode(std::cout);
+    RunDistTestNormal();
+    RunDistTestWithBins();
+    RunDistTestWithMask();
 }
