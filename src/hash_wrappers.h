@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <string_view>
 
@@ -155,6 +156,7 @@ namespace hfl {
     private:
         uint16_t Hash(std::string_view str) const override;
 
+        mutable std::mutex hash_mutex_;
         mutable CyclicHash<uint16_t, unsigned char> hasher_{1024, 16};
     };
 
@@ -165,6 +167,7 @@ namespace hfl {
     private:
         uint24_t Hash(std::string_view str) const override;
 
+        mutable std::mutex hash_mutex_;
         mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 24};
     };
 
@@ -175,6 +178,7 @@ namespace hfl {
     private:
         uint32_t Hash(std::string_view str) const override;
 
+        mutable std::mutex hash_mutex_;
         mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 32};
     };
 
@@ -185,6 +189,7 @@ namespace hfl {
     private:
         uint64_t Hash(std::string_view str) const override;
 
+        mutable std::mutex hash_mutex_;
         mutable CyclicHash<uint64_t, unsigned char> hasher_{1024, 64};
     };
 
@@ -357,9 +362,11 @@ namespace hfl {
         PearsonHash16Wrapper() noexcept;
 
     private:
+        void PearsonHashInit() const;
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
 
         mutable std::vector<uint16_t> t16;
+        mutable std::once_flag init_flag;
     };
 
     class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
@@ -367,24 +374,24 @@ namespace hfl {
         PearsonHash24Wrapper() noexcept;
 
     private:
+        void PearsonHashInit() const;
         [[nodiscard]] uint24_t Hash(std::string_view str) const override;
 
         mutable std::vector<uint32_t> t24;
+        mutable std::once_flag init_flag;
     };
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
-    public:
-        PearsonHash32Wrapper() noexcept;
-
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+
+        mutable std::once_flag init_flag;
     };
 
     class [[maybe_unused]] PearsonHash64Wrapper : public BaseHash64Wrapper {
-    public:
-        PearsonHash64Wrapper() noexcept;
-
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+
+        mutable std::once_flag init_flag;
     };
 
 //------------ PJW Hash ------------

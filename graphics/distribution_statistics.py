@@ -52,8 +52,8 @@ class DistributionStatistics:
 
     def create_histogram(self, file_name: str):
         fig, ax = plt.subplots()
-        func_name = file_name.split('.')[0]
-        ax.set_title(func_name)
+        func_name = file_name.split()[0]
+        ax.set_title(self.hash_name)
 
         self.__bar(ax, fig)
 

@@ -65,53 +65,60 @@ namespace {
         result["Y max"] = y_max;
         return result;
     }
+
+
 }
 
-void PrintReports(const std::vector<uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name) {
+void PrintReports(const std::vector<uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name,
+                  ReportsRoot& reports_root) {
     using namespace std::literals;
-    std::string file_name = "reports/check_dist/"s + std::to_string(cp.hash_bits) + "/"s +
-                            hash_name + " with "s + TestFlagToString(cp.mode) + " mode " + CurrentTime() + ".json"s;
+    const std::filesystem::path check_dist_dir = "Distribution tests";
+    const std::filesystem::path hash_bits_dir = std::to_string(cp.hash_bits);
+    const std::filesystem::path report_name = hash_name + " with "s + TestFlagToString(cp.mode) + " mode.json";
+    const auto hash_bits_path = reports_root.root_path / check_dist_dir / hash_bits_dir;
+    std::filesystem::create_directories(hash_bits_path);
 
-    std::ofstream hash_out(file_name);
+    const std::filesystem::path hash_out_path = hash_bits_path / report_name;
+    std::ofstream hash_out(hash_out_path);
     assert(hash_out);
+
     boost::json::object obj = ProcessingStatistics(buckets, cp, hash_name);
     hash_out << obj;
 
 }
 
-void RunDistTestNormal(std::ostream& log) {
+void RunDistTestNormal(ReportsRoot& reports_root) {
     const auto hashes16 = hfl::Build16bitsHashes();
     const CheckParameters cp16{16, 16, TestFlag::NORMAL};
-    DistributionTest(hashes16, cp16, log);
+    DistributionTest(hashes16, cp16, reports_root);
 
     const auto hashes24 = hfl::Build24bitsHashes();
     const CheckParameters cp24{24, 24, TestFlag::NORMAL};
-    DistributionTest(hashes24, cp24, log);
+    DistributionTest(hashes24, cp24, reports_root);
 }
 
-void RunDistTestWithBins(std::ostream& log) {
+void RunDistTestWithBins(ReportsRoot& reports_root) {
     const auto hashes32 = hfl::Build32bitsHashes();
     const CheckParameters cp32{32, 32, TestFlag::BINS};
-    DistributionTest(hashes32, cp32, log);
+    DistributionTest(hashes32, cp32, reports_root);
 
     const auto hashes64 = hfl::Build64bitsHashes();
     const CheckParameters cp64{64, 64, TestFlag::BINS};
-    DistributionTest(hashes64, cp64, log);
+    DistributionTest(hashes64, cp64, reports_root);
 }
 
-void RunDistTestWithMask(std::ostream& log) {
+void RunDistTestWithMask(ReportsRoot& reports_root) {
     const auto hashes32 = hfl::Build32bitsHashes(hfl::BuildFlag::MASK);
     const CheckParameters cp32{32, 24, TestFlag::MASK};
-    DistributionTest(hashes32, cp32, log);
+    DistributionTest(hashes32, cp32, reports_root);
 
     const auto hashes64 = hfl::Build64bitsHashes(hfl::BuildFlag::MASK);
     const CheckParameters cp64{64, 24, TestFlag::MASK};
-    DistributionTest(hashes64, cp64, log);
+    DistributionTest(hashes64, cp64, reports_root);
 }
 
-void RunDistributionTests() {
-    std::ofstream log("reports/Log Check Dist " + CurrentTime() + ".txt");
-    RunDistTestNormal();
-    RunDistTestWithBins();
-    RunDistTestWithMask();
+void RunDistributionTests(ReportsRoot& reports_root) {
+    RunDistTestNormal(reports_root);
+    RunDistTestWithBins(reports_root);
+    RunDistTestWithMask(reports_root);
 }

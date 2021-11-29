@@ -6,6 +6,13 @@
 
 #include "hash_wrappers.h"
 
+struct ReportsRoot {
+    const std::filesystem::path root_path;
+    std::ofstream log;
+
+    explicit ReportsRoot(const std::filesystem::path& root_path);
+};
+
 enum class TestFlag {
     NORMAL, // Честный подсчет 16 и 24-битных хешей
     BINS,   // Подсчет по бинам 32 и 64-битных хешей
@@ -38,10 +45,9 @@ private:
     static constexpr uint16_t DIVIDER_FOR_32 = 5; // попробовать 5
     static constexpr uint16_t DIVIDER_FOR_64 = DIVIDER_FOR_32 + 32;
     static constexpr uint32_t MAX_BINS_COUNT = 134'217'728; // 2^27
-    static constexpr hfl::uint24_t MASK_24 = -1;
+    //static constexpr hfl::uint24_t MASK_24 = -1;
 
 private:
-
     void SetParameters();
     void SetNormalMode();
     void SetBinsMode();
@@ -55,10 +61,5 @@ struct WordsParameters : TestParameters {
 };
 
 uint64_t ModifyHash(const TestParameters& tp, uint64_t hash);
-
-
-
-
-
 
 #endif //THESIS_WORK_HELPER_STRUCTS_H

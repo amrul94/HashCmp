@@ -9,7 +9,6 @@
 // HFL = Hash function library
 namespace hfl {
 
-
     // Hashes
     [[maybe_unused]] inline const BuzHash16Wrapper buz_hash_16;
     [[maybe_unused]] inline const BuzHash24Wrapper buz_hash_24;
@@ -119,6 +118,7 @@ namespace hfl {
         ALL,
         MASK
     };
+
     //----------- BuildHashes ----------
 
     std::vector<Hash16Struct> Build16bitsHashes(BuildFlag bf = BuildFlag::ALL);

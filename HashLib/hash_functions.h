@@ -53,18 +53,18 @@ UintType SDBMHash(std::string_view str) {
 // https://www.programmingalgorithms.com/algorithm/pjw-hash/cpp/
 template<typename UintT>
 UintT PJWHash(std::string_view str) {
-    const auto BitsInUnsignedInt = static_cast<uint8_t>(sizeof(UintT) * 8);
-    const auto ThreeQuarters     = static_cast<uint8_t>((BitsInUnsignedInt  * 3) / 4);
-    const auto OneEighth         = static_cast<uint8_t>(BitsInUnsignedInt / 8);
+    const uint8_t BitsInUnsignedInt = sizeof(UintT) * 8;
+    const uint8_t ThreeQuarters     = (BitsInUnsignedInt  * 3) / 4;
+    const uint8_t OneEighth         = BitsInUnsignedInt / 8;
     const auto MaxUintT = std::numeric_limits<UintT>::max();
     const auto HighBits  = MaxUintT << (BitsInUnsignedInt - OneEighth);
     UintT hash = 0;
     UintT test{};
 
     for (char c : str) {
-        hash = (hash << (uint64_t)OneEighth) + c;
+        hash = (hash << OneEighth) + c;
         if ((test = hash & HighBits) != 0) {
-            hash = ((hash ^ (test >> (uint64_t)ThreeQuarters)) & (~HighBits));
+            hash = ((hash ^ (test >> ThreeQuarters)) & (~HighBits));
         }
     }
 

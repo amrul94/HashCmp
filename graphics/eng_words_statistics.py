@@ -49,6 +49,7 @@ class EnglishWordsStatistics(CollisionsStatistics):
         file_path = os.path.join(self.hist_path, f'{self.bits} bits.png')
         fig.savefig(file_path, bbox_inches='tight')
 
+
 def create_histogram(dir_path: str, file_name: str):
     path_to_file = os.path.join(dir_path, file_name)
     with open(path_to_file, 'r') as file:

@@ -20,7 +20,7 @@ namespace hfl {
         return hashes;
     }
 
-    std::vector<Hash24Struct> Build24bitsHashes(BuildFlag RandomWordsTest) {
+    std::vector<Hash24Struct> Build24bitsHashes(BuildFlag bf) {
         using namespace std::literals;
         std::vector<Hash24Struct> hashes;
 

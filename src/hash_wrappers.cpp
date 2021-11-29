@@ -204,11 +204,15 @@ namespace hfl {
 
     PearsonHash16Wrapper::PearsonHash16Wrapper() noexcept
         : t16(65536) {
+    }
+
+    void PearsonHash16Wrapper::PearsonHashInit() const {
         iota(t16.begin(), t16.end(), uint16_t(0));
         shuffle(t16.begin(), t16.end(), std::mt19937(std::random_device()()));
     }
 
     uint16_t PearsonHash16Wrapper::Hash(std::string_view str) const {
+        std::call_once(init_flag, &PearsonHash16Wrapper::PearsonHashInit, this);
         uint16_t hash;
         for (auto c : str) {
             hash = t16[hash ^ (65535 & c)];
@@ -218,11 +222,15 @@ namespace hfl {
 
     PearsonHash24Wrapper::PearsonHash24Wrapper() noexcept
         : t24(16'777'216) {
+}
+
+    void PearsonHash24Wrapper::PearsonHashInit() const {
         iota(t24.begin(), t24.end(), uint32_t(0));
         shuffle(t24.begin(), t24.end(), std::mt19937(std::random_device()()));
     }
 
     uint24_t PearsonHash24Wrapper::Hash(std::string_view str) const {
+        std::call_once(init_flag, &PearsonHash24Wrapper::PearsonHashInit, this);
         uint24_t hash;
         for (auto c : str) {
             uint24_t index = hash ^ (16'777'215 & c);
@@ -231,19 +239,13 @@ namespace hfl {
         return hash;
     }
 
-    PearsonHash32Wrapper::PearsonHash32Wrapper() noexcept{
-        pearson_hash_init();
-    }
-
     uint32_t PearsonHash32Wrapper::Hash(std::string_view str) const {
+        std::call_once(init_flag, pearson_hash_init);
         return pearson_hash_32(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
     }
 
-    PearsonHash64Wrapper::PearsonHash64Wrapper() noexcept{
-        pearson_hash_init();
-    }
-
     uint64_t PearsonHash64Wrapper::Hash(std::string_view str) const {
+        std::call_once(init_flag, pearson_hash_init);
         return pearson_hash_64(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
     }
 
@@ -268,18 +270,22 @@ namespace hfl {
 //----- Rolling Hash (BuzHash) -----
 
     uint16_t BuzHash16Wrapper::Hash(std::string_view str) const {
+        std::scoped_lock guard{hash_mutex_};
         return hasher_.hash(str);
     }
 
     uint24_t BuzHash24Wrapper::Hash(std::string_view str) const {
+        std::scoped_lock guard{hash_mutex_};
         return hasher_.hash(str);
     }
 
     uint32_t BuzHash32Wrapper::Hash(std::string_view str) const {
+        std::scoped_lock guard{hash_mutex_};
         return hasher_.hash(str);
     }
 
     uint64_t BuzHash64Wrapper::Hash(std::string_view str) const {
+        std::scoped_lock guard{hash_mutex_};
         return hasher_.hash(str);
     }
 

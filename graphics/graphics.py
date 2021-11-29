@@ -6,7 +6,7 @@ import eng_words_statistics as ews
 
 
 def main():
-    test_number = 3
+    test_number = 1
     if test_number == 1:
         ds.process_distribution_statistics()
     elif test_number == 2:

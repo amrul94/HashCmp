@@ -3,6 +3,13 @@
 #include <cmath>
 #include <limits>
 
+#include "log_duration.h"
+
+ReportsRoot::ReportsRoot(const std::filesystem::path& root_path)
+        : root_path(root_path)
+        , log(root_path / "Log.txt") {
+}
+
 std::string TestFlagToString(TestFlag mode) {
     switch (mode) {
         case TestFlag::NORMAL:
@@ -11,6 +18,8 @@ std::string TestFlagToString(TestFlag mode) {
             return "Bins";
         case TestFlag::MASK:
             return "Mask";
+        default:
+            assert(false);
     }
 }
 
@@ -101,9 +110,12 @@ uint64_t ModifyHash(const TestParameters& tp, uint64_t hash) {
             return hash;
         case TestFlag::MASK:
             return MaskShift(hash, tp.test_bits);
-        case TestFlag::BINS:
-            const auto& cp = dynamic_cast<const CheckParameters&>(tp);
+        case TestFlag::BINS: {
+            const auto &cp = dynamic_cast<const CheckParameters &>(tp);
             return hash / cp.divisor;
+        }
+        default:
+            assert(false);
     }
 }
 
