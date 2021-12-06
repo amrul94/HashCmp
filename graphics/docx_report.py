@@ -18,7 +18,6 @@ def save_document(document: Document, path: str, name: str):
 
 
 def num_to_str(num) -> str:
-    """ Преобразует число в строку округляя до NUM_FOR_ROUND знаков """
     if isinstance(num, str):
         return num
     return str(np.round(num, NUM_FOR_ROUND))

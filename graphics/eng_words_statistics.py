@@ -1,4 +1,6 @@
 import json
+import os.path
+
 import math
 
 import matplotlib.pyplot as plt
@@ -11,10 +13,14 @@ PLOT_ENG_WORDS_PATH = 'graphics/eng_words/'
 
 
 class EnglishWordsStatistics(CollisionsStatistics):
-    def __init__(self, js: dict):
-        CollisionsStatistics.__init__(self, js)
-        self.words_count = js["Number of words"]
-        self.hist_path = PLOT_ENG_WORDS_PATH
+    def __init__(self, tests_data: dict, tests_dir_name: str):
+        CollisionsStatistics.__init__(self, tests_data)
+        self.tests_dir_path = os.path.join(self.graphics_path, tests_dir_name)
+        self.test_name = tests_data["Test name"]
+        self.hist_path = os.path.join(self.tests_dir_path, self.test_name)
+        self.words_count = tests_data["Number of words"]
+        make_dir(self.tests_dir_path)
+        make_dir(self.hist_path)
 
     def __auto_label(self, ax, rects):
         for rect in rects:
@@ -36,6 +42,7 @@ class EnglishWordsStatistics(CollisionsStatistics):
         max_height = max([rect.get_height() for rect in rects])
         ax.yaxis.set_major_locator(ticker.MultipleLocator(max_height / 5))
         ax.yaxis.set_minor_locator(ticker.MultipleLocator(max_height / 25))
+        plt.grid(ls=':')
         plt.ylim(top=max_height*1.2)
 
     def create_histogram(self, file_name):
@@ -50,18 +57,19 @@ class EnglishWordsStatistics(CollisionsStatistics):
         fig.savefig(file_path, bbox_inches='tight')
 
 
-def create_histogram(dir_path: str, file_name: str):
+def create_histogram(tests_dir_name: str, dir_path: str, file_name: str):
     path_to_file = os.path.join(dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
-        ews = EnglishWordsStatistics(js)
+        ews = EnglishWordsStatistics(js, tests_dir_name)
         ews.create_histogram(file_name)
 
 
-def process_collision_statistics():
-    root_path = "reports/eng_words"
-    list_of_files = os.listdir(root_path)
+def process_collision_statistics(tests_dir_name):
+    path_to_test_dir = get_report_path(tests_dir_name)
+    path_to_eg_dir = os.path.join(path_to_test_dir, "English words tests")
+    list_of_files = os.listdir(path_to_eg_dir)
     for file_name in list_of_files:
-        create_histogram(root_path, file_name)
+        create_histogram(tests_dir_name, path_to_eg_dir, file_name)
 
 

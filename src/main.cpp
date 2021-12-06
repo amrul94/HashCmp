@@ -7,7 +7,19 @@
 #include <execution>
 
 void TempTests() {
-    std::cout << std::thread::hardware_concurrency() << std::endl;
+    std::atomic_uint32_t atom32;
+    atom32 += 100;
+    std::cout << atom32 << std::endl;
+    hfl::uint48_t number = 5;
+    std::cout << sizeof(uint16_t) << std::endl;
+    std::cout << sizeof(hfl::uint24_t) << std::endl;
+    std::cout << sizeof(uint32_t) << std::endl;
+    std::cout << sizeof(hfl::uint48_t) << std::endl;
+    std::cout << sizeof(uint64_t) << std::endl;
+
+    std::cout << std::numeric_limits<hfl::uint24_t>::max()<< std::endl;
+    std::cout << std::numeric_limits<hfl::uint48_t>::max() << std::endl;
+
 }
 
 
@@ -62,7 +74,7 @@ void TryCreateDirectory(const std::filesystem::path& path, std::ostream& log) {
 }
 
 int main() {
-    const std::vector test_numbers{1, 2, 3};
+    const std::vector test_numbers{1};
     ReportsRoot reports_root = CreateReportsRoot();
     assert(reports_root.log);
     RunTests(test_numbers, reports_root);

@@ -72,6 +72,10 @@ namespace hfl {
         return DJB2Hash<uint32_t>(str);
     }
 
+    uint48_t DJB2Hash48Wrapper::Hash(std::string_view str) const {
+        return DJB2Hash<uint48_t>(str);
+    }
+
     uint64_t DJB2Hash64Wrapper::Hash(std::string_view str) const {
         return DJB2Hash<uint64_t>(str);
     }
@@ -100,6 +104,11 @@ namespace hfl {
 
     uint32_t FastHash32Wrapper::Hash(std::string_view str) const {
         return fasthash32(str.data(), str.size(), 0);
+    }
+
+    uint48_t FastHash48Wrapper::Hash(std::string_view str) const {
+        uint64_t h = fasthash64(str.data(), str.size(), 0);
+        return h - (h >> 32);
     }
 
     uint64_t FastHash64Wrapper::Hash(std::string_view str) const {
@@ -146,6 +155,10 @@ namespace hfl {
 
     uint32_t OneTimeHash32Wrapper::Hash(std::string_view str) const {
         return one_at_a_time_hash<uint32_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+    }
+
+    uint48_t OneTimeHash48Wrapper::Hash(std::string_view str) const {
+        return one_at_a_time_hash<uint48_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
     }
 
     uint64_t OneTimeHash64Wrapper::Hash(std::string_view str) const {
@@ -263,6 +276,10 @@ namespace hfl {
         return PJWHash<uint32_t>(str);
     }
 
+    uint48_t PJWHash48Wrapper::Hash(std::string_view str) const {
+        return PJWHash<uint48_t>(str);
+    }
+
     uint64_t PJWHash64Wrapper::Hash(std::string_view str) const {
         return PJWHash<uint64_t>(str);
     }
@@ -280,6 +297,11 @@ namespace hfl {
     }
 
     uint32_t BuzHash32Wrapper::Hash(std::string_view str) const {
+        std::scoped_lock guard{hash_mutex_};
+        return hasher_.hash(str);
+    }
+
+    uint48_t BuzHash48Wrapper::Hash(std::string_view str) const {
         std::scoped_lock guard{hash_mutex_};
         return hasher_.hash(str);
     }
@@ -303,6 +325,10 @@ namespace hfl {
         return SDBMHash<uint32_t>(str);
     }
 
+    uint48_t SDBMHash48Wrapper::Hash(std::string_view str) const {
+        return SDBMHash<uint48_t>(str);
+    }
+
     uint64_t SDBMHash64Wrapper::Hash(std::string_view str) const {
         return SDBMHash<uint64_t>(str);
     }
@@ -321,6 +347,11 @@ namespace hfl {
 
     uint32_t SpookyHash32Wrapper::Hash(std::string_view str) const {
         return spooky_hash32(str.data(), str.size(), 0);
+    }
+
+    uint48_t SpookyHash48Wrapper::Hash(std::string_view str) const {
+        auto hash = spooky_hash64(str.data(), str.size(), 0);
+        return static_cast<uint48_t>(hash);
     }
 
     uint64_t SpookyHash64Wrapper::Hash(std::string_view str) const {

@@ -42,10 +42,10 @@ struct CheckParameters : TestParameters{
     explicit CheckParameters(uint16_t hash_bits, uint16_t test_bits, TestFlag mode);
 
 private:
-    static constexpr uint16_t DIVIDER_FOR_32 = 5; // попробовать 5
+    static constexpr uint16_t DIVIDER_FOR_32 = 5;
+    static constexpr uint16_t DIVIDER_FOR_48 = DIVIDER_FOR_32 + 16;
     static constexpr uint16_t DIVIDER_FOR_64 = DIVIDER_FOR_32 + 32;
     static constexpr uint32_t MAX_BINS_COUNT = 134'217'728; // 2^27
-    //static constexpr hfl::uint24_t MASK_24 = -1;
 
 private:
     void SetParameters();

@@ -95,7 +95,7 @@ def open_sub_dir(root_path: str, sub_dir_name, report: Document):
         plot_graphics(sub_dir_path, sub_dir_name, file_name, report)
 
 
-def process_collision_statistics():
+def process_collision_statistics(reports_path):
     report_heading = 'Таблицы коллизий'
     root_path = "reports/gen_words"
     process_statistics(open_sub_dir, report_heading, root_path, PLOT_GEN_BLOCKS_PATH)

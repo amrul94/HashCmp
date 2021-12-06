@@ -52,13 +52,12 @@ std::vector<std::string> ParseWords(const std::filesystem::path& file_name) {
 
 void RunTestWithEnglishWords(ReportsRoot& reports_root) {
     const std::filesystem::path& file_name = "data/english_words.txt";
-    reports_root.log << "Parse english words START" << std::endl;
     const std::vector<std::string> words = ParseWords(file_name);
-    reports_root.log << "Parse english words END\n" << std::endl;
 
     RUN_TEST_WITH_ENG_WORDS_IMPL(words, 16, reports_root);
     RUN_TEST_WITH_ENG_WORDS_IMPL(words, 24, reports_root);
     RUN_TEST_WITH_ENG_WORDS_IMPL(words, 32, reports_root);
+    RUN_TEST_WITH_ENG_WORDS_IMPL(words, 48, reports_root);
     RUN_TEST_WITH_ENG_WORDS_IMPL(words, 64, reports_root);
 }
 

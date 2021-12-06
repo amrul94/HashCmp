@@ -67,6 +67,20 @@ namespace hfl {
         return hashes;
     }
 
+    std::vector<Hash48Struct> Build48bitsHashes(BuildFlag bf) {
+        using namespace std::literals;
+        std::vector<Hash48Struct> hashes;
+
+        hashes.emplace_back("DJB2"s, djb2_hash_48);
+        hashes.emplace_back("SDBM"s, sdbm_hash_48);
+        hashes.emplace_back("PJW"s, pjw_hash_48);
+        hashes.emplace_back("BuzHash"s, buz_hash_48);
+        hashes.emplace_back("One at a time"s, one_at_a_time_hash_48);
+        hashes.emplace_back("SpookyHash"s, spooky_hash_48);
+        hashes.emplace_back("Fast-Hash"s, fast_hash_48);
+        return hashes;
+    }
+
     std::vector<Hash64Struct> Build64bitsHashes(BuildFlag bf) {
         using namespace std::literals;
         std::vector<Hash64Struct> hashes;
@@ -89,6 +103,7 @@ namespace hfl {
         hashes.emplace_back("MetroHash64"s, metro_hash_64);
         hashes.emplace_back("T1HA1 le", t1ha1_le_hash);
         hashes.emplace_back("T1HA1 be", t1ha1_be_hash);
+        // закончил тесты на распределение 03.12.21 здесь
         hashes.emplace_back("T1HA2 atonce", t1ha2_atonce_hash);
         hashes.emplace_back("xxHash64", xx_hash_64);
         hashes.emplace_back("XXH3_64bits", xxh3_64bits);

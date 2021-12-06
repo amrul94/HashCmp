@@ -36,7 +36,6 @@ uint64_t HashTestWithEngWords(const HashStruct& hs, const std::vector<std::strin
 template <typename HashStruct>
 void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vector<std::string>& words,
                           const WordsParameters& wp, ReportsRoot& reports_root) {
-    reports_root.log << "Test with english words (" << wp.hash_bits << " bits) START" << std::endl;
 
     const std::filesystem::path report_test_dir = "English words tests";
     const auto report_test_path = reports_root.root_path / report_test_dir;
@@ -58,8 +57,6 @@ void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vect
     }
     obj["Collisions"] = collisions;
     out << obj;
-
-    reports_root.log << "Test with english words (" << wp.hash_bits << " bits) END" << std::endl;
 }
 
 void RunTestWithEnglishWords(ReportsRoot& reports_root);
@@ -93,17 +90,19 @@ auto HashTestWithGenBlocks(Generator& generator, const HashStruct& hs, const Wor
     boost::json::object counters;
     auto word_counts = static_cast<uint64_t>(pow(2, wp.test_bits / 2));
     uint64_t i = 0;
+    //std::cout << "key_count = " << wp.key_count << std::endl;
     for (; word_counts <= wp.key_count; word_counts *= 2) {
         for (; i < word_counts; ++i) {
             std::string str = GenerateRandomDataBlock(generator, wp.words_length);
             const uint64_t hash = hs.hash_function(str);
             const uint64_t modify = ModifyHash(wp, hash);
+            //std::cout << hs.hash_name << ": modify_hash = " << modify << std::endl;
             ++hashes[modify];
         }
         std::string index = std::to_string(word_counts);
         counters[index] = CountCollisions(hashes);
     }
-
+    std::cout << hs.hash_name << ": i = " << i << std::endl;
     auto hash_name = static_cast<boost::json::string>(hs.hash_name);
     if (wp.test_bits > 24) {
         hash_name += " (mask " + std::to_string(wp.test_bits) + " bits)";
@@ -120,17 +119,18 @@ void TestWithGeneratedBlocks(Generator gen, const HashStructs& hash_vec, const W
     using namespace std::literals;
 
     reports_root.log << "start " << wp.hash_bits << " bits" << std::endl;
+    std::cout << "start " << wp.hash_bits << " bits" << std::endl;
 
     const std::filesystem::path gen_tests_dir = "Generated blocks tests";
     const std::filesystem::path block_size_dir = std::to_string(wp.words_length);
     const auto block_size_path = reports_root.root_path / gen_tests_dir / block_size_dir;
     std::filesystem::create_directories(block_size_path);
-    reports_root.log << "block_size_path: " << block_size_path << std::endl;
+    //reports_root.log << "block_size_path: " << block_size_path << std::endl;
 
     const std::filesystem::path report_name = std::to_string(wp.hash_bits) + " bits (" + TestFlagToString(wp.mode)
                                               + " "s + std::to_string(wp.test_bits) + " bits).json"s;
     const std::filesystem::path report_path = block_size_path / report_name;
-    reports_root.log << "report_path: " << report_path << std::endl;
+    //reports_root.log << "report_path: " << report_path << std::endl;
 
 
     std::ofstream out(report_path);
@@ -144,40 +144,54 @@ void TestWithGeneratedBlocks(Generator gen, const HashStructs& hash_vec, const W
 
     boost::json::object collisions;
     std::mutex local_mutex;
-    auto lambda = [&] (size_t index) {
-        std::unique_lock guard{local_mutex};
-        reports_root.log << "index " << index << ", thread " << std::this_thread::get_id() << std::endl;
-        guard.unlock();
+    auto lambda = [&gen, &local_mutex, &hash_vec, &collisions, &wp, &reports_root] (size_t index) {
+        //std::cout << "index - " << index << std::endl;
         const auto& current_hash = hash_vec[index];
+        std::cout << current_hash.hash_name << std::endl;
         Generator c_gen = gen;
         auto [hash_name, counters] = HashTestWithGenBlocks(c_gen, current_hash, wp, reports_root);
-        //std::scoped_lock guard{local_mutex};
-        guard.lock();
+        std::scoped_lock guard{local_mutex};
+        //std::cout << hash_vec[index].hash_name << " ок" << std::endl;
         collisions[hash_name] = counters;
+        //std::cout << "counters ок" << std::endl;
     };
 
     const size_t hardware_threads = std::thread::hardware_concurrency();
     const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
 
-    reports_root.log << "Num threads = " << num_threads << std::endl;
+    //reports_root.log << "Num threads = " << num_threads << std::endl;
 
+    std::cout << "hash_vec.size() = " << hash_vec.size() << std::endl;
     const uint64_t chunks = hash_vec.size() / num_threads;
     std::vector<std::thread> threads(num_threads - 1);
-    for (uint64_t i = 0; i < chunks; ++i) {
-        for (size_t j = 0; i < threads.size(); ++i) {
-            threads[i] = std::thread{lambda, i * num_threads + j};
+    std::cout << "chunks = " << chunks << std::endl;
+    for (uint64_t chunk_num = 0; chunk_num < chunks; ++chunk_num) {
+        std::cout << "\tchunk = " << chunk_num << std::endl;
+        std::cout << "\tStart threads" << std::endl;
+        for (size_t thread_num = 0; thread_num < threads.size(); ++thread_num) {
+            const auto index = chunk_num * num_threads + thread_num;
+            std::cout << "\t\tthread_num = " << thread_num << ", index = " << index << std::endl;
+            threads[thread_num] = std::thread{lambda, index};
         }
-        lambda(i * num_threads + threads.size());
-
+        const auto index = chunk_num * num_threads + threads.size();
+        std::cout << "\tStart in current thread (index = " << index << ')' << std::endl;
+        lambda(index);
+        std::cout << "\tJoin threads" << std::endl;
         for (auto& t : threads) {
             t.join();
         }
     }
 
+
     uint64_t diff = hash_vec.size() - chunks * num_threads;
-    for (size_t i = 0; i < diff; ++i) {
-        threads[i] = std::thread{lambda, i + chunks * num_threads};
+    std::cout << "diff = " << diff << std::endl;
+    std::cout << "Start threads" << std::endl;
+    for (size_t thread_num = 0; thread_num < diff; ++thread_num) {
+        const auto index = chunks * num_threads + thread_num;
+        std::cout << "\t\tthread_num = " << thread_num << ", index = " << index << std::endl;
+        threads[thread_num] = std::thread{lambda, thread_num + chunks * num_threads};
     }
+    std::cout << "Join threads" << std::endl;
     for (size_t i = 0; i < diff; ++i) {
         threads[i].join();
     }
@@ -185,7 +199,7 @@ void TestWithGeneratedBlocks(Generator gen, const HashStructs& hash_vec, const W
     out << obj;
 
     reports_root.log << "end " << wp.hash_bits << " bits" << std::endl << std::endl;
-
+    std::cout << "end " << wp.hash_bits << " bits" << std::endl << std::endl;
 }
 
 void RunTestWithGeneratedBlocks(uint32_t words_length, ReportsRoot& reports_root);

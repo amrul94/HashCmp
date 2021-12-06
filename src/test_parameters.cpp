@@ -87,6 +87,9 @@ void CheckParameters::SetBinsMode() {
         case 32:
             divisor = GiveDivisor(DIVIDER_FOR_32);
             break;
+        case 48:
+            divisor = GiveDivisor(DIVIDER_FOR_48);
+            break;
         case 64:
             divisor = GiveDivisor(DIVIDER_FOR_64);
             break;
