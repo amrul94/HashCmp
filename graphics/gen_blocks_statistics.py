@@ -9,19 +9,20 @@ PLOT_GEN_BLOCKS_PATH = 'graphics/gen_words/'
 
 
 class GeneratedBlocksStatistics(CollisionsStatistics):
-    def __init__(self, js: dict):
+    def __init__(self, js: dict, tests_dir_path: str):
         CollisionsStatistics.__init__(self, js)
         self.mask = js['Mask']
         self.blocks_size = js['Blocks size']
 
-        root_path = PLOT_GEN_BLOCKS_PATH
-        blocks_dir_path = os.path.join(root_path, str(self.blocks_size))
+        blocks_dir_path = os.path.join(tests_dir_path, str(self.blocks_size))
+        make_dir(blocks_dir_path)
         self.plot_path = os.path.join(blocks_dir_path, str(self.mask))
+        make_dir(self.plot_path)
 
     @staticmethod
     def __plot_log_scale(ax):
-        plt.xscale('log_file', base=2)
-        plt.yscale('log_file', base=2)
+        plt.xscale('log', base=2)
+        plt.yscale('log', base=2)
         x_major = ticker.LogLocator(base=2.0, numticks=50)
         ax.xaxis.set_major_locator(x_major)
         y_major = ticker.LogLocator(base=2.0, numticks=50)
@@ -50,11 +51,12 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
 
         ax.grid(which='major', color='gray', linestyle=':')
         if self.bits != self.mask:
-            file_name = f'{hash_name} {self.bits} bits (mask {self.mask} bits) (log_file).png'
+            file_name = f'{hash_name} {self.bits} bits (mask {self.mask} bits) (log).png'
         else:
-            file_name = f'{hash_name} {self.bits} bits (log_file).png'
+            file_name = f'{hash_name} {self.bits} bits (log).png'
 
         file_path = os.path.join(self.plot_path, file_name)
+        print(file_path)
         fig.savefig(file_path)
         plt.cla()
         plt.clf()
@@ -75,28 +77,36 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
         return collisions
 
 
-def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report: Document):
+def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report: Document, save_path: str):
     path_to_file = os.path.join(sub_dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
         # временно
         js["Blocks size"] = sub_dir_name
-        cs = GeneratedBlocksStatistics(js)
+        cs = GeneratedBlocksStatistics(js, save_path)
+        cs.plot()
         cs.get_collisions()
         data_collisions = cs.get_collisions()
         heading = f'{cs.bits} bits ({cs.mask} bits) with {cs.blocks_size} bytes block size'
         dr.add_table_to_report(heading, data_collisions, report)
 
 
-def open_sub_dir(root_path: str, sub_dir_name, report: Document):
+def open_sub_dir(root_path: str, sub_dir_name, report: Document, save_path: str):
     sub_dir_path = os.path.join(root_path, sub_dir_name)
     list_of_files = os.listdir(sub_dir_path)
     for file_name in list_of_files:
-        plot_graphics(sub_dir_path, sub_dir_name, file_name, report)
+        plot_graphics(sub_dir_path, sub_dir_name, file_name, report, save_path)
 
 
-def process_collision_statistics(reports_path):
+def process_collision_statistics(tests_dir_name):
     report_heading = 'Таблицы коллизий'
-    root_path = "reports/gen_words"
-    process_statistics(open_sub_dir, report_heading, root_path, PLOT_GEN_BLOCKS_PATH)
+    path_to_test_dir = get_report_path(tests_dir_name)
+    test_name = "Generated blocks tests"
+    path_to_gen_dir = os.path.join(path_to_test_dir, test_name)
+    save_path = os.path.join('graphics', tests_dir_name)
+    make_dir(save_path)
+    save_path = os.path.join(save_path, test_name)
+    make_dir(save_path)
+    print(save_path)
+    process_statistics(open_sub_dir, report_heading, path_to_gen_dir, save_path)
 

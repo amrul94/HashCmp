@@ -28,7 +28,6 @@ class DistributionStatistics:
     def __bar(self, ax, fig):
         plt.bar(self.x_bars, self.y_mean, yerr=self.y_err, ecolor='red', capsize=6, bottom=0, color='b', alpha=0.3,
                 edgecolor='blue')
-        print(f'{self.hash_name}: x_ranges_size - {len(self.x_ranges)}')
         if self.bits < 48:
             plt.xticks(self.x_bars, self.x_ranges)
         else:
@@ -73,7 +72,7 @@ def create_dict_tables(bits: int):
     table = [['Название функции',
               'Минимальное значение',
               'Максимальное значение']]
-    if bits > 24:
+    if bits > 32:
         return {"Bins": table[:], "Mask": table[:]}
     else:
         return {'Normal': table[:]}
