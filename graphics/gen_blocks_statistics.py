@@ -20,8 +20,8 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
 
     @staticmethod
     def __plot_log_scale(ax):
-        plt.xscale('log', base=2)
-        plt.yscale('log', base=2)
+        plt.xscale('log_file', base=2)
+        plt.yscale('log_file', base=2)
         x_major = ticker.LogLocator(base=2.0, numticks=50)
         ax.xaxis.set_major_locator(x_major)
         y_major = ticker.LogLocator(base=2.0, numticks=50)
@@ -50,9 +50,9 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
 
         ax.grid(which='major', color='gray', linestyle=':')
         if self.bits != self.mask:
-            file_name = f'{hash_name} {self.bits} bits (mask {self.mask} bits) (log).png'
+            file_name = f'{hash_name} {self.bits} bits (mask {self.mask} bits) (log_file).png'
         else:
-            file_name = f'{hash_name} {self.bits} bits (log).png'
+            file_name = f'{hash_name} {self.bits} bits (log_file).png'
 
         file_path = os.path.join(self.plot_path, file_name)
         fig.savefig(file_path)

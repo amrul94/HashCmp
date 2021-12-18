@@ -12,6 +12,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include <hash_functions.h>
 #include <rolling_hash/cyclichash.h>
 
 #include "img.h"
@@ -47,20 +48,20 @@ namespace hfl {
             return str;
         }
 
-        template<typename HashType>
+        template<typename UintT>
         class BaseHashWrapper {
         public:
-            HashType operator()(std::string_view str) const {
+            UintT operator()(std::string_view str) const {
                 return Hash(str);
             }
 
-            HashType operator()(std::ifstream& file) const {
+            UintT operator()(std::ifstream& file) const {
                 std::string binary_file = ReadFile(file);
                 assert(!binary_file.empty());
                 return Hash(binary_file);
             }
 
-            HashType operator()(const img::Image& image) const {
+            UintT operator()(const img::Image& image) const {
 
                 // Возможно стоит сделать так:
                 // const char* bytes = reinterpret_cast<const char*>(image.GetLine(0);
@@ -72,44 +73,44 @@ namespace hfl {
                 return Hash(bytes);
             }
 
-            HashType operator()(int8_t number) const {
+            UintT operator()(int8_t number) const {
                 uint8_t number8 = number;
                 uint64_t number64 = number8;
                 return operator()(number64);
             }
 
-            HashType operator()(int16_t number) const {
+            UintT operator()(int16_t number) const {
                 uint64_t number64 = number;
                 return operator()(number64);
             }
 
-            HashType operator()(int32_t number) const {
+            UintT operator()(int32_t number) const {
                 uint64_t number64 = number;
                 return operator()(number64);
             }
 
-            HashType operator()(int64_t number) const {
+            UintT operator()(int64_t number) const {
                 uint64_t number64 = number;
                 return operator()(number64);
             }
 
 
-            HashType operator()(uint8_t number) const {
+            UintT operator()(uint8_t number) const {
                 uint64_t number64 = number;
                 return operator()(number64);
             }
 
-            HashType operator()(uint16_t number) const {
+            UintT operator()(uint16_t number) const {
                 uint64_t number64 = number;
                 return operator()(number64);
             }
 
-            HashType operator()(uint32_t number) const {
+            UintT operator()(uint32_t number) const {
                 uint64_t number64 = number;
                 return operator()(number64);
             }
 
-            HashType operator()(uint64_t number) const {
+            UintT operator()(uint64_t number) const {
                 std::string bytes = WriteToString<uint64_t>(number);
                 assert(sizeof(bytes[0]) == 1);
                 assert((&bytes[1] - &bytes[0]) == 1);
@@ -119,7 +120,7 @@ namespace hfl {
             virtual ~BaseHashWrapper() = default;
 
         private:
-            [[nodiscard]] virtual HashType Hash(std::string_view str) const = 0;
+            [[nodiscard]] virtual UintT Hash(std::string_view str) const = 0;
         };
     }
 
@@ -132,86 +133,60 @@ namespace hfl {
 
 //----- Bernstein's hash DJB2 ------
 
-    class [[maybe_unused]] DJB2Hash16Wrapper : public BaseHash16Wrapper {
+    template<typename UintT>
+    class [[maybe_unused]] DJB2HashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+        [[nodiscard]] UintT Hash(std::string_view str) const override {
+            return DJB2Hash<UintT>(str);
+        }
     };
 
-    class [[maybe_unused]] DJB2Hash24Wrapper : public BaseHash24Wrapper {
-    private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] DJB2Hash32Wrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] DJB2Hash48Wrapper : public BaseHash48Wrapper {
-    private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] DJB2Hash64Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
-    };
 
 //----- Rolling Hash (BuzHash) -----
 
-    class [[maybe_unused]] BuzHash16Wrapper : public BaseHash16Wrapper {
+    template<typename UintT>
+    class [[maybe_unused]] BuzHashWrapper : public detail::BaseHashWrapper<UintT> {
     public:
-        BuzHash16Wrapper() noexcept = default;
+        BuzHashWrapper() noexcept = default;
 
     private:
-        uint16_t Hash(std::string_view str) const override;
+        UintT Hash(std::string_view str) const override {
+            std::scoped_lock guard{hash_mutex_};
+            return hasher_.hash(str);
+        }
 
         mutable std::mutex hash_mutex_;
-        mutable CyclicHash<uint16_t, unsigned char> hasher_{1024, 16};
+        mutable CyclicHash<UintT> hasher_{4096, sizeof(UintT) * 8};
     };
 
-    class [[maybe_unused]] BuzHash24Wrapper : public BaseHash24Wrapper {
+    template<>
+    class [[maybe_unused]] BuzHashWrapper<uint24_t> : public detail::BaseHashWrapper<uint24_t> {
     public:
-        BuzHash24Wrapper() noexcept = default;
+        BuzHashWrapper() noexcept = default;
 
     private:
-        uint24_t Hash(std::string_view str) const override;
+        uint24_t Hash(std::string_view str) const override {
+            std::scoped_lock guard{hash_mutex_};
+            return hasher_.hash(str);
+        }
 
         mutable std::mutex hash_mutex_;
-        mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 24};
+        mutable CyclicHash<uint32_t> hasher_{4096, 24};
     };
 
-    class [[maybe_unused]] BuzHash32Wrapper : public BaseHash32Wrapper {
+    template<>
+    class [[maybe_unused]] BuzHashWrapper<uint48_t> : public BaseHash48Wrapper {
     public:
-        BuzHash32Wrapper() noexcept = default;
+        BuzHashWrapper() noexcept = default;
 
     private:
-        uint32_t Hash(std::string_view str) const override;
+        uint48_t Hash(std::string_view str) const override {
+            std::scoped_lock guard{hash_mutex_};
+            return hasher_.hash(str);
+        }
 
         mutable std::mutex hash_mutex_;
-        mutable CyclicHash<uint32_t, unsigned char> hasher_{1024, 32};
-    };
-
-    class [[maybe_unused]] BuzHash48Wrapper : public BaseHash48Wrapper {
-    public:
-        BuzHash48Wrapper() noexcept = default;
-
-    private:
-        uint48_t Hash(std::string_view str) const override;
-
-        mutable std::mutex hash_mutex_;
-        mutable CyclicHash<uint64_t, unsigned char> hasher_{1024, 48};
-    };
-
-    class [[maybe_unused]] BuzHash64Wrapper : public BaseHash64Wrapper {
-    public:
-        BuzHash64Wrapper() noexcept = default;
-
-    private:
-        uint64_t Hash(std::string_view str) const override;
-
-        mutable std::mutex hash_mutex_;
-        mutable CyclicHash<uint64_t, unsigned char> hasher_{1024, 64};
+        mutable CyclicHash<uint64_t> hasher_{4096, 48};
     };
 
 //----------- CityHashes ----------
@@ -282,6 +257,11 @@ namespace hfl {
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
+    class [[maybe_unused]] FNV1aHash48Wrapper : public BaseHash48Wrapper {
+    private:
+        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
+    };
+
     class [[maybe_unused]] FNV1aHash64Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
@@ -290,29 +270,12 @@ namespace hfl {
 
 //--------- Jenkins hash -----------
 
-    class [[maybe_unused]] OneTimeHash16Wrapper : public BaseHash16Wrapper {
+    template<typename UintT>
+    class [[maybe_unused]] OneTimeHashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] OneTimeHash24Wrapper : public BaseHash24Wrapper {
-    private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] OneTimeHash32Wrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] OneTimeHash48Wrapper : public BaseHash48Wrapper {
-    private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] OneTimeHash64Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] UintT Hash(std::string_view str) const override {
+            return one_at_a_time_hash<UintT>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+        }
     };
 
     class [[maybe_unused]] Lookup3LittleWrapper : public BaseHash32Wrapper {
@@ -394,27 +357,28 @@ namespace hfl {
 //---------- PearsonHashes ---------
 
     class [[maybe_unused]] PearsonHash16Wrapper : public BaseHash16Wrapper {
-    public:
-        PearsonHash16Wrapper() noexcept;
-
     private:
         void PearsonHashInit() const;
         [[nodiscard]] uint16_t Hash(std::string_view str) const override;
 
-        mutable std::once_flag init_flag;
-        mutable std::vector<uint16_t> t16;
+        mutable std::once_flag init_flag_;
+        mutable std::vector<uint16_t> t16_;
+        const uint32_t table_size_ = 65536;
+        const uint32_t mask_ = 65535;
     };
 
     class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
-    public:
-        PearsonHash24Wrapper() noexcept;
 
     private:
         void PearsonHashInit() const;
         [[nodiscard]] uint24_t Hash(std::string_view str) const override;
 
-        mutable std::once_flag init_flag;
-        mutable std::vector<uint32_t> t24;
+
+        mutable std::once_flag init_flag_;
+        mutable std::vector<uint32_t> t24_;
+        const uint32_t table_size_ = 16'777'216;
+        const uint32_t mask_ = 16'777'215;
+
     };
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
     private:
@@ -432,56 +396,38 @@ namespace hfl {
 
 //------------ PJW Hash ------------
 
-    class [[maybe_unused]] PJWHash16Wrapper : public BaseHash16Wrapper {
+    template<typename UintT>
+    class [[maybe_unused]] PJWHashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+        [[nodiscard]] UintT Hash(std::string_view str) const override {
+            return PJWHash<UintT>(str);
+        }
     };
 
-    class [[maybe_unused]] PJWHash24Wrapper : public BaseHash24Wrapper {
+    template<>
+    class [[maybe_unused]] PJWHashWrapper<uint24_t>: public detail::BaseHashWrapper<uint24_t> {
     private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override {
+            return PJWHash<uint24_t, 24>(str);
+        }
     };
 
-    class [[maybe_unused]] PJWHash32Wrapper : public BaseHash32Wrapper {
+    template<>
+    class [[maybe_unused]] PJWHashWrapper<uint48_t>: public detail::BaseHashWrapper<uint48_t> {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] PJWHash48Wrapper : public BaseHash48Wrapper {
-    private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] PJWHash64Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint48_t Hash(std::string_view str) const override {
+            return PJWHash<uint48_t, 48>(str);
+        }
     };
 
 //-------------- SDBM --------------
 
-    class [[maybe_unused]] SDBMHash16Wrapper : public BaseHash16Wrapper {
+    template<typename UintT>
+    class [[maybe_unused]] SDBMHashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] SDBMHash24Wrapper : public BaseHash24Wrapper {
-    private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] SDBMHash32Wrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] SDBMHash48Wrapper : public BaseHash48Wrapper {
-    private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] SDBMHash64Wrapper : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] UintT Hash(std::string_view str) const override {
+            return SDBMHash<UintT>(str);
+        }
     };
 
 //-------------- T1HA --------------

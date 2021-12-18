@@ -14,7 +14,6 @@
 #include <metro_hash/metrohash64.h>
 #include <spooky_hash/spooky.h>
 #include <xx_hash/xxhash.h>
-#include <hash_functions.h>
 
 #include "hash_wrappers.h"
 
@@ -58,28 +57,6 @@ namespace hfl {
         return city::CityHash64(str.data(), str.size());
     }
 
-//----- Bernstein's hash djb2 ------
-
-    uint16_t DJB2Hash16Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash<uint16_t>(str);
-    }
-
-    uint24_t DJB2Hash24Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash<uint24_t>(str);
-    }
-
-    uint32_t DJB2Hash32Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash<uint32_t>(str);
-    }
-
-    uint48_t DJB2Hash48Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash<uint48_t>(str);
-    }
-
-    uint64_t DJB2Hash64Wrapper::Hash(std::string_view str) const {
-        return DJB2Hash<uint64_t>(str);
-    }
-
 //----------- FarmHashes ----------
 
     uint32_t FarmHash32Wrapper::Hash(std::string_view str) const {
@@ -118,7 +95,7 @@ namespace hfl {
 //---------- FNV-1a hash -----------
 
     uint16_t FNV1aHash16Wrapper::Hash(std::string_view str) const {
-        static const uint32_t mask16 = (((u_int32_t)1<<16)-1); /* i.e., (u_int32_t)0xffff */
+        static const uint32_t mask16 = (((uint32_t)1<<16)-1); /* i.e., (u_int32_t)0xffff */
         const auto len = static_cast<int>(str.size());
         uint32_t hash = FNV32a(str.data(), len, 0);
         hash = (hash>>16) ^ (hash & mask16);
@@ -126,7 +103,7 @@ namespace hfl {
     }
 
     uint24_t FNV1aHash24Wrapper::Hash(std::string_view str) const {
-        static const uint32_t mask24 = (((u_int32_t)1<<24)-1); /* i.e., (u_int32_t)0xffffff */
+        static const uint32_t mask24 = (((uint32_t)1<<24)-1); /* i.e., (u_int32_t)0xffffff */
         const auto len = static_cast<int>(str.size());
         uint32_t hash = FNV32a(str.data(), len, 0);
         hash = (hash>>24) ^ (hash & mask24);
@@ -138,6 +115,14 @@ namespace hfl {
         return FNV32a(str.data(), len, 0);
     }
 
+    uint48_t FNV1aHash48Wrapper::Hash(std::string_view str) const {
+        static const uint64_t mask48 = (((uint64_t)1<<48)-1); /* i.e., (u_int32_t)0xffffff */
+        const auto len = static_cast<int>(str.size());
+        uint64_t hash = FNV64a(str.data(), len, 0);
+        hash = (hash>>48) ^ (hash & mask48);
+        return hash;
+    }
+
     uint64_t FNV1aHash64Wrapper::Hash(std::string_view str) const {
         const auto len = static_cast<int>(str.size());
         return FNV64a(str.data(), len, 0);
@@ -145,32 +130,35 @@ namespace hfl {
 
 //--------- Jenkins hash -----------
 
-    uint16_t OneTimeHash16Wrapper::Hash(std::string_view str) const {
-        return one_at_a_time_hash<uint16_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
-    }
-
-    uint24_t OneTimeHash24Wrapper::Hash(std::string_view str) const {
-        return one_at_a_time_hash<uint24_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
-    }
-
-    uint32_t OneTimeHash32Wrapper::Hash(std::string_view str) const {
-        return one_at_a_time_hash<uint32_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
-    }
-
-    uint48_t OneTimeHash48Wrapper::Hash(std::string_view str) const {
-        return one_at_a_time_hash<uint48_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
-    }
-
-    uint64_t OneTimeHash64Wrapper::Hash(std::string_view str) const {
-        return one_at_a_time_hash<uint64_t>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
-    }
-
     uint32_t Lookup3LittleWrapper::Hash(std::string_view str) const {
         return hashlittle(str.data(), str.size(), GenerateSeed());
     }
 
     uint32_t Lookup3BigWrapper::Hash(std::string_view str) const {
         return hashbig(str.data(), str.size(), GenerateSeed());
+    }
+
+    uint16_t SpookyHash16Wrapper::Hash(std::string_view str) const {
+        auto hash = spooky_hash32(str.data(), str.size(), 0);
+        return static_cast<uint32_t>(hash);
+    }
+
+    uint24_t SpookyHash24Wrapper::Hash(std::string_view str) const {
+        auto hash = spooky_hash32(str.data(), str.size(), 0);
+        return static_cast<uint24_t>(hash);
+    }
+
+    uint32_t SpookyHash32Wrapper::Hash(std::string_view str) const {
+        return spooky_hash32(str.data(), str.size(), 0);
+    }
+
+    uint48_t SpookyHash48Wrapper::Hash(std::string_view str) const {
+        auto hash = spooky_hash64(str.data(), str.size(), 0);
+        return static_cast<uint48_t>(hash);
+    }
+
+    uint64_t SpookyHash64Wrapper::Hash(std::string_view str) const {
+        return spooky_hash64(str.data(), str.size(), 0);
     }
 
 //------------ MetroHash -----------
@@ -214,40 +202,33 @@ namespace hfl {
     }
 
 //---------- PearsonHashes ---------
-
-    PearsonHash16Wrapper::PearsonHash16Wrapper() noexcept
-        : t16(65536) {
-    }
-
     void PearsonHash16Wrapper::PearsonHashInit() const {
-        iota(t16.begin(), t16.end(), uint16_t(0));
-        shuffle(t16.begin(), t16.end(), std::mt19937(std::random_device()()));
+        t16_.resize(table_size_);
+        iota(t16_.begin(), t16_.end(), uint16_t(0));
+        shuffle(t16_.begin(), t16_.end(), std::mt19937(std::random_device()()));
     }
 
     uint16_t PearsonHash16Wrapper::Hash(std::string_view str) const {
-        std::call_once(init_flag, &PearsonHash16Wrapper::PearsonHashInit, this);
+        std::call_once(init_flag_, &PearsonHash16Wrapper::PearsonHashInit, this);
         uint16_t hash;
         for (auto c : str) {
-            hash = t16[hash ^ (65535 & c)];
+            hash = t16_[hash ^ (65535 & c)];
         }
         return hash;
     }
 
-    PearsonHash24Wrapper::PearsonHash24Wrapper() noexcept
-        : t24(16'777'216) {
-}
-
     void PearsonHash24Wrapper::PearsonHashInit() const {
-        iota(t24.begin(), t24.end(), uint32_t(0));
-        shuffle(t24.begin(), t24.end(), std::mt19937(std::random_device()()));
+        t24_.resize(table_size_);
+        iota(t24_.begin(), t24_.end(), uint32_t(0));
+        shuffle(t24_.begin(), t24_.end(), std::mt19937(std::random_device()()));
     }
 
     uint24_t PearsonHash24Wrapper::Hash(std::string_view str) const {
-        std::call_once(init_flag, &PearsonHash24Wrapper::PearsonHashInit, this);
+        std::call_once(init_flag_, &PearsonHash24Wrapper::PearsonHashInit, this);
         uint24_t hash;
         for (auto c : str) {
-            uint24_t index = hash ^ (16'777'215 & c);
-            hash = t24[static_cast<size_t>(index)];
+            uint24_t index = hash ^ (mask_ & c);
+            hash = t24_[static_cast<size_t>(index)];
         }
         return hash;
     }
@@ -260,102 +241,6 @@ namespace hfl {
     uint64_t PearsonHash64Wrapper::Hash(std::string_view str) const {
         std::call_once(init_flag, pearson_hash_init);
         return pearson_hash_64(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
-    }
-
-//------------ PJW Hash ------------
-
-    uint16_t PJWHash16Wrapper::Hash(std::string_view str) const {
-        return PJWHash<uint16_t>(str);
-    }
-
-    uint24_t PJWHash24Wrapper::Hash(std::string_view str) const {
-        return PJWHash<uint24_t>(str);
-    }
-
-    uint32_t PJWHash32Wrapper::Hash(std::string_view str) const {
-        return PJWHash<uint32_t>(str);
-    }
-
-    uint48_t PJWHash48Wrapper::Hash(std::string_view str) const {
-        return PJWHash<uint48_t>(str);
-    }
-
-    uint64_t PJWHash64Wrapper::Hash(std::string_view str) const {
-        return PJWHash<uint64_t>(str);
-    }
-
-//----- Rolling Hash (BuzHash) -----
-
-    uint16_t BuzHash16Wrapper::Hash(std::string_view str) const {
-        std::scoped_lock guard{hash_mutex_};
-        return hasher_.hash(str);
-    }
-
-    uint24_t BuzHash24Wrapper::Hash(std::string_view str) const {
-        std::scoped_lock guard{hash_mutex_};
-        return hasher_.hash(str);
-    }
-
-    uint32_t BuzHash32Wrapper::Hash(std::string_view str) const {
-        std::scoped_lock guard{hash_mutex_};
-        return hasher_.hash(str);
-    }
-
-    uint48_t BuzHash48Wrapper::Hash(std::string_view str) const {
-        std::scoped_lock guard{hash_mutex_};
-        return hasher_.hash(str);
-    }
-
-    uint64_t BuzHash64Wrapper::Hash(std::string_view str) const {
-        std::scoped_lock guard{hash_mutex_};
-        return hasher_.hash(str);
-    }
-
-//-------------- SDBM --------------
-
-    uint16_t SDBMHash16Wrapper::Hash(std::string_view str) const {
-        return SDBMHash<uint16_t>(str);
-    }
-
-    uint24_t SDBMHash24Wrapper::Hash(std::string_view str) const {
-        return SDBMHash<uint24_t>(str);
-    }
-
-    uint32_t SDBMHash32Wrapper::Hash(std::string_view str) const {
-        return SDBMHash<uint32_t>(str);
-    }
-
-    uint48_t SDBMHash48Wrapper::Hash(std::string_view str) const {
-        return SDBMHash<uint48_t>(str);
-    }
-
-    uint64_t SDBMHash64Wrapper::Hash(std::string_view str) const {
-        return SDBMHash<uint64_t>(str);
-    }
-
-//---------- Spooky hash -----------uint24_t
-
-    uint16_t SpookyHash16Wrapper::Hash(std::string_view str) const {
-        auto hash = spooky_hash32(str.data(), str.size(), 0);
-        return static_cast<uint32_t>(hash);
-    }
-
-    uint24_t SpookyHash24Wrapper::Hash(std::string_view str) const {
-        auto hash = spooky_hash32(str.data(), str.size(), 0);
-        return static_cast<uint24_t>(hash);
-    }
-
-    uint32_t SpookyHash32Wrapper::Hash(std::string_view str) const {
-        return spooky_hash32(str.data(), str.size(), 0);
-    }
-
-    uint48_t SpookyHash48Wrapper::Hash(std::string_view str) const {
-        auto hash = spooky_hash64(str.data(), str.size(), 0);
-        return static_cast<uint48_t>(hash);
-    }
-
-    uint64_t SpookyHash64Wrapper::Hash(std::string_view str) const {
-        return spooky_hash64(str.data(), str.size(), 0);
     }
 
 //-------------- T1HA --------------

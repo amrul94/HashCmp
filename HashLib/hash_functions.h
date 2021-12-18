@@ -51,9 +51,8 @@ UintType SDBMHash(std::string_view str) {
 }
 
 // https://www.programmingalgorithms.com/algorithm/pjw-hash/cpp/
-template<typename UintT>
+template<typename UintT, uint8_t BitsInUnsignedInt = sizeof(UintT) * 8>
 UintT PJWHash(std::string_view str) {
-    const uint8_t BitsInUnsignedInt = sizeof(UintT) * 8;
     const uint8_t ThreeQuarters     = (BitsInUnsignedInt  * 3) / 4;
     const uint8_t OneEighth         = BitsInUnsignedInt / 8;
     const auto MaxUintT = std::numeric_limits<UintT>::max();

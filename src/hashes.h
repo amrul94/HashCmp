@@ -10,20 +10,20 @@
 namespace hfl {
 
     // Hashes
-    [[maybe_unused]] inline const BuzHash16Wrapper buz_hash_16;
-    [[maybe_unused]] inline const BuzHash24Wrapper buz_hash_24;
-    [[maybe_unused]] inline const BuzHash32Wrapper buz_hash_32;
-    [[maybe_unused]] inline const BuzHash48Wrapper buz_hash_48;
-    [[maybe_unused]] inline const BuzHash64Wrapper buz_hash_64;
+    [[maybe_unused]] inline const BuzHashWrapper<uint16_t> buz_hash_16;
+    [[maybe_unused]] inline const BuzHashWrapper<uint24_t> buz_hash_24;
+    [[maybe_unused]] inline const BuzHashWrapper<uint32_t> buz_hash_32;
+    [[maybe_unused]] inline const BuzHashWrapper<uint48_t> buz_hash_48;
+    [[maybe_unused]] inline const BuzHashWrapper<uint64_t> buz_hash_64;
 
     [[maybe_unused]] inline constinit CityHash32Wrapper city_hash_32;
     [[maybe_unused]] inline constinit CityHash64Wrapper city_hash_64;
 
-    [[maybe_unused]] inline constinit DJB2Hash16Wrapper djb2_hash_16;
-    [[maybe_unused]] inline constinit DJB2Hash24Wrapper djb2_hash_24;
-    [[maybe_unused]] inline constinit DJB2Hash32Wrapper djb2_hash_32;
-    [[maybe_unused]] inline constinit DJB2Hash48Wrapper djb2_hash_48;
-    [[maybe_unused]] inline constinit DJB2Hash64Wrapper djb2_hash_64;
+    [[maybe_unused]] inline constinit DJB2HashWrapper<uint16_t> djb2_hash_16;
+    [[maybe_unused]] inline constinit DJB2HashWrapper<uint24_t> djb2_hash_24;
+    [[maybe_unused]] inline constinit DJB2HashWrapper<uint32_t> djb2_hash_32;
+    [[maybe_unused]] inline constinit DJB2HashWrapper<uint48_t> djb2_hash_48;
+    [[maybe_unused]] inline constinit DJB2HashWrapper<uint64_t> djb2_hash_64;
 
     [[maybe_unused]] inline constinit FarmHash32Wrapper farm_hash_32;
     [[maybe_unused]] inline constinit FarmHash64Wrapper farm_hash_64;
@@ -37,6 +37,7 @@ namespace hfl {
     [[maybe_unused]] inline constinit FNV1aHash16Wrapper fnv_1a_hash_16;
     [[maybe_unused]] inline constinit FNV1aHash24Wrapper fnv_1a_hash_24;
     [[maybe_unused]] inline constinit FNV1aHash32Wrapper fnv_1a_hash_32;
+    [[maybe_unused]] inline constinit FNV1aHash48Wrapper fnv_1a_hash_48;
     [[maybe_unused]] inline constinit FNV1aHash64Wrapper fnv_1a_hash_64;
 
     [[maybe_unused]] inline constinit Lookup3LittleWrapper lookup3_little_hash;
@@ -50,30 +51,30 @@ namespace hfl {
     [[maybe_unused]] inline constinit MurmurHash64AWrapper murmur_hash2_64;
     [[maybe_unused]] inline constinit MurmurHash3Wrapper murmur_hash3;
 
-    [[maybe_unused]] inline constinit OneTimeHash16Wrapper one_at_a_time_hash_16;
-    [[maybe_unused]] inline constinit OneTimeHash24Wrapper one_at_a_time_hash_24;
-    [[maybe_unused]] inline constinit OneTimeHash32Wrapper one_at_a_time_hash_32;
-    [[maybe_unused]] inline constinit OneTimeHash48Wrapper one_at_a_time_hash_48;
-    [[maybe_unused]] inline constinit OneTimeHash64Wrapper one_at_a_time_hash_64;
+    [[maybe_unused]] inline constinit OneTimeHashWrapper<uint16_t> one_at_a_time_hash_16;
+    [[maybe_unused]] inline constinit OneTimeHashWrapper<uint24_t> one_at_a_time_hash_24;
+    [[maybe_unused]] inline constinit OneTimeHashWrapper<uint32_t> one_at_a_time_hash_32;
+    [[maybe_unused]] inline constinit OneTimeHashWrapper<uint48_t> one_at_a_time_hash_48;
+    [[maybe_unused]] inline constinit OneTimeHashWrapper<uint64_t> one_at_a_time_hash_64;
 
     [[maybe_unused]] inline const PearsonHash16Wrapper pearson_hash_16;
     [[maybe_unused]] inline const PearsonHash24Wrapper pearson_hash_24;
     [[maybe_unused]] inline const PearsonHash32Wrapper pearson_hash_32;
     [[maybe_unused]] inline const PearsonHash64Wrapper pearson_hash_64;
 
-    [[maybe_unused]] inline constinit PJWHash16Wrapper pjw_hash_16;
-    [[maybe_unused]] inline constinit PJWHash24Wrapper pjw_hash_24;
-    [[maybe_unused]] inline constinit PJWHash32Wrapper pjw_hash_32;
-    [[maybe_unused]] inline constinit PJWHash48Wrapper pjw_hash_48;
-    [[maybe_unused]] inline constinit PJWHash64Wrapper pjw_hash_64;
+    [[maybe_unused]] inline constinit PJWHashWrapper<uint16_t> pjw_hash_16;
+    [[maybe_unused]] inline constinit PJWHashWrapper<uint24_t> pjw_hash_24;
+    [[maybe_unused]] inline constinit PJWHashWrapper<uint32_t> pjw_hash_32;
+    [[maybe_unused]] inline constinit PJWHashWrapper<uint48_t> pjw_hash_48;
+    [[maybe_unused]] inline constinit PJWHashWrapper<uint64_t> pjw_hash_64;
 
     [[maybe_unused]] inline constinit SuperFastHashWrapper super_fast_hash;
 
-    [[maybe_unused]] inline constinit SDBMHash16Wrapper sdbm_hash_16;
-    [[maybe_unused]] inline constinit SDBMHash24Wrapper sdbm_hash_24;
-    [[maybe_unused]] inline constinit SDBMHash32Wrapper sdbm_hash_32;
-    [[maybe_unused]] inline constinit SDBMHash48Wrapper sdbm_hash_48;
-    [[maybe_unused]] inline constinit SDBMHash64Wrapper sdbm_hash_64;
+    [[maybe_unused]] inline constinit SDBMHashWrapper<uint16_t> sdbm_hash_16;
+    [[maybe_unused]] inline constinit SDBMHashWrapper<uint24_t> sdbm_hash_24;
+    [[maybe_unused]] inline constinit SDBMHashWrapper<uint32_t> sdbm_hash_32;
+    [[maybe_unused]] inline constinit SDBMHashWrapper<uint48_t> sdbm_hash_48;
+    [[maybe_unused]] inline constinit SDBMHashWrapper<uint64_t> sdbm_hash_64;
 
     [[maybe_unused]] inline constinit SpookyHash16Wrapper spooky_hash_16;
     [[maybe_unused]] inline constinit SpookyHash24Wrapper spooky_hash_24;
@@ -92,9 +93,9 @@ namespace hfl {
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
 
     namespace detail {
-        template<typename HashType>
+        template<typename UintT>
         struct HashStruct {
-            using HashFunction = const BaseHashWrapper<HashType>&;
+            using HashFunction = const BaseHashWrapper<UintT>&;
             HashStruct(std::string hash_name, HashFunction hash_function)
                     : hash_name(std::move(hash_name))
                     , hash_function(hash_function) {

@@ -3,14 +3,27 @@
 
 #include <cmath>
 #include <cstdint>
+#include <thread>
+
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/tee.hpp>
 
 #include "hash_wrappers.h"
 
 struct ReportsRoot {
-    const std::filesystem::path root_path;
-    std::ofstream log;
+    typedef boost::iostreams::tee_device<std::ostream, std::ofstream> TeeDevice;
+    typedef boost::iostreams::stream<TeeDevice> TeeStream;
 
     explicit ReportsRoot(const std::filesystem::path& root_path);
+    ~ReportsRoot();
+
+    const std::filesystem::path root_path;
+
+private:
+    std::ofstream log_file_;
+    std::ostream cout_copy_;
+    TeeDevice output_device_;
+    TeeStream logger_;
 };
 
 enum class TestFlag {
@@ -20,32 +33,40 @@ enum class TestFlag {
 };
 
 std::string TestFlagToString(TestFlag mode);
+uint64_t XorFoldMask(uint64_t src, uint16_t mask_bits);
 
 uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
 
 struct TestParameters {
-    uint16_t hash_bits{};   // Количество битов, которые выдает хеш-функция
-    uint16_t test_bits{};   // Количество битов для тестов (иногда задается маской)
-    uint64_t key_count{};   // Количество входных данных для хешей
-    TestFlag mode;          // Тип подсчета
+    const uint16_t hash_bits{}; // Количество битов, которые выдает хеш-функция
+    const uint16_t test_bits{}; // Количество битов для тестов (иногда задается маской)
+    uint64_t num_keys{};       // Количество входных данных для хешей
+    const size_t num_threads{}; // Количество потоков выполнения
+    const TestFlag mode;        // Тип подсчета
 
-    TestParameters(uint16_t hash_bits, uint16_t test_bits, TestFlag mode);
-    TestParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t key_counts, TestFlag mode);
+
+    TestParameters(uint16_t hash_bits, size_t num_threads, TestFlag mode = TestFlag::NORMAL);
+    TestParameters(uint16_t hash_bits, uint16_t test_bits, size_t num_threads, TestFlag mode);
+    TestParameters(uint16_t hash_bits, uint64_t key_counts, size_t num_threads, TestFlag mode);
+    TestParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t key_counts, size_t num_threads, TestFlag mode);
     [[nodiscard]] static uint64_t GiveDivisor(uint16_t degree);
     virtual ~TestParameters() = default;
 };
 
-struct CheckParameters : TestParameters{
-    uint32_t buckets_count{};   // Количество счетчиков
+struct DistTestParameters : TestParameters{
+    uint64_t num_buckets{};   // Количество счетчиков
     uint64_t divisor = 1;       // Делитель. Нужен, когда в одном счетчике много хешей
 
-    explicit CheckParameters(uint16_t hash_bits, uint16_t test_bits, TestFlag mode);
+    DistTestParameters(uint16_t hash_bits, size_t num_threads, TestFlag mode);
+    DistTestParameters(uint16_t hash_bits, uint16_t test_bits, size_t num_threads, TestFlag mode);
 
 private:
-    static constexpr uint16_t DIVIDER_FOR_32 = 5;
+    static constexpr uint16_t DIVIDER_FOR_32 = 0; // было ранее 5;
+    //static constexpr uint16_t DIVIDER_FOR_32 = 5; // было ранее 5;
     static constexpr uint16_t DIVIDER_FOR_48 = DIVIDER_FOR_32 + 16;
     static constexpr uint16_t DIVIDER_FOR_64 = DIVIDER_FOR_32 + 32;
-    static constexpr uint32_t MAX_BINS_COUNT = 134'217'728; // 2^27
+    static constexpr uint64_t MAX_BINS_COUNT = static_cast<uint64_t>(UINT32_MAX) + 1;
+    //static constexpr uint64_t MAX_BINS_COUNT = 134'217'728; // 2^27
 
 private:
     void SetParameters();
@@ -54,10 +75,12 @@ private:
     void SetMaskMode();
 };
 
-struct WordsParameters : TestParameters {
+struct GenBlocksParameters : TestParameters {
     uint32_t words_length{};
 
-    explicit WordsParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t word_counts, uint32_t length, TestFlag mode);
+    GenBlocksParameters(uint16_t hash_bits, uint64_t num_words, TestFlag mode = TestFlag::NORMAL);
+    GenBlocksParameters(uint16_t hash_bits, uint64_t num_words, uint32_t length, size_t num_threads, TestFlag mode);
+    GenBlocksParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t num_words, uint32_t length, size_t num_threads, TestFlag mode);
 };
 
 uint64_t ModifyHash(const TestParameters& tp, uint64_t hash);

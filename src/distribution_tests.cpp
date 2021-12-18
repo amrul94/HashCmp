@@ -3,61 +3,79 @@
 #include <span>
 
 #include <boost/accumulators/statistics/mean.hpp>
+#include <boost/format.hpp>
 #include <boost/json.hpp>
 
 namespace {
-    using json_obj = boost::json::object;
     // потом переделаю
-
     uint64_t Median(uint64_t first, uint64_t last, uint64_t bin_size) {
-        // Требует переделки
+        // Требует переделки (оставил на 8 семестр)
         uint64_t med_index = (last + first) / 2;
-        //uint64_t m1 = (med_index - 1);
-        //uint64_t m2 = med_index;
         return med_index * bin_size;
     }
 
-    json_obj ProcessingStatistics(const std::vector<std::atomic_uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name) {
+    boost::json::object ProcessingStatistics(const std::vector<Bucket>& buckets,
+                                             const DistTestParameters& dtp, const std::string& hash_name) {
         boost::json::object result;
         result["Test name"] = "Test Check Distribution";
-        result["Mode"] = TestFlagToString(cp.mode);
-        result["Bits"] = cp.hash_bits;
+        result["Mode"] = TestFlagToString(dtp.mode);
+        result["Bits"] = dtp.hash_bits;
         result["Hash name"] = hash_name;
-        uint32_t bar_count = 16;
 
-        boost::json::array x_bars(16, 0);
-        std::iota(x_bars.begin(),  x_bars.end(), 1);
+        uint16_t bar_count = 16;
+        boost::json::array x_bars(bar_count);
+        std::iota(x_bars.begin(), x_bars.end(), 1);
 
-        boost::json::array x_ranges{};
-        boost::json::array y_mean{};
-        boost::json::array y_err_min{};
-        boost::json::array y_err_max{};
-        boost::json::array y_min{};
-        boost::json::array y_max{};
+        boost::json::array x_ranges(bar_count);
+        boost::json::array y_mean(bar_count);
+        boost::json::array y_err_min(bar_count);
+        boost::json::array y_err_max(bar_count);
+        boost::json::array y_min(bar_count);
+        boost::json::array y_max(bar_count);
 
-        uint32_t step = buckets.size() / bar_count;
-        for (uint32_t i = 0; i < bar_count; ++i) {
-            const uint32_t begin = i * step;
-            const uint32_t end = (i + 1) * step;
+        auto lambda = [&](uint64_t start_bar, uint64_t end_bar) {
+            const auto log_thread_id = boost::format("thread %1%") % std::this_thread::get_id();
+            //LOG_DURATION_STREAM(log_thread_id.str(), std::cout);
+            uint64_t step = buckets.size() / bar_count;
+            for (uint32_t bar = start_bar; bar < end_bar; ++bar) {
+                const uint64_t begin = bar * step;
+                const uint64_t end = (bar + 1) * step;
 
-            const uint64_t median = Median(begin, end, cp.divisor);
-            x_ranges.push_back(median);
-            const std::span y_block(buckets.begin() + begin, buckets.begin() + end);
-            const double sum_value = std::accumulate(y_block.begin(), y_block.end(), static_cast<double>(0));
-            const double avg_value = sum_value / static_cast<double>(step);
-            y_mean.push_back(avg_value);
-            const auto min_value = std::ranges::min_element(y_block);
-            const auto max_value = std::ranges::max_element(y_block);
-            const auto min_diff = std::abs(avg_value - *min_value);
-            const auto max_diff = std::abs(avg_value - *max_value);
-            y_err_min.push_back(min_diff);
-            y_err_max.push_back(max_diff);
-            y_min.push_back(min_value->load());
-            y_max.push_back(max_value->load());
+                const uint64_t median = Median(begin, end, dtp.divisor);
+                x_ranges[bar] = median;
+
+                // Указатели стоит заменить на итераторы
+                const std::span y_block(buckets.data() + begin, buckets.data() + end);
+                const double sum_value = std::accumulate(y_block.begin(), y_block.end(), static_cast<double>(0));
+                const double avg_value = sum_value / static_cast<double>(step);
+                y_mean[bar] = avg_value;
+                const auto min_value = std::ranges::min_element(y_block);
+                const auto max_value = std::ranges::max_element(y_block);
+                const auto min_diff = std::abs(avg_value - *min_value);
+                const auto max_diff = std::abs(avg_value - *max_value);
+                y_err_min[bar] = min_diff;
+                y_err_max[bar] = max_diff;
+                y_min[bar] = *min_value;
+                y_max[bar] = *max_value;
+            }
+        };
+
+        uint64_t start_bar = 0;
+        uint64_t step_bar = bar_count / dtp.num_threads;
+        std::vector<std::thread> threads(dtp.num_threads - 1);
+
+        for (auto& t : threads) {
+            t = std::thread{lambda, start_bar, start_bar + step_bar};
+            start_bar += step_bar;
+        }
+        lambda(start_bar, bar_count);
+
+        for (auto& t : threads) {
+            t.join();
         }
 
         result["Bar count"] = bar_count;
-        result["Bin size"] = cp.divisor;
+        result["Bin size"] = dtp.divisor;
         result["X ranges"] = x_ranges;
         result["Y mean"] = y_mean;
         result["Y err min"] = y_err_min;
@@ -70,8 +88,9 @@ namespace {
 
 }
 
-void PrintReports(const std::vector<std::atomic_uint32_t>& buckets, const CheckParameters& cp, const std::string& hash_name,
+void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& cp, const std::string& hash_name,
                   ReportsRoot& reports_root) {
+    //LOG_DURATION_STREAM("PrintReports", std::cout);
     using namespace std::literals;
     const std::filesystem::path check_dist_dir = "Distribution tests";
     const std::filesystem::path hash_bits_dir = std::to_string(cp.hash_bits);
@@ -88,42 +107,33 @@ void PrintReports(const std::vector<std::atomic_uint32_t>& buckets, const CheckP
 
 }
 
-void RunDistTestNormal(ReportsRoot& reports_root) {
-    const auto hashes16 = hfl::Build16bitsHashes();
-    const CheckParameters cp16{16, 16, TestFlag::NORMAL};
-    DistributionTest(hashes16, cp16, reports_root);
+#define RUN_DIST_TEST_NORMAL_IMPL(BITS, NUM_THREADS)                        \
+    const auto hashes##BITS = hfl::Build##BITS##bitsHashes();               \
+    const DistTestParameters cp##BITS{BITS, NUM_THREADS, TestFlag::NORMAL}; \
+    DistributionTest(hashes##BITS, cp##BITS, reports_root)
 
-    const auto hashes24 = hfl::Build24bitsHashes();
-    const CheckParameters cp24{24, 24, TestFlag::NORMAL};
-    DistributionTest(hashes24, cp24, reports_root);
+void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
+    RUN_DIST_TEST_NORMAL_IMPL(16, num_threads);
+    RUN_DIST_TEST_NORMAL_IMPL(24, num_threads);
+    RUN_DIST_TEST_NORMAL_IMPL(32, num_threads);
 }
 
-void RunDistTestWithBins(ReportsRoot& reports_root) {
-    const auto hashes32 = hfl::Build32bitsHashes();
-    const CheckParameters cp32{32, 32, TestFlag::BINS};
-    DistributionTest(hashes32, cp32, reports_root);
+#define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS)                     \
+    const auto hashes##BITS = hfl::Build##BITS##bitsHashes();               \
+    const DistTestParameters cp##BITS{BITS, NUM_THREADS, TestFlag::BINS};   \
+    DistributionTest(hashes##BITS, cp##BITS, reports_root)
 
-    const auto hashes48 = hfl::Build48bitsHashes();
-    const CheckParameters cp48{48, 48, TestFlag::BINS};
-    DistributionTest(hashes48, cp48, reports_root);
 
-    const auto hashes64 = hfl::Build64bitsHashes();
-    const CheckParameters cp64{64, 64, TestFlag::BINS};
-    DistributionTest(hashes64, cp64, reports_root);
-}
-
-void RunDistTestWithMask(ReportsRoot& reports_root) {
-    const auto hashes32 = hfl::Build32bitsHashes(hfl::BuildFlag::MASK);
-    const CheckParameters cp32{32, 24, TestFlag::MASK};
-    DistributionTest(hashes32, cp32, reports_root);
-
-    const auto hashes64 = hfl::Build64bitsHashes(hfl::BuildFlag::MASK);
-    const CheckParameters cp64{64, 24, TestFlag::MASK};
-    DistributionTest(hashes64, cp64, reports_root);
+void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
+    RUN_DIST_TEST_WITH_BINS_IMPL(48, num_threads);
+    //RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads);
 }
 
 void RunDistributionTests(ReportsRoot& reports_root) {
-    RunDistTestNormal(reports_root);
-    RunDistTestWithBins(reports_root);
-    RunDistTestWithMask(reports_root);
+    const size_t hardware_threads = std::thread::hardware_concurrency();
+    const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+
+    std::cout << boost::format("num_threads = %1%\n") % num_threads;
+    //RunDistTestNormal(num_threads, reports_root);
+    RunDistTestWithBins(num_threads, reports_root);
 }

@@ -437,7 +437,7 @@ inline std::istream& operator>>( std::istream& is, MTRand& mtrand )
 
 #endif  // MERSENNETWISTER_H
 
-// Change log:
+// Change log_file:
 //
 // v0.1 - First release on 15 May 2000
 //      - Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
