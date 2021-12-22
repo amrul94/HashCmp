@@ -1,18 +1,6 @@
-/cmake-build-debug
-/data
-.idea
-/"reports (копия)"/
-/reports
-/"src (копия)"/
+/cmake-build-debug/
+/data/images/
+/data/csv/
 /reports/
-/graphics/check_dist/
-/graphics/gen_words/
 /venv/
-/reports (копия)/
-/reports (копия)/check_dist/
-"/reports (копия)/check_dist/"
-/graphics/eng_words/
-/reports (копия)/check_dist/*
-/graphics/Thu Dec  2 23.44.12 2021/
-/graphics/Report v2.1. (12.12.2021)/
-/graphics/Report v2.1. (12.12.2021)/Distribution tests/
+.idea
