@@ -3,10 +3,11 @@ cmake_minimum_required(VERSION 3.17)
 project(HashLib)
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS "-pthread -Wno-deprecated-enum-enum-conversion -Woverflow -Wdeprecated-enum-enum-conversion")
-set(CMAKE_C_FLAGS "-pthread -maes")
+set(CMAKE_C_FLAGS "-march=native -O3 -pipe -pthread -maes")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
-set(CITY_HASH cityhash/city.h cityhash/city.cc cityhash/config.h)
+
+set(CITY_HASH cityhash/citycrc.h cityhash/config.h cityhash/city.h cityhash/city.cc)
 set(FARM_HASH farmhash/farmhash.h farmhash/farmhash.cc)
 set(FAST_HASH fasthash/fasthash.h fasthash/fasthash.c)
 set(JENKINS_HASH spooky_hash/spooky.h spooky_hash/spooky.c jenkins_hash/lookup3.cpp

@@ -22,7 +22,7 @@ void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& 
 
 template<typename HashStruct>
 void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-    LOG_DURATION_STREAM(hs.hash_name, std::cout);
+    LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
 
     std::vector<Bucket> buckets(dtp.num_buckets, 0);
     const auto max_bucket = std::numeric_limits<Bucket>::max();
@@ -30,18 +30,13 @@ void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRo
                                 % dtp.num_keys % dtp.num_buckets % dtp.divisor;*/
     std::mutex mutex;
     auto lambda = [&mutex, &hs, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
-        //const auto log_thread_id = boost::format("thread %1%") % std::this_thread::get_id();
-        //LOG_DURATION_STREAM(log_thread_id.str(), std::cout);
         for (uint64_t number = start; number < end; ++number) {
             const uint64_t hash = hs.hash_function(number);
             const uint64_t modified = ModifyHash(dtp, hash);
-
             std::lock_guard guard{mutex};
-            /*std::cerr << boost::format("hash: %1%\n") % hash;
-            std::cerr << boost::format("modified: %1%\n") % modified;
-            std::cerr << boost::format("number: %1%\n") % number;*/
             Bucket& bucket = buckets[modified];
-            bucket = (bucket != max_bucket) ? (bucket + 1) : bucket;
+            const uint64_t tmp = (bucket != max_bucket) ? 1 : 0;
+            bucket += tmp;
         }
     };
 
@@ -67,11 +62,11 @@ void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRo
 
 template<typename HashStructs>
 void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-    std::cout << "start " << dtp.hash_bits << " bits" << std::endl;
+    reports_root.logger << "start " << dtp.hash_bits << " bits" << std::endl;
     for (const auto& current_hash : funcs) {
         HashDistTest(current_hash, dtp, reports_root);
     }
-    std::cout << "end " << dtp.hash_bits << " bits" << std::endl << std::endl;
+    reports_root.logger << "end " << dtp.hash_bits << " bits" << std::endl << std::endl;
 }
 
 void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root);

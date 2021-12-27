@@ -19,9 +19,8 @@ uint64_t CountCollisions(const std::vector<std::uint32_t>& hashes) {
 uint64_t CountCollisions(const std::map<uint64_t, uint64_t>& hashes) {
     uint64_t collisions = 0;
     for (const auto& [hash, count] : hashes) {
-        if (count > 1) {
-            collisions += (count - 1);
-        }
+        const uint64_t tmp = (count > 1) ? (count - 1) : 0;
+        collisions += tmp;
     }
     return collisions;
 }

@@ -57,23 +57,23 @@ void RunTests(const std::vector<int>& test_numbers, ReportsRoot& reports_root) {
     for (int test_number : test_numbers) {
         switch (test_number) {
             case 1:
-                std::cout << "start DistributionTest\n\n";
+                reports_root.logger << "start DistributionTest\n\n";
                 RunDistributionTests(reports_root);
-                std::cout << "end DistributionTest\n\n\n";
+                reports_root.logger << "end DistributionTest\n\n\n";
                 break;
             case 2:
-                std::cout << "start generated blocks test (length = 16)\n\n";
+                reports_root.logger << "start generated blocks test (length = 16)\n\n";
                 RunTestWithGeneratedBlocks(16, reports_root);
-                std::cout << "end generated blocks test (length = 16)\n\n\n";
+                reports_root.logger << "end generated blocks test (length = 16)\n\n\n";
                 break;
             case 3:
-                std::cout << "start generated blocks test (length = 4096)\n\n";
+                reports_root.logger << "start generated blocks test (length = 4096)\n\n";
                 RunTestWithGeneratedBlocks(KILOBYTE, reports_root);
-                std::cout << "end generated blocks test (length = 4096)\n\n\n";
+                reports_root.logger << "end generated blocks test (length = 4096)\n\n\n";
             case 4:
-                std::cout << "start english words test\n\n";
+                reports_root.logger << "start english words test\n\n";
                 RunTestWithEnglishWords(reports_root);
-                std::cout << "end english words test\n\n\n";
+                reports_root.logger << "end english words test\n\n\n";
                 break;
             default:
                 TempTests();
@@ -91,7 +91,7 @@ ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{4};
+    const std::vector test_numbers{1, 2, 4};
     ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

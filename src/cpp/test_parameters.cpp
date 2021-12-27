@@ -9,15 +9,13 @@ ReportsRoot::ReportsRoot(const std::filesystem::path& root_path)
         : root_path(root_path)
         , log_file_(root_path / "Log.txt")
         , output_device_(std::cout, log_file_)
-        , logger_(output_device_) {
+        , logger(output_device_) {
     assert(log_file_);
-    std::cerr << "ReportsRoot build\n";
 }
 
 ReportsRoot::~ReportsRoot() {
-    logger_.flush();
-    logger_.close();
-    std::cerr << "ReportsRoot destruct\n";
+    logger.flush();
+    logger.close();
 }
 
 std::string TestFlagToString(TestFlag mode) {

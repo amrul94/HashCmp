@@ -21,9 +21,10 @@ struct ReportsRoot {
 
 private:
     std::ofstream log_file_;
-    //std::ostream cout_copy_;
     TeeDevice output_device_;
-    TeeStream logger_;
+
+public:
+    TeeStream logger;
 };
 
 enum class TestFlag {

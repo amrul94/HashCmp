@@ -90,7 +90,7 @@ namespace {
 
 void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& cp, const std::string& hash_name,
                   ReportsRoot& reports_root) {
-    //LOG_DURATION_STREAM("PrintReports", std::cout);
+    //LOG_DURATION_STREAM("PrintReports", reports_root.logger);
     using namespace std::literals;
     const std::filesystem::path check_dist_dir = "Distribution tests";
     const std::filesystem::path hash_bits_dir = std::to_string(cp.hash_bits);
@@ -115,7 +115,7 @@ void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& 
 void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
     RUN_DIST_TEST_NORMAL_IMPL(16, num_threads);
     RUN_DIST_TEST_NORMAL_IMPL(24, num_threads);
-    RUN_DIST_TEST_NORMAL_IMPL(32, num_threads);
+    //RUN_DIST_TEST_NORMAL_IMPL(32, num_threads);
 }
 
 #define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS)                     \
@@ -126,14 +126,14 @@ void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
 
 void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
     RUN_DIST_TEST_WITH_BINS_IMPL(48, num_threads);
-    //RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads);
+    RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads);
 }
 
 void RunDistributionTests(ReportsRoot& reports_root) {
     const size_t hardware_threads = std::thread::hardware_concurrency();
     const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
 
-    std::cout << boost::format("num_threads = %1%\n") % num_threads;
-    //RunDistTestNormal(num_threads, reports_root);
-    RunDistTestWithBins(num_threads, reports_root);
+    reports_root.logger << boost::format("num_threads = %1%\n") % num_threads;
+    RunDistTestNormal(num_threads, reports_root);
+    //RunDistTestWithBins(num_threads, reports_root);
 }

@@ -28,7 +28,7 @@ std::vector<std::string> ParseWords(const std::filesystem::path& file_name);
 template <typename HashStruct>
 uint64_t HashTestWithEngWords(const HashStruct& hs, const std::vector<std::string>& words,
                               const TestParameters& tp, ReportsRoot& reports_root) {
-    LOG_DURATION_STREAM(hs.hash_name, std::cout);
+    LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
     std::map<uint64_t, uint64_t> hashes;
     for (const std::string& word : words) {
         const uint64_t hash = hs.hash_function(word);
@@ -41,7 +41,7 @@ uint64_t HashTestWithEngWords(const HashStruct& hs, const std::vector<std::strin
 template <typename HashStruct>
 void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vector<std::string>& words,
                           const TestParameters& tp, ReportsRoot& reports_root) {
-    std::cout << boost::format("start test with %1% bits hashes\n") % tp.hash_bits;
+    reports_root.logger << boost::format("start test with %1% bits hashes\n") % tp.hash_bits;
     const std::filesystem::path report_test_dir = "English words tests";
     const auto report_test_path = reports_root.root_path / report_test_dir;
     std::filesystem::create_directories(report_test_path);
@@ -63,7 +63,7 @@ void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vect
     obj["Collisions"] = collisions;
     out << obj;
 
-    std::cout << boost::format("end test with %1% bits hashes\n\n") % tp.hash_bits;
+    reports_root.logger << boost::format("end test with %1% bits hashes\n\n") % tp.hash_bits;
 }
 
 void RunTestWithEnglishWords(ReportsRoot& reports_root);
@@ -76,7 +76,7 @@ std::string GenerateRandomDataBlockPar(std::vector<pcg64>& generators, uint32_t 
 template<typename HashStruct>
 auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs, const GenBlocksParameters& gbp,
                            ReportsRoot& reports_root) {
-    LOG_DURATION_STREAM(hs.hash_name, std::cout);
+    LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
 
     const auto num_hashes = static_cast<uint64_t>(std::pow(2, gbp.test_bits));
     std::deque<bool> coll_flags(num_hashes, false);
@@ -99,9 +99,8 @@ auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs,
             //std::cerr << boost::format("hash: %1%\n") % hash;
             //std::cerr << boost::format("modified: %1%\n\n") % modified;
             bool& coll_flag = coll_flags[modified];
-            if (coll_flag) {
-                ++num_collisions;
-            }
+            const uint64_t tmp = coll_flag ? 1 : 0;
+            num_collisions += tmp;
             coll_flag = true;
         }
 
@@ -125,7 +124,7 @@ void TestWithGeneratedBlocks(const std::vector<pcg64>& generators, const HashStr
                              const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
     using namespace std::literals;
 
-    std::cout << "start " << gbp.hash_bits << " bits" << std::endl;
+    reports_root.logger << "start " << gbp.hash_bits << " bits" << std::endl;
 
     const std::filesystem::path gen_tests_dir = "Generated blocks tests";
     const std::filesystem::path block_size_dir = std::to_string(gbp.words_length);
@@ -158,7 +157,7 @@ void TestWithGeneratedBlocks(const std::vector<pcg64>& generators, const HashStr
     obj["Collisions"] = collisions;
     out << obj;
 
-    std::cout << "end " << gbp.hash_bits << " bits" << std::endl << std::endl;
+    reports_root.logger << "end " << gbp.hash_bits << " bits" << std::endl << std::endl;
 }
 
 

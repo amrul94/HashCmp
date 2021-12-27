@@ -514,7 +514,7 @@ namespace city {
     }
 
 #ifdef __SSE4_2__
-    #include <citycrc.h>
+    #include "citycrc.h"
 #include <nmmintrin.h>
 
 // Requires len >= 240.
