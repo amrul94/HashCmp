@@ -70,34 +70,26 @@ void RunTestWithEnglishWords(ReportsRoot& reports_root);
 
 // в будущем возможно объединю эту функцию с WriteToHash из hash_wrappers
 std::string UintToString(uint64_t src, uint64_t size);
-std::string GenerateRandomDataBlockSeq(pcg64& generator, uint32_t length);
-std::string GenerateRandomDataBlockPar(std::vector<pcg64>& generators, uint32_t length);
+std::string GenerateRandomDataBlock(pcg64& generator, uint32_t length);
 
 template<typename HashStruct>
 auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs, const GenBlocksParameters& gbp,
                            ReportsRoot& reports_root) {
     LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
 
+    // Выделить coll_flags, collisions, num_collisions и мьютекс (в будущем) в отдельный класс (например, Counters).
+    // При этом подсчет коллизий вынести в метод класса AddHash
     const auto num_hashes = static_cast<uint64_t>(std::pow(2, gbp.test_bits));
     std::deque<bool> coll_flags(num_hashes, false);
-
     boost::json::object collisions;
-
     uint64_t num_collisions = 0;
-
-    /*std::cerr << boost::format("num_keys = %1%\nhash_bits = %2%\nnum_hashes = %3%\n")
-                 % gbp.num_keys % gbp.hash_bits % num_hashes;*/
 
     auto num_words = static_cast<uint64_t>(pow(2, gbp.test_bits / 2));
     for (uint64_t i = 0; num_words <= gbp.num_keys; num_words *= 2) {
-        //std::cerr << boost::format("num_words: %1%\n") % num_words;
         for (; i < num_words; ++i) {
-            std::string str = GenerateRandomDataBlockPar(generators, gbp.words_length);
+            std::string str = GenerateRandomDataBlock(generators.back(), gbp.words_length);
             const uint64_t hash = hs.hash_function(str);
             const uint64_t modified = ModifyHash(gbp, hash);
-            //std::cerr << boost::format("string: %1%\n") % str;
-            //std::cerr << boost::format("hash: %1%\n") % hash;
-            //std::cerr << boost::format("modified: %1%\n\n") % modified;
             bool& coll_flag = coll_flags[modified];
             const uint64_t tmp = coll_flag ? 1 : 0;
             num_collisions += tmp;
@@ -105,7 +97,6 @@ auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs,
         }
 
         std::string index = std::to_string(num_words);
-        //std::cerr << boost::format("index: %1%\n") % index;
         collisions[index] = num_collisions;
     }
 

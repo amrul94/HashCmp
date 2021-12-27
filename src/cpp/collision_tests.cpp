@@ -62,81 +62,23 @@ std::string UintToString(uint64_t src, uint64_t size) {
     return dest;
 }
 
-std::string GenerateRandomDataBlockSeq(pcg64& generator, uint32_t length) {
+std::string GenerateRandomDataBlock(pcg64& generator, uint32_t length) {
     std::string word;
-    word.reserve(length);
+    word.resize(length);
 
-    uint64_t chunks = length / sizeof(uint64_t);
+    uint64_t chunk_size = sizeof(uint64_t);
+    uint64_t chunks = length / chunk_size;
     for (uint64_t i = 0; i < chunks; ++i) {
-        word += UintToString(generator(), sizeof(uint64_t));
+        uint64_t src = generator();
+        std::memcpy(word.data() + i * chunk_size, &src, chunk_size);
     }
 
-    uint64_t diff = length - chunks * sizeof(uint64_t);
-    word += UintToString(generator(), diff);
+    uint64_t diff = length - chunks * chunk_size;
+    uint64_t src = generator();
+    std::memcpy(word.data() + chunks * chunk_size, &src, diff);
 
     assert(word.size() == length);
     return word;
-}
-
-namespace {
-    using GenerateTask = std::packaged_task<std::string(pcg64&, uint32_t)>;
-
-    std::vector<GenerateTask> CreateTasks(size_t num_threads) {
-        std::vector<GenerateTask> tasks(num_threads - 1);
-        for (auto& task : tasks) {
-            task = GenerateTask(GenerateRandomDataBlockSeq);
-        }
-        return tasks;
-    }
-
-    std::vector<std::future<std::string>> GetFutures(std::vector<GenerateTask>& tasks) {
-        std::vector<std::future<std::string>> results(tasks.size());
-        for (int i = 0; i < tasks.size(); ++i) {
-            results[i] = tasks[i].get_future();
-        }
-        return results;
-    }
-
-    std::vector<std::thread> StartThreads(std::vector<pcg64>& generators, std::vector<GenerateTask>& tasks,
-                                          uint32_t chunk_length) {
-        std::vector<std::thread> threads(tasks.size());
-        for (int i = 0; i < tasks.size(); ++i) {
-            threads[i] = std::thread(std::move(tasks[i]), std::ref(generators[i]), chunk_length);
-        }
-        return threads;
-    }
-
-    void JoinThreads(std::vector<std::thread>& threads) {
-        for (auto & thread : threads) {
-            thread.join();
-        }
-    }
-
-    std::string GetFirstResults(std::vector<std::future<std::string>>& results) {
-        std::string result;
-        for (auto & i : results) {
-            result += i.get();
-        }
-        return result;
-    }
-}
-
-std::string GenerateRandomDataBlockPar(std::vector<pcg64>& generators, uint32_t length) {
-    const size_t num_threads = generators.size();
-    const uint32_t chunk_length = length / num_threads;
-
-    auto tasks = CreateTasks(num_threads);
-    auto results = GetFutures(tasks);
-    auto threads = StartThreads(generators, tasks, chunk_length);
-
-    const uint32_t last_chunk_length = length - chunk_length * threads.size();
-    std::string last_result = GenerateRandomDataBlockSeq(generators.back(), last_chunk_length);
-
-    JoinThreads(threads);
-    std::string result = GetFirstResults(results) + std::move(last_result);
-
-    assert(result.size() == length);
-    return result;
 }
 
 #define RUN_COLL_TEST_NORMAL_IMPL(GENS, BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)  \
@@ -166,8 +108,8 @@ void RunCollTestWithMask(const std::vector<pcg64>& generators, uint16_t words_le
 
 std::vector<pcg64> GetGenerators(uint16_t words_length) {
     const size_t hardware_threads = std::thread::hardware_concurrency();
-    const size_t num_threads = (hardware_threads != 0 && words_length > 1024) ? hardware_threads : 1;
     //const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+    const size_t num_threads = 1;
     std::vector<pcg64> generators(num_threads);
 
     for (auto& generator : generators) {

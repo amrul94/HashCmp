@@ -24,12 +24,15 @@ template<typename HashStruct>
 void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
     LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
 
+    // Выделить buckets, max_bucket и мьютекс в отдельный класс (например, Distributor).
+    // При этом добавление нового элемента вынести в метод класса AddHash
     std::vector<Bucket> buckets(dtp.num_buckets, 0);
     const auto max_bucket = std::numeric_limits<Bucket>::max();
-    /*std::cerr << boost::format("num_keys = %1%\nnum_buckets = %2%\ndivisor = %3%\n")
-                                % dtp.num_keys % dtp.num_buckets % dtp.divisor;*/
+
     std::mutex mutex;
     auto lambda = [&mutex, &hs, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
+        // Создать строку длины sizeof(number), записывать числа в эту строку
+        // и хешировать эту строку. Это должно избавить от лишних выделений памяти
         for (uint64_t number = start; number < end; ++number) {
             const uint64_t hash = hs.hash_function(number);
             const uint64_t modified = ModifyHash(dtp, hash);
@@ -43,8 +46,6 @@ void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRo
     uint64_t start = 0;
     uint64_t step = dtp.num_keys / dtp.num_threads;
     std::vector<std::thread> threads(dtp.num_threads - 1);
-    //uint64_t step = dtp.num_keys / 1;
-    //std::vector<std::thread> threads;
 
     for (auto& t : threads) {
         t = std::thread{lambda, start, start + step};

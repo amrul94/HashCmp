@@ -13,41 +13,83 @@
 
 #include "hashes.h"
 
-template <typename Type>
-class [[maybe_unused]] DJB2HashWrapper : public hfl::detail::BaseHashWrapper<Type> {
-private:
-    [[nodiscard]] Type Hash(std::string_view str) const override {
-        return DJB2Hash<Type>(str);
+std::string GenerateRandomDataBlockNew(pcg64& generator, uint32_t length) {
+    std::string word;
+    word.resize(length);
+
+    uint64_t chunks = length / sizeof(uint64_t);
+    for (uint64_t i = 0; i < chunks; ++i) {
+        uint64_t src = generator();
+        std::memcpy(word.data() + i * sizeof(uint64_t), &src, sizeof(uint64_t));
     }
-};
+
+    uint64_t diff = length - chunks * sizeof(uint64_t);
+    uint64_t src = generator();
+    std::memcpy(word.data() + chunks * sizeof(uint64_t), &src, diff);
+
+    assert(word.size() == length);
+    return word;
+}
 
 void TempTests() {
-    std::cerr << "TempTests\n";
-    const auto num_hashes = static_cast<uint64_t>(std::pow(2, 32));
-    /*std::vector<std::uint16_t> vec (num_hashes);
-    std::mutex m;
-    auto lambda = [&vec, &m](uint64_t start, uint64_t end){
+    const uint64_t num_count = 10'000'000;
+    const uint64_t word_size = FOUR_KILOBYTES;
+
+    {
+        pcg64 rng;
+        LOG_DURATION("New generator");
+        uint64_t sum_hashes = 0;
+        for (uint64_t number = 0; number < num_count; ++number) {
+            std::string str = GenerateRandomDataBlockNew(rng, word_size);
+            sum_hashes += hfl::city_hash_32(str);
+        }
+        std::cout << sum_hashes << std::endl;
+    }
+
+    {
+        pcg64 rng;
+        LOG_DURATION("New generator parallel");
+        std::uint64_t sum_hashes = 0;
+        std::mutex m;
+        auto lambda = [&rng, &sum_hashes, &m](uint64_t word_count) {
+            for (uint64_t number = 0; number < word_count; ++number) {
+                std::string str = GenerateRandomDataBlockNew(rng, word_size);
+                auto hash = hfl::city_hash_32(str);
+                std::lock_guard guard{m};
+                sum_hashes += hash;
+            }
+        };
         {
-            std::lock_guard guard{m};
-            std::cout << "start: " << start << std::endl;
-            std::cout << "end: " << end << std::endl;
+            std::jthread jt1{lambda, num_count / 4};
+            std::jthread jt2{lambda, num_count / 4};
+            std::jthread jt3{lambda, num_count / 4};
+            lambda(num_count / 4);
         }
 
-        for (uint64_t i = start; i < end; ++i) {
-            auto hash = hfl::murmur_hash1(i);
-            std::lock_guard guard{m};
-            vec[hash] = (hash != UINT16_MAX) ? (vec[hash] + 1) : vec[hash];
+        std::cout << sum_hashes << std::endl;
+    }
+
+
+    {
+        pcg64 rng;
+        LOG_DURATION("New generator atomic");
+        std::atomic_uint64_t sum_hashes = 0;
+        auto lambda = [&rng, &sum_hashes](uint64_t word_count) {
+            for (uint64_t number = 0; number < word_count; ++number) {
+                std::string str = GenerateRandomDataBlockNew(rng, word_size);
+                sum_hashes += hfl::city_hash_32(str);
+            }
+        };
+        {
+            std::jthread jt1{lambda, num_count / 4};
+            std::jthread jt2{lambda, num_count / 4};
+            std::jthread jt3{lambda, num_count / 4};
+            lambda(num_count / 4);
         }
-    };
-    const auto count = static_cast<uint64_t>(std::pow(2, 32));
-    LOG_DURATION("atomic " + std::to_string(count));
-    uint64_t start = 0;
-    uint64_t step = count / 4;
-    std::jthread jt1(lambda, start, start + step); start += step;
-    std::jthread jt2(lambda, start, start + step); start += step;
-    std::jthread jt3(lambda, start, start + step); start += step;
-    lambda(start, start + step);*/
-    //lambda(0, count);
+
+        std::cout << sum_hashes << std::endl;
+        std::cout << sum_hashes.is_lock_free() << std::endl;
+    }
 }
 
 
@@ -91,7 +133,7 @@ ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{1, 2, 4};
+    const std::vector test_numbers{2, 4, 1, 3};
     ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }
