@@ -7,19 +7,19 @@ namespace hfl {
     #define ADD_UNIVERSAL_HASHES(BITS)                                          \
         hashes.reserve(8);                                                      \
         hashes.emplace_back("FNV-1a Hash"s, fnv_1a_hash_##BITS);                \
-        /*hashes.emplace_back("DJB2 Hash"s, djb2_hash_##BITS);                    \
+        hashes.emplace_back("DJB2 Hash"s, djb2_hash_##BITS);                    \
         hashes.emplace_back("SDBM Hash"s, sdbm_hash_##BITS);                    \
         hashes.emplace_back("PJW Hash"s, pjw_hash_##BITS);                      \
         hashes.emplace_back("BuzHash"s, buz_hash_##BITS);                       \
         hashes.emplace_back("One at a time hash"s, one_at_a_time_hash_##BITS);  \
         hashes.emplace_back("SpookyHash"s, spooky_hash_##BITS);                 \
-        hashes.emplace_back("Fast-Hash"s, fast_hash_##BITS)*/
+        hashes.emplace_back("Fast-Hash"s, fast_hash_##BITS)
 
     std::vector<Hash16Struct> Build16bitsHashes(BuildFlag bf) {
         using namespace std::literals;
 
         std::vector<Hash16Struct> hashes;
-        //hashes.emplace_back("PearsonHash"s, pearson_hash_16);
+        hashes.emplace_back("PearsonHash"s, pearson_hash_16);
         ADD_UNIVERSAL_HASHES(16);
 
         return hashes;
@@ -29,7 +29,7 @@ namespace hfl {
         using namespace std::literals;
 
         std::vector<Hash24Struct> hashes;
-        //hashes.emplace_back("PearsonHash"s, pearson_hash_24);
+        hashes.emplace_back("PearsonHash"s, pearson_hash_24);
         ADD_UNIVERSAL_HASHES(24);
 
         return hashes;
@@ -40,10 +40,10 @@ namespace hfl {
         std::vector<Hash32Struct> hashes;
 
         if (bf == BuildFlag::ALL) {
-            //hashes.emplace_back("PearsonHash"s, pearson_hash_32);
+            hashes.emplace_back("PearsonHash"s, pearson_hash_32);
             ADD_UNIVERSAL_HASHES(32);
         }
-        /*
+
         hashes.emplace_back("SuperFastHash"s, super_fast_hash);
         hashes.emplace_back("MurmurHash1"s, murmur_hash1);
         hashes.emplace_back("MurmurHash2"s, murmur_hash2_32);
@@ -53,7 +53,7 @@ namespace hfl {
         hashes.emplace_back("FarmHash32"s, farm_hash_32);
         hashes.emplace_back("T1HA0 32le hash"s, t1ha0_32le_hash);
         hashes.emplace_back("T1HA0 32be hash"s, t1ha0_32be_hash);
-        hashes.emplace_back("xxHash32"s, xx_hash_32);*/
+        hashes.emplace_back("xxHash32"s, xx_hash_32);
 
         return hashes;
     }
@@ -72,10 +72,10 @@ namespace hfl {
         std::vector<Hash64Struct> hashes;
 
         if (bf == BuildFlag::ALL) {
-            //hashes.emplace_back("PearsonHash"s, pearson_hash_64);
+            hashes.emplace_back("PearsonHash"s, pearson_hash_64);
             ADD_UNIVERSAL_HASHES(64);
         }
-        /*
+
         hashes.emplace_back("MurmurHash2 64 bits"s, murmur_hash2_64);
         hashes.emplace_back("CityHash64"s, city_hash_64);
         hashes.emplace_back("FarmHash64"s, farm_hash_64);
@@ -84,7 +84,7 @@ namespace hfl {
         hashes.emplace_back("T1HA1 be hash", t1ha1_be_hash);
         hashes.emplace_back("T1HA2 atonce hash", t1ha2_atonce_hash);
         hashes.emplace_back("xxHash64", xx_hash_64);
-        hashes.emplace_back("XXH3_64bits", xxh3_64bits);*/
+        hashes.emplace_back("XXH3_64bits", xxh3_64bits);
 
         return hashes;
     }

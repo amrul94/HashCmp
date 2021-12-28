@@ -21,6 +21,20 @@ void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& 
                   ReportsRoot& reports_root);
 
 template<typename HashStruct>
+void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root);
+
+template<typename HashStructs>
+void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, ReportsRoot& reports_root);
+
+void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root);
+void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root);
+
+void RunDistributionTests(ReportsRoot& reports_root);
+
+
+// ==================================================
+
+template<typename HashStruct>
 void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
     LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
 
@@ -69,10 +83,5 @@ void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, R
     }
     reports_root.logger << "end " << dtp.hash_bits << " bits" << std::endl << std::endl;
 }
-
-void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root);
-void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root);
-
-void RunDistributionTests(ReportsRoot& reports_root);
 
 #endif //THESIS_WORK_CHECK_DISTRIBUTION_H

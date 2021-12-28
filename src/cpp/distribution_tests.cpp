@@ -110,8 +110,8 @@ void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& 
 
 void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
     RUN_DIST_TEST_NORMAL_IMPL(16, num_threads);
-    RUN_DIST_TEST_NORMAL_IMPL(24, num_threads);
-    RUN_DIST_TEST_NORMAL_IMPL(32, num_threads);
+    //RUN_DIST_TEST_NORMAL_IMPL(24, num_threads);
+    //RUN_DIST_TEST_NORMAL_IMPL(32, num_threads);
 }
 
 #define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS)                     \
@@ -126,11 +126,13 @@ void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
 }
 
 void RunDistributionTests(ReportsRoot& reports_root) {
-    const size_t hardware_threads = std::thread::hardware_concurrency();
-    //const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
-    const size_t num_threads = 1;
-    reports_root.logger << boost::format("num_threads = %1%\n") % num_threads;
+    {
+        const size_t hardware_threads = std::thread::hardware_concurrency();
+        //const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+        const size_t num_threads = 1;
+        reports_root.logger << boost::format("num_threads = %1%\n") % num_threads;
 
-    RunDistTestNormal(num_threads, reports_root);
-    RunDistTestWithBins(num_threads, reports_root);
+        RunDistTestNormal(num_threads, reports_root);
+        //RunDistTestWithBins(num_threads, reports_root);
+    }
 }

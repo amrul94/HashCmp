@@ -14,63 +14,33 @@
 
 #include <pcg_random.hpp>
 
+#include "blocks_generator.h"
 #include "test_parameters.h"
 #include "log_duration.h"
 
 constexpr int KILOBYTE = 1024;
 constexpr int FOUR_KILOBYTES = KILOBYTE * 4;
 
-uint64_t CountCollisions(const std::vector<std::uint32_t>& hashes);
-uint64_t CountCollisions(const std::map<uint64_t, uint64_t>& hashes);
+template<typename HashStruct>
+auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs, const GenBlocksParameters& gbp,
+                           ReportsRoot& reports_root);
 
-std::vector<std::string> ParseWords(const std::filesystem::path& file_name);
+template<typename HashStructs>
+void TestWithGeneratedBlocks(const std::vector<pcg64>& generators, const HashStructs& hash_vec,
+                             const GenBlocksParameters& gbp, ReportsRoot& reports_root);
 
-template <typename HashStruct>
-uint64_t HashTestWithEngWords(const HashStruct& hs, const std::vector<std::string>& words,
-                              const TestParameters& tp, ReportsRoot& reports_root) {
-    LOG_DURATION_STREAM(hs.hash_name, reports_root.logger);
-    std::map<uint64_t, uint64_t> hashes;
-    for (const std::string& word : words) {
-        const uint64_t hash = hs.hash_function(word);
-        const uint64_t modify = ModifyHash(tp, hash);
-        ++hashes[modify];
-    }
-    return CountCollisions(hashes);
-}
 
-template <typename HashStruct>
-void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vector<std::string>& words,
-                          const TestParameters& tp, ReportsRoot& reports_root) {
-    reports_root.logger << boost::format("start test with %1% bits hashes\n") % tp.hash_bits;
-    const std::filesystem::path report_test_dir = "English words tests";
-    const auto report_test_path = reports_root.root_path / report_test_dir;
-    std::filesystem::create_directories(report_test_path);
+void RunCollTestNormal(const std::vector<pcg64>& generators, uint16_t words_length, size_t num_threads,
+                       ReportsRoot& reports_root);
 
-    const std::filesystem::path report_name = std::to_string(tp.hash_bits) + " bits.json";
-    const std::filesystem::path out_path = report_test_path / report_name;
-    std::ofstream out(out_path);
-    assert(out);
+void RunCollTestWithMask(const std::vector<pcg64>& generators, uint16_t words_length, size_t num_threads,
+                         ReportsRoot& reports_root);
 
-    boost::json::object obj;
-    obj["Test name"] = "Test With English Words";
-    obj["Bits"] = tp.hash_bits;
-    obj["Number of words"] = words.size();
+std::vector<pcg64> GetGenerators(uint16_t words_length);
+void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root);
 
-    boost::json::object collisions;
-    for (const auto& hs : hashes) {
-        collisions[hs.hash_name] = HashTestWithEngWords(hs, words, tp, reports_root);
-    }
-    obj["Collisions"] = collisions;
-    out << obj;
 
-    reports_root.logger << boost::format("end test with %1% bits hashes\n\n") % tp.hash_bits;
-}
-
-void RunTestWithEnglishWords(ReportsRoot& reports_root);
-
-// в будущем возможно объединю эту функцию с WriteToHash из hash_wrappers
-std::string UintToString(uint64_t src, uint64_t size);
-std::string GenerateRandomDataBlock(pcg64& generator, uint32_t length);
+// ===============================================================================
 
 template<typename HashStruct>
 auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs, const GenBlocksParameters& gbp,
@@ -150,15 +120,5 @@ void TestWithGeneratedBlocks(const std::vector<pcg64>& generators, const HashStr
 
     reports_root.logger << "end " << gbp.hash_bits << " bits" << std::endl << std::endl;
 }
-
-
-void RunCollTestNormal(const std::vector<pcg64>& generators, uint16_t words_length, size_t num_threads,
-                       ReportsRoot& reports_root);
-
-void RunCollTestWithMask(const std::vector<pcg64>& generators, uint16_t words_length, size_t num_threads,
-                         ReportsRoot& reports_root);
-
-std::vector<pcg64> GetGenerators(uint16_t words_length);
-void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root);
 
 #endif //THESIS_WORK_WORDS_TESTS_H
