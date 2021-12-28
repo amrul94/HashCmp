@@ -17,17 +17,17 @@ template <typename HashStruct>
     std::unordered_map<size_t, size_t> hashes;
     for (const auto& dir_entry: std::filesystem::directory_iterator(p)) {
         Image image = LoadJPEG(dir_entry.path());
-        auto hash = hash_struct.hash_function(image);
+        auto hash = hash_struct.hasher(image);
         ++hashes[hash];
     }
 
-    report << hash_struct.hash_name << " collisions = " << CountCollisions(hashes) << std::endl;
+    report << hash_struct.name << " collisions = " << CountCollisions(hashes) << std::endl;
 }
 
 template <typename HashStruct>
 void TestImages(const std::vector<HashStruct>& hashes, const std::filesystem::path& p, std::ostream& report) {
     for (const auto& hash_struct : hashes) {
-        LOG_DURATION_STREAM(hash_struct.hash_name, std::cout);
+        LOG_DURATION_STREAM(hash_struct.name, std::cout);
         TestImagesInDir(hash_struct, p, report);
     }
 }

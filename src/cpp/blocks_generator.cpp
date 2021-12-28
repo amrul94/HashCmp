@@ -28,3 +28,15 @@ std::string GenerateRandomDataBlock(pcg64& rng, uint32_t length) {
     assert(word.size() == length);
     return word;
 }
+
+std::vector<std::string> GenerateRandomDataBlocks(pcg64& rng, uint64_t num_blocks, uint32_t block_length) {
+    std::vector<std::string> generated_blocks;
+    generated_blocks.reserve(num_blocks);
+
+    for (uint64_t i = 0; i < num_blocks; ++i) {
+        std::string str = GenerateRandomDataBlock(rng, block_length);
+        generated_blocks.push_back(std::move(str));
+    }
+
+    return generated_blocks;
+}

@@ -25,12 +25,13 @@ public:
 
         const auto end_time = Clock::now();
         const auto dur = end_time - start_time_;
-        if (duration_cast<milliseconds>(dur).count() < 1000) {
-            out_ << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
+        const auto dur_ms = static_cast<double>(duration_cast<milliseconds>(dur).count());
+        if (dur_ms < 1000) {
+            out_ << id_ << ": "s << dur_ms << " ms"s << std::endl;
         } else if (duration_cast<seconds>(dur).count() < 60) {
-            out_ << id_ << ": "s << duration_cast<seconds>(dur).count() << " s"s << std::endl;
+            out_ << id_ << ": "s << dur_ms / 1000 << " s"s << std::endl;
         } else {
-            out_ << id_ << ": "s << duration_cast<minutes>(dur).count() << " min"s << std::endl;
+            out_ << id_ << ": "s << dur_ms / 60'000 << " min"s << std::endl;
         }
 
     }

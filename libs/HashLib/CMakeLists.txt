@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.17)
 project(HashLib)
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_C_FLAGS "-O3 -pipe -pthread -maes")
+set(CMAKE_C_FLAGS "-O3 -pipe -Werror -pthread -maes")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
 

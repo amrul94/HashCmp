@@ -96,13 +96,15 @@ namespace hfl {
         template<typename UintT>
         struct HashStruct {
             using HashFunction = const BaseHashWrapper<UintT>&;
-            HashStruct(std::string hash_name, HashFunction hash_function)
-                    : hash_name(std::move(hash_name))
-                    , hash_function(hash_function) {
+            HashStruct(std::string name, HashFunction function, uint16_t bits)
+                    : name(std::move(name))
+                    , hasher(function)
+                    , bits(bits) {
             }
 
-            std::string hash_name;
-            HashFunction hash_function;
+            std::string name{};
+            HashFunction hasher{};
+            uint16_t bits{};
         };
 
         template<typename SourceUintT, typename DestUintT>
