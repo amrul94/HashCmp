@@ -394,6 +394,13 @@ namespace hfl {
         mutable std::once_flag init_flag;
     };
 
+//----------- PengyHash ------------
+
+    class [[maybe_unused]] PengyHash64Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
 //------------ PJW Hash ------------
 
     template<typename UintT>
@@ -454,6 +461,19 @@ namespace hfl {
 
 
     class [[maybe_unused]] T1HA2AtonceWrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+//------------ wyHashes -----------
+//https://github.com/wangyi-fudan/wyhash
+
+    class [[maybe_unused]] WyHash32Wrapper : public BaseHash32Wrapper {
+    private:
+        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] WyHash64Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };

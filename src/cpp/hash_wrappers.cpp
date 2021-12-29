@@ -12,8 +12,11 @@
 #include <super_fast_hash/super_fast_hash.h>
 #include <t1ha/t1ha.h>
 #include <metro_hash/metrohash64.h>
+#include <pengyhash/pengyhash.h>
 #include <spooky_hash/spooky.h>
 #include <xx_hash/xxhash.h>
+#include <wyhash/wyhash.h>
+#include <wyhash/wyhash32.h>
 
 #include "hash_wrappers.h"
 
@@ -243,36 +246,51 @@ namespace hfl {
         return pearson_hash_64(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
     }
 
+//----------- PengyHash ------------
+
+    uint64_t PengyHash64Wrapper::Hash(std::string_view str) const {
+        return pengyhash(str.data(), str.size(), 0);
+    }
 //-------------- T1HA --------------
 
     uint32_t T1HA0_32leWrapper::Hash(std::string_view str) const {
-        return t1ha0_32le(str.data(), str.size(), GenerateSeed());
+        return t1ha0_32le(str.data(), str.size(), 0);
     }
 
     uint32_t T1HA0_32beWrapper::Hash(std::string_view str) const {
-        return t1ha0_32be(str.data(), str.size(), GenerateSeed());
+        return t1ha0_32be(str.data(), str.size(), 0);
     }
 
     uint64_t T1HA1LeWrapper::Hash(std::string_view str) const {
-        return t1ha1_le(str.data(), str.size(), GenerateSeed());
+        return t1ha1_le(str.data(), str.size(), 0);
     }
 
     uint64_t T1HA1BeWrapper::Hash(std::string_view str) const {
-        return t1ha1_be(str.data(), str.size(), GenerateSeed());
+        return t1ha1_be(str.data(), str.size(), 0);
     }
 
     uint64_t T1HA2AtonceWrapper::Hash(std::string_view str) const {
-        return t1ha2_atonce(str.data(), str.size(), GenerateSeed());
+        return t1ha2_atonce(str.data(), str.size(), 0);
+    }
+
+//------------ wyHashes -----------
+
+    uint32_t WyHash32Wrapper::Hash(std::string_view str) const {
+        return wyhash32(str.data(), str.size(), 0);
+    }
+
+    uint64_t WyHash64Wrapper::Hash(std::string_view str) const {
+        return wyhash(str.data(), str.size(), 0, _wyp);
     }
 
 //------------ xxHashes -----------
 
     uint32_t xxHash32Wrapper::Hash(std::string_view str) const {
-        return XXH32(str.data(), str.size(), GenerateSeed());
+        return XXH32(str.data(), str.size(), 0);
     }
 
     uint64_t xxHash64Wrapper::Hash(std::string_view str) const {
-        return XXH64(str.data(), str.size(), GenerateSeed());
+        return XXH64(str.data(), str.size(), 0);
     }
 
     uint64_t XXH3_64BitsWrapper::Hash(std::string_view str) const {

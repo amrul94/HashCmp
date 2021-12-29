@@ -15,14 +15,33 @@
 
 #include "hashes.h"
 
-void TempTests(tests::ReportsRoot& report_root) {
+#include <pengyhash/pengyhash.h>
 
+void LocalSpeedTest(tests::ReportsRoot& report_root) {
+    pcg64 rng;
+    const auto words = GenerateRandomDataBlocks(rng, 1'000'000, FOUR_KILOBYTES);
+
+
+
+    hfl::Hash32Struct city_hash_32s {"CityHash32", hfl::city_hash_32, 32};
+    tests::HashSpeedTest(city_hash_32s, words, report_root);
+
+    const auto hashes32 = hfl::Build32bitsHashes();
+    tests::HashSpeedTest(hashes32.back(), words, report_root);
+
+    const auto hashes64 = hfl::Build64bitsHashes();
+    tests::HashSpeedTest(hashes64.back(), words, report_root);
 }
 
-
+void TempTests(tests::ReportsRoot& report_root) {
+    std::string  s="fcdskhfjs";
+    hfl::PengyHash64Wrapper ph;
+    std::cout << ph(s) << std::endl;
+    LocalSpeedTest(report_root);
+}
 
 void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_root) {
-
+    LOG_DURATION_STREAM("Full time", reports_root.logger);
     for (int test_number : test_numbers) {
         switch (test_number) {
             case 1:
@@ -66,7 +85,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{1, 2, 3, 4, 5};
+    const std::vector test_numbers{50};
     tests::ReportsRoot reports_root = CreateReportsRoot();
 
     RunTests(test_numbers, reports_root);

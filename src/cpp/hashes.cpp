@@ -57,6 +57,8 @@ namespace hfl {
         hashes.emplace_back("T1HA0 32be hash"s, t1ha0_32be_hash, bits);
         hashes.emplace_back("xxHash32"s, xx_hash_32, bits);
 
+        hashes.emplace_back("wyhash32", wy_hash_32, bits);
+
         return hashes;
     }
 
@@ -88,6 +90,9 @@ namespace hfl {
         hashes.emplace_back("T1HA2 atonce hash", t1ha2_atonce_hash, bits);
         hashes.emplace_back("xxHash64", xx_hash_64, bits);
         hashes.emplace_back("XXH3_64bits", xxh3_64bits, bits);
+
+        hashes.emplace_back("wyhash", wy_hash_64, bits);
+        hashes.emplace_back("PengyHash", pengy_hash_64, bits);
 
         return hashes;
     }

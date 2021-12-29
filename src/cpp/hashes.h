@@ -62,6 +62,8 @@ namespace hfl {
     [[maybe_unused]] inline const PearsonHash32Wrapper pearson_hash_32;
     [[maybe_unused]] inline const PearsonHash64Wrapper pearson_hash_64;
 
+    [[maybe_unused]] inline const PengyHash64Wrapper pengy_hash_64;
+
     [[maybe_unused]] inline constinit PJWHashWrapper<uint16_t> pjw_hash_16;
     [[maybe_unused]] inline constinit PJWHashWrapper<uint24_t> pjw_hash_24;
     [[maybe_unused]] inline constinit PJWHashWrapper<uint32_t> pjw_hash_32;
@@ -91,6 +93,9 @@ namespace hfl {
     [[maybe_unused]] inline constinit xxHash32Wrapper xx_hash_32;
     [[maybe_unused]] inline constinit xxHash64Wrapper xx_hash_64;
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
+
+    [[maybe_unused]] inline constinit WyHash32Wrapper wy_hash_32;
+    [[maybe_unused]] inline constinit WyHash64Wrapper wy_hash_64;
 
     namespace detail {
         template<typename UintT>
