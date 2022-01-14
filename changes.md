@@ -124,3 +124,7 @@
 
 Изменения 29.12.2021
 1. Добавил wyhash и peggyhash
+
+Изменения 14.01.2022
+1. Добавил класс Timer и переделал LogDuration
+2. Добавил NMHASH, mx3, SipHash, HighwayHash

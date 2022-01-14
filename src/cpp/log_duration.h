@@ -1,9 +1,31 @@
 #ifndef THESIS_WORK_LOG_DURATION_H
 #define THESIS_WORK_LOG_DURATION_H
 
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <utility>
+
+
+#include <sys/times.h>
+
+class Timer {
+public:
+    void Start();
+    void End();
+    [[nodiscard]] double GetTotalTime() const;
+
+private:
+    clock_t GetTime();
+
+    tms tms_time_{};
+    clock_t start_time_ = 0;
+    clock_t stop_time_ = 0;
+    clock_t total_time = 0;
+    const long double sc_clk_tck_ = static_cast<long double>(sysconf(_SC_CLK_TCK));
+};
+
+std::ostream& operator<< (std::ostream& out, const Timer& point);
 
 #define PROFILE_CONCAT_INTERNAL(X, Y) X##Y
 #define PROFILE_CONCAT(X, Y) PROFILE_CONCAT_INTERNAL(X, Y)
@@ -15,30 +37,13 @@ class LogDuration {
 public:
     using Clock = std::chrono::steady_clock;
 
-    explicit LogDuration(std::string_view id, std::ostream& out = std::cerr)
-            : id_(id), out_(out) {
-    }
+    explicit LogDuration(std::string_view id, std::ostream& out = std::cerr);
 
-    ~LogDuration() {
-        using namespace std::chrono;
-        using namespace std::literals;
-
-        const auto end_time = Clock::now();
-        const auto dur = end_time - start_time_;
-        const auto dur_ms = static_cast<double>(duration_cast<milliseconds>(dur).count());
-        if (dur_ms < 1000) {
-            out_ << id_ << ": "s << dur_ms << " ms"s << std::endl;
-        } else if (duration_cast<seconds>(dur).count() < 60) {
-            out_ << id_ << ": "s << dur_ms / 1000 << " s"s << std::endl;
-        } else {
-            out_ << id_ << ": "s << dur_ms / 60'000 << " min"s << std::endl;
-        }
-
-    }
+    ~LogDuration();
 
 private:
     const std::string id_;
-    const Clock::time_point start_time_ = Clock::now();
+    Timer timer_;
     std::ostream& out_;
 };
 

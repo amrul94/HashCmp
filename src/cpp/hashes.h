@@ -40,8 +40,7 @@ namespace hfl {
     [[maybe_unused]] inline constinit FNV1aHash48Wrapper fnv_1a_hash_48;
     [[maybe_unused]] inline constinit FNV1aHash64Wrapper fnv_1a_hash_64;
 
-    [[maybe_unused]] inline constinit Lookup3LittleWrapper lookup3_little_hash;
-    [[maybe_unused]] inline constinit Lookup3BigWrapper lookup_big_hash;
+    [[maybe_unused]] inline constinit HighwayHashWrapper highway_hash;
 
     [[maybe_unused]] inline constinit MetroHash64_Wrapper metro_hash_64;
 
@@ -50,6 +49,11 @@ namespace hfl {
     [[maybe_unused]] inline constinit MurmurHash2AWrapper murmur_hash2a_32;
     [[maybe_unused]] inline constinit MurmurHash64AWrapper murmur_hash2_64;
     [[maybe_unused]] inline constinit MurmurHash3Wrapper murmur_hash3;
+
+    [[maybe_unused]] inline constinit MX3HashWrapper mx3;
+
+    [[maybe_unused]] inline constinit nmHash32Wrapper nmhash32;
+    [[maybe_unused]] inline constinit nmHash32XWrapper nmhash32x;
 
     [[maybe_unused]] inline constinit OneTimeHashWrapper<uint16_t> one_at_a_time_hash_16;
     [[maybe_unused]] inline constinit OneTimeHashWrapper<uint24_t> one_at_a_time_hash_24;
@@ -78,6 +82,12 @@ namespace hfl {
     [[maybe_unused]] inline constinit SDBMHashWrapper<uint48_t> sdbm_hash_48;
     [[maybe_unused]] inline constinit SDBMHashWrapper<uint64_t> sdbm_hash_64;
 
+    [[maybe_unused]] inline constinit SipHashWrapper siphash;
+    [[maybe_unused]] inline constinit SipHash13Wrapper siphash13;
+    [[maybe_unused]] inline constinit SipHashAVX2Wrapper siphash_avx2;
+    [[maybe_unused]] inline constinit HalfSipHashWrapper halfsiphash;
+
+
     [[maybe_unused]] inline constinit SpookyHash16Wrapper spooky_hash_16;
     [[maybe_unused]] inline constinit SpookyHash24Wrapper spooky_hash_24;
     [[maybe_unused]] inline constinit SpookyHash32Wrapper spooky_hash_32;
@@ -94,7 +104,7 @@ namespace hfl {
     [[maybe_unused]] inline constinit xxHash64Wrapper xx_hash_64;
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
 
-    [[maybe_unused]] inline constinit WyHash32Wrapper wy_hash_32;
+    [[maybe_unused]] inline constinit WyHash32Wrapper wyhash32;
     [[maybe_unused]] inline constinit WyHash64Wrapper wy_hash_64;
 
     namespace detail {

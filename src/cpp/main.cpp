@@ -17,11 +17,13 @@
 
 #include <pengyhash/pengyhash.h>
 
+#include "siphash/siphash.h"
+
+#include <highwayhash/sip_hash.h>
+
 void LocalSpeedTest(tests::ReportsRoot& report_root) {
     pcg64 rng;
     const auto words = GenerateRandomDataBlocks(rng, 1'000'000, FOUR_KILOBYTES);
-
-
 
     hfl::Hash32Struct city_hash_32s {"CityHash32", hfl::city_hash_32, 32};
     tests::HashSpeedTest(city_hash_32s, words, report_root);
@@ -30,13 +32,19 @@ void LocalSpeedTest(tests::ReportsRoot& report_root) {
     tests::HashSpeedTest(hashes32.back(), words, report_root);
 
     const auto hashes64 = hfl::Build64bitsHashes();
+    tests::HashSpeedTest(hashes64[hashes64.size() - 4], words, report_root);
+    tests::HashSpeedTest(hashes64[hashes64.size() - 3], words, report_root);
+    tests::HashSpeedTest(hashes64[hashes64.size() - 2], words, report_root);
     tests::HashSpeedTest(hashes64.back(), words, report_root);
 }
 
 void TempTests(tests::ReportsRoot& report_root) {
-    std::string  s="fcdskhfjs";
-    hfl::PengyHash64Wrapper ph;
-    std::cout << ph(s) << std::endl;
+    std::string str = "test_string";
+
+    using namespace highwayhash;
+    const highwayhash::HH_U64 key2[2] = {1234, 5678};
+    char in[8] = {1};
+    std::cout << SipHash(key2, in, 8) << std::endl;
     LocalSpeedTest(report_root);
 }
 

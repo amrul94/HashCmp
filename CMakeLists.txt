@@ -10,7 +10,7 @@ add_subdirectory(${LIBS}/HashLib HashLibBuildDir)
 set(LIBJPEG_DIR ${LIBS}/libjpeg)
 
 set(SRC "src/cpp")
-set(UTILITIES ${SRC}/log_duration.h ${SRC}/blocks_generator.h ${SRC}/blocks_generator.cpp)
+set(UTILITIES ${SRC}/log_duration.h ${SRC}/log_duration.cpp ${SRC}/blocks_generator.h ${SRC}/blocks_generator.cpp)
 set(WRAPPERS ${SRC}/hash_wrappers.h ${SRC}/hash_wrappers.cpp ${SRC}/hashes.h ${SRC}/hashes.cpp)
 set(HELP_STRUCTS ${SRC}/test_parameters.h ${SRC}/test_parameters.cpp)
 set(IMG_FILES ${SRC}/img.h ${SRC}/img.cpp ${SRC}/jpeg_image.h ${SRC}/jpeg_image.cpp)

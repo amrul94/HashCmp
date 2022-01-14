@@ -267,6 +267,12 @@ namespace hfl {
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
+//---------- HighwayHash -----------
+
+    class [[maybe_unused]] HighwayHashWrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
 
 //--------- Jenkins hash -----------
 
@@ -276,16 +282,6 @@ namespace hfl {
         [[nodiscard]] UintT Hash(std::string_view str) const override {
             return one_at_a_time_hash<UintT>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
         }
-    };
-
-    class [[maybe_unused]] Lookup3LittleWrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
-    };
-
-    class [[maybe_unused]] Lookup3BigWrapper : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
     class [[maybe_unused]] SpookyHash16Wrapper : public BaseHash16Wrapper {
@@ -343,6 +339,25 @@ namespace hfl {
     };
 
     class [[maybe_unused]] MurmurHash3Wrapper: public BaseHash32Wrapper  {
+    private:
+        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+//------------- MX3 --------------
+
+    class [[maybe_unused]] MX3HashWrapper: public BaseHash64Wrapper  {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+//------------ NMHASH ------------
+
+    class [[maybe_unused]] nmHash32Wrapper : public BaseHash32Wrapper {
+    private:
+        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] nmHash32XWrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
@@ -436,6 +451,30 @@ namespace hfl {
             return SDBMHash<UintT>(str);
         }
     };
+
+//------------- SIPHASH ------------
+
+    class [[maybe_unused]] SipHashWrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+
+    class [[maybe_unused]] SipHash13Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] SipHashAVX2Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] HalfSipHashWrapper : public BaseHash32Wrapper {
+    private:
+        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
 
 //-------------- T1HA --------------
 

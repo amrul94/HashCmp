@@ -57,7 +57,10 @@ namespace hfl {
         hashes.emplace_back("T1HA0 32be hash"s, t1ha0_32be_hash, bits);
         hashes.emplace_back("xxHash32"s, xx_hash_32, bits);
 
-        hashes.emplace_back("wyhash32", wy_hash_32, bits);
+        hashes.emplace_back("wyhash32", wyhash32, bits);
+        hashes.emplace_back("nmhash32", nmhash32, bits);
+        hashes.emplace_back("nmhash32x", nmhash32x, bits);
+        hashes.emplace_back("halfsiphash", halfsiphash, bits);
 
         return hashes;
     }
@@ -93,7 +96,11 @@ namespace hfl {
 
         hashes.emplace_back("wyhash", wy_hash_64, bits);
         hashes.emplace_back("PengyHash", pengy_hash_64, bits);
-
+        hashes.emplace_back("mx3", mx3, bits);
+        hashes.emplace_back("SipHash", siphash, bits);
+        hashes.emplace_back("SipHash13", siphash13, bits);
+        hashes.emplace_back("SipHash (Google Impl)", siphash_avx2, bits);
+        hashes.emplace_back("HighwayHash", highway_hash, bits);
         return hashes;
     }
 }

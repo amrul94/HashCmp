@@ -4,15 +4,19 @@
 #include <cityhash/city.h>
 #include <farmhash/farmhash.h>
 #include <fasthash/fasthash.h>
-#include <jenkins_hash/lookup3.h>
+#include <highwayhash/sip_hash.h>
+#include <highwayhash/highwayhash.h>
 #include <murmur_hash/MurmurHash1.h>
 #include <murmur_hash/MurmurHash2.h>
 #include <murmur_hash/MurmurHash3.h>
+#include <mx3/mx3.h>
 #include <pearson/pearson.h>
 #include <super_fast_hash/super_fast_hash.h>
 #include <t1ha/t1ha.h>
 #include <metro_hash/metrohash64.h>
+#include <nmhash/nmhash.h>
 #include <pengyhash/pengyhash.h>
+#include <siphash/siphash_impl.h>
 #include <spooky_hash/spooky.h>
 #include <xx_hash/xxhash.h>
 #include <wyhash/wyhash.h>
@@ -131,15 +135,19 @@ namespace hfl {
         return FNV64a(str.data(), len, 0);
     }
 
+//---------- HighwayHash -----------
+
+    uint64_t HighwayHashWrapper::Hash(std::string_view str) const {
+        using namespace highwayhash;
+        const HHKey key HH_ALIGNAS(32) = {1, 2, 3, 4};
+        HHResult64 result;
+        HHStateT<HH_TARGET> state(key);
+        HighwayHashT(&state, str.data(), str.size(), &result);
+        return result;
+    }
+
+
 //--------- Jenkins hash -----------
-
-    uint32_t Lookup3LittleWrapper::Hash(std::string_view str) const {
-        return hashlittle(str.data(), str.size(), GenerateSeed());
-    }
-
-    uint32_t Lookup3BigWrapper::Hash(std::string_view str) const {
-        return hashbig(str.data(), str.size(), GenerateSeed());
-    }
 
     uint16_t SpookyHash16Wrapper::Hash(std::string_view str) const {
         auto hash = spooky_hash32(str.data(), str.size(), 0);
@@ -198,6 +206,23 @@ namespace hfl {
         return hash;
     }
 
+
+//-------------- MX3 ---------------
+    uint64_t MX3HashWrapper::Hash(std::string_view str) const {
+        const auto* const key = reinterpret_cast<const uint8_t*>(str.data());
+        return mx3::hash(key, static_cast<int>(str.size()), 0);
+    }
+
+//------------- NMHASH -------------
+
+    uint32_t nmHash32Wrapper::Hash(std::string_view str) const {
+        return NMHASH32(str.data(), static_cast<int>(str.size()), 0);
+    }
+
+    uint32_t nmHash32XWrapper::Hash(std::string_view str) const {
+        return NMHASH32X(str.data(), static_cast<int>(str.size()), 0);
+    }
+
 //--- Paul Hsieh's SuperFastHash ---
 
     uint32_t SuperFastHashWrapper::Hash(std::string_view str) const {
@@ -251,6 +276,36 @@ namespace hfl {
     uint64_t PengyHash64Wrapper::Hash(std::string_view str) const {
         return pengyhash(str.data(), str.size(), 0);
     }
+
+//------------- SIPHASH ------------
+
+    uint64_t SipHashWrapper::Hash(std::string_view str) const {
+        unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        uint64_t seed = 0;
+        memcpy(key, &seed, sizeof(seed));
+        return siphash(key, (const unsigned char *)str.data(), str.size());
+    }
+
+    uint64_t SipHash13Wrapper::Hash(std::string_view str) const {
+        unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        uint64_t seed = 0;
+        memcpy(key, &seed, sizeof(seed));
+        return siphash13(key, (const unsigned char *)str.data(), str.size());
+    }
+
+    uint64_t SipHashAVX2Wrapper::Hash(std::string_view str) const {
+        using namespace highwayhash;
+        const HH_U64 key2[2] = {1234, 5678};
+        return SipHash(key2, str.data(), str.size());
+    }
+
+    uint32_t HalfSipHashWrapper::Hash(std::string_view str) const {
+        unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        uint64_t seed = 0;
+        memcpy(key, &seed, sizeof(seed));
+        return halfsiphash(key, (const unsigned char *)str.data(), str.size());
+    }
+
 //-------------- T1HA --------------
 
     uint32_t T1HA0_32leWrapper::Hash(std::string_view str) const {

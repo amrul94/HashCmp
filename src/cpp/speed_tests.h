@@ -1,8 +1,6 @@
 #ifndef THESISWORK_SPEED_TESTS_H
 #define THESISWORK_SPEED_TESTS_H
 
-#include <sys/times.h>
-
 #include "boost/format.hpp"
 #include "boost/json.hpp"
 
@@ -17,77 +15,71 @@ namespace tests {
 
     struct HashSpeed {
         std::string name{};
-        clock_t tck_time{};
         double sec_time{};
     };
 
     template<typename HashStruct>
-    clock_t InnerLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    double InnerLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
 
     template<typename HashStruct>
-    clock_t OuterLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    double OuterLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
 
     template<typename HashStruct>
     HashSpeed HashSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
 
     template<typename HashStructs>
-    void SpeedTests(const HashStructs& hashes, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    void SpeedTests([[maybe_unused]] const HashStructs& hashes, const std::vector<std::string>& words, ReportsRoot& reports_root);
 
     void RunSpeedTests(uint64_t num_blocks, uint32_t block_length, ReportsRoot& reports_root);
-
 
 // ====================================
 
     template<typename HashStruct>
-    clock_t InnerLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
+    double InnerLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
         const auto sc_clk_tck = static_cast<long double>(sysconf(_SC_CLK_TCK));
 
-        tms tms_time{};
-        clock_t delta_t = 0;
+        Timer timer;
         auto sum_hashes = static_cast<uint64_t>(hs.hasher("initial hash"));
 
         for (const std::string& word : words) {
-            clock_t t1 = times(&tms_time);
+            timer.Start();
             sum_hashes += static_cast<uint64_t>(hs.hasher(word));
-            clock_t t2 = times(&tms_time);
-            delta_t += t2 - t1;
+            timer.End();
         }
 
         std::cout << boost::format("\tsum hashes: %1%\n") % sum_hashes;
-        reports_root.logger << boost::format("\tfirst timer: %1% tck (%2% s)\n") % delta_t % (delta_t / sc_clk_tck);
+        reports_root.logger << boost::format("\tfirst timer: %1%\n") % timer;
 
-        return delta_t;
+        return timer.GetTotalTime();
     }
 
     template<typename HashStruct>
-    clock_t OuterLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
-        const auto sc_clk_tck = static_cast<long double>(sysconf(_SC_CLK_TCK));
-
-
-        tms tms_time{};
-        clock_t delta_t = 0;
+    double OuterLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
         auto sum_hashes = static_cast<uint64_t>(hs.hasher("initial hash"));
 
-        clock_t t1 = times(&tms_time);
+        Timer timer1;
+        timer1.Start();
         for (const auto & word : words) {
             sum_hashes += static_cast<uint64_t>(hs.hasher(word));
         }
-        clock_t t2 = times(&tms_time);
+        timer1.End();
 
         std::cout << boost::format("\tsum hashes: %1%\n") % sum_hashes;
         uint64_t sum_k = 0;
 
-        clock_t t3 = times(&tms_time);
+        Timer timer2;
+        timer2.Start();
         for (const auto & word : words) {
             sum_k += (++sum_k);
         }
-        clock_t t4 = times(&tms_time);
+        timer2.End();
 
-        delta_t = (t2 - t1) - (t4 - t3);
+
+        const double total_time = timer1.GetTotalTime() - timer2.GetTotalTime();
         std::cout << boost::format("\tsum k: %1%\n") % sum_k;
-        reports_root.logger << boost::format("\tsecond timer: %1% tck (%2% s)\n") % delta_t % (delta_t / sc_clk_tck);
+        reports_root.logger << boost::format("\tsecond timer: %1% sec\n") % total_time;
 
-        return delta_t;
+        return total_time;
     }
 
 
@@ -96,19 +88,17 @@ namespace tests {
         LOG_DURATION_STREAM("\tlog duration all time", reports_root.logger);
         reports_root.logger << boost::format("\n%1%:") % hs.name << std::endl;
 
-        const auto sc_clk_tck = static_cast<long double>(sysconf(_SC_CLK_TCK));
-        const clock_t delta_t1 = InnerLoopSpeedTest(hs, words, reports_root);
-        const clock_t delta_t2 = OuterLoopSpeedTest(hs, words, reports_root);
-        const clock_t tck_best_timer = delta_t1 < delta_t2 ? delta_t1 : delta_t2;
+        const double total_time_1 = InnerLoopSpeedTest(hs, words, reports_root);
+        const double total_time_2 = OuterLoopSpeedTest(hs, words, reports_root);
+        const double best_total_time = total_time_1 < total_time_2 ? total_time_1 : total_time_2;
 
-        long double sec_best_timer = (tck_best_timer / sc_clk_tck);
-        reports_root.logger << boost::format("\tbest timer: %1% tck (%2% s)\n") % tck_best_timer % sec_best_timer;
-        return HashSpeed{hs.name, tck_best_timer, static_cast<double>(sec_best_timer)};
+        reports_root.logger << boost::format("\tbest timer: %1% sec\n") % best_total_time;
+        return HashSpeed{hs.name, best_total_time};
     }
 
     template<typename HashStructs>
     void SpeedTests(const HashStructs& hashes, const std::vector<std::string>& words, ReportsRoot& reports_root) {
-        const auto hash_bits = hashes.front().bits;
+        [[maybe_unused]] const auto hash_bits = hashes.front().bits;
 
         reports_root.logger << boost::format("start %1% bits") % hash_bits;
 
@@ -116,10 +106,7 @@ namespace tests {
         boost::json::object speed;
         for (const auto& current_hash : hashes) {
             HashSpeed hs = HashSpeedTest(current_hash, words, reports_root);
-            boost::json::object jhs;
-            jhs["Tck time"] = hs.tck_time;
-            jhs["Sec time"] = hs.sec_time;
-            speed[hs.name] = jhs;
+            speed[hs.name] = std::to_string(hs.sec_time) + " sec";
         }
 
         out_json.obj["Speed"] = speed;
