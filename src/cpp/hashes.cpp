@@ -101,6 +101,8 @@ namespace hfl {
         hashes.emplace_back("SipHash13", siphash13, bits);
         hashes.emplace_back("SipHash (Google Impl)", siphash_avx2, bits);
         hashes.emplace_back("HighwayHash", highway_hash, bits);
+        hashes.emplace_back("MUM hash", mum_hash, bits);
+        hashes.emplace_back("mir hash", mir_hash, bits);
         return hashes;
     }
 }

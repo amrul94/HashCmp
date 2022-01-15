@@ -128,3 +128,6 @@
 Изменения 14.01.2022
 1. Добавил класс Timer и переделал LogDuration
 2. Добавил NMHASH, mx3, SipHash, HighwayHash
+
+Изменения 15.01.2022
+1. Добавил MUM/mix hash

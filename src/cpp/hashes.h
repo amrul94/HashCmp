@@ -50,6 +50,9 @@ namespace hfl {
     [[maybe_unused]] inline constinit MurmurHash64AWrapper murmur_hash2_64;
     [[maybe_unused]] inline constinit MurmurHash3Wrapper murmur_hash3;
 
+    [[maybe_unused]] inline constinit MumHashWrapper mum_hash;
+    [[maybe_unused]] inline constinit MirHashWrapper mir_hash;
+
     [[maybe_unused]] inline constinit MX3HashWrapper mx3;
 
     [[maybe_unused]] inline constinit nmHash32Wrapper nmhash32;
@@ -87,7 +90,6 @@ namespace hfl {
     [[maybe_unused]] inline constinit SipHashAVX2Wrapper siphash_avx2;
     [[maybe_unused]] inline constinit HalfSipHashWrapper halfsiphash;
 
-
     [[maybe_unused]] inline constinit SpookyHash16Wrapper spooky_hash_16;
     [[maybe_unused]] inline constinit SpookyHash24Wrapper spooky_hash_24;
     [[maybe_unused]] inline constinit SpookyHash32Wrapper spooky_hash_32;
@@ -104,8 +106,8 @@ namespace hfl {
     [[maybe_unused]] inline constinit xxHash64Wrapper xx_hash_64;
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
 
-    [[maybe_unused]] inline constinit WyHash32Wrapper wyhash32;
-    [[maybe_unused]] inline constinit WyHash64Wrapper wy_hash_64;
+    [[maybe_unused]] inline constinit wyHash32Wrapper wyhash32;
+    [[maybe_unused]] inline constinit wyHash64Wrapper wy_hash_64;
 
     namespace detail {
         template<typename UintT>

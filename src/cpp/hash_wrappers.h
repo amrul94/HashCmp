@@ -13,6 +13,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include <hash_functions.h>
+#include <highwayhash/sip_hash.h>
 #include <rolling_hash/cyclichash.h>
 
 #include "img.h"
@@ -343,6 +344,18 @@ namespace hfl {
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
+//----------- MUM/mir -----------
+
+    class [[maybe_unused]] MumHashWrapper: public BaseHash64Wrapper  {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] MirHashWrapper: public BaseHash64Wrapper  {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+    };
+
 //------------- MX3 --------------
 
     class [[maybe_unused]] MX3HashWrapper: public BaseHash64Wrapper  {
@@ -457,22 +470,30 @@ namespace hfl {
     class [[maybe_unused]] SipHashWrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+
+        const unsigned char key_[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     };
 
 
     class [[maybe_unused]] SipHash13Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+
+        const unsigned char key_[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     };
 
     class [[maybe_unused]] SipHashAVX2Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+
+        const highwayhash::HH_U64 key2_[2] = {1234, 5678};
     };
 
     class [[maybe_unused]] HalfSipHashWrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+
+        const unsigned char key_[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     };
 
 
@@ -507,12 +528,12 @@ namespace hfl {
 //------------ wyHashes -----------
 //https://github.com/wangyi-fudan/wyhash
 
-    class [[maybe_unused]] WyHash32Wrapper : public BaseHash32Wrapper {
+    class [[maybe_unused]] wyHash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
     };
 
-    class [[maybe_unused]] WyHash64Wrapper : public BaseHash64Wrapper {
+    class [[maybe_unused]] wyHash64Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };

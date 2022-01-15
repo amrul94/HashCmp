@@ -4,11 +4,12 @@
 #include <cityhash/city.h>
 #include <farmhash/farmhash.h>
 #include <fasthash/fasthash.h>
-#include <highwayhash/sip_hash.h>
 #include <highwayhash/highwayhash.h>
 #include <murmur_hash/MurmurHash1.h>
 #include <murmur_hash/MurmurHash2.h>
 #include <murmur_hash/MurmurHash3.h>
+#include <mum-mir/mir-hash.h>
+#include <mum-mir/mum.h>
 #include <mx3/mx3.h>
 #include <pearson/pearson.h>
 #include <super_fast_hash/super_fast_hash.h>
@@ -139,10 +140,12 @@ namespace hfl {
 
     uint64_t HighwayHashWrapper::Hash(std::string_view str) const {
         using namespace highwayhash;
+
         const HHKey key HH_ALIGNAS(32) = {1, 2, 3, 4};
-        HHResult64 result;
         HHStateT<HH_TARGET> state(key);
+        HHResult64 result;
         HighwayHashT(&state, str.data(), str.size(), &result);
+
         return result;
     }
 
@@ -207,7 +210,20 @@ namespace hfl {
     }
 
 
+//------------ MUM/mir -------------
+
+    uint64_t MumHashWrapper::Hash(std::string_view str) const {
+        return mum_hash(str.data(), str.size(), 0);
+    }
+
+    uint64_t MirHashWrapper::Hash(std::string_view str) const {
+        return mir_hash(str.data(), str.size(), 0);
+    }
+
+
+
 //-------------- MX3 ---------------
+
     uint64_t MX3HashWrapper::Hash(std::string_view str) const {
         const auto* const key = reinterpret_cast<const uint8_t*>(str.data());
         return mx3::hash(key, static_cast<int>(str.size()), 0);
@@ -280,30 +296,19 @@ namespace hfl {
 //------------- SIPHASH ------------
 
     uint64_t SipHashWrapper::Hash(std::string_view str) const {
-        unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        uint64_t seed = 0;
-        memcpy(key, &seed, sizeof(seed));
-        return siphash(key, (const unsigned char *)str.data(), str.size());
+        return siphash(key_, (const unsigned char *)str.data(), str.size());
     }
 
     uint64_t SipHash13Wrapper::Hash(std::string_view str) const {
-        unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        uint64_t seed = 0;
-        memcpy(key, &seed, sizeof(seed));
-        return siphash13(key, (const unsigned char *)str.data(), str.size());
+        return siphash13(key_, (const unsigned char *)str.data(), str.size());
     }
 
     uint64_t SipHashAVX2Wrapper::Hash(std::string_view str) const {
-        using namespace highwayhash;
-        const HH_U64 key2[2] = {1234, 5678};
-        return SipHash(key2, str.data(), str.size());
+        return highwayhash::SipHash(key2_, str.data(), str.size());
     }
 
     uint32_t HalfSipHashWrapper::Hash(std::string_view str) const {
-        unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        uint64_t seed = 0;
-        memcpy(key, &seed, sizeof(seed));
-        return halfsiphash(key, (const unsigned char *)str.data(), str.size());
+        return halfsiphash(key_, (const unsigned char *)str.data(), str.size());
     }
 
 //-------------- T1HA --------------
@@ -330,11 +335,11 @@ namespace hfl {
 
 //------------ wyHashes -----------
 
-    uint32_t WyHash32Wrapper::Hash(std::string_view str) const {
+    uint32_t wyHash32Wrapper::Hash(std::string_view str) const {
         return wyhash32(str.data(), str.size(), 0);
     }
 
-    uint64_t WyHash64Wrapper::Hash(std::string_view str) const {
+    uint64_t wyHash64Wrapper::Hash(std::string_view str) const {
         return wyhash(str.data(), str.size(), 0, _wyp);
     }
 

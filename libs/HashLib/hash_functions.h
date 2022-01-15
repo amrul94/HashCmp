@@ -11,11 +11,33 @@
 //=============================================================================
 
 // https://github.com/rurban/smhasher/blob/master/Hashes.cpp
-uint32_t FNV32a(const void *key, int len, uint32_t seed);
-uint64_t FNV64a(const char *key, int len, uint64_t seed);
+static inline uint32_t FNV32a(const void *key, int len, uint32_t seed) {
+    uint32_t h = seed;
+    const auto  *data = (const uint8_t *)key;
+
+    h ^= UINT32_C(2166136261);
+    for (int i = 0; i < len; i++) {
+        h ^= data[i];
+        h *= 16777619;
+    }
+    return h;
+}
+
+static inline uint64_t FNV64a(const char *key, int len, uint64_t seed) {
+    uint64_t  h = seed;
+    auto  *data = (uint8_t *)key;
+    const uint8_t *const end = &data[len];
+
+    h ^= UINT64_C(0xcbf29ce484222325);
+    while (data < end) {
+        h ^= *data++;
+        h *= UINT64_C(0x100000001b3);
+    }
+    return h;
+}
 
 template<typename UintT>
-UintT one_at_a_time_hash(const uint8_t* key, size_t length) {
+static inline UintT one_at_a_time_hash(const uint8_t* key, size_t length) {
     size_t i = 0;
     UintT hash = 0;
     while (i != length) {
@@ -32,7 +54,7 @@ UintT one_at_a_time_hash(const uint8_t* key, size_t length) {
 
 // http://www.cse.yorku.ca/~oz/hash.html
 template<typename UintT>
-UintT DJB2Hash(std::string_view str) {
+static inline UintT DJB2Hash(std::string_view str) {
     UintT hash = 5381;
     for (uint8_t c : str) {
         hash = hash * 33 + c;
@@ -42,7 +64,7 @@ UintT DJB2Hash(std::string_view str) {
 
 // https://www.programmingalgorithms.com/algorithm/sdbm-hash/cpp/
 template<typename UintType>
-UintType SDBMHash(std::string_view str) {
+static inline UintType SDBMHash(std::string_view str) {
     UintType hash = 0;
     for (char c : str) {
         hash = c + (hash << 6) + (hash << 16) - hash;
@@ -52,7 +74,7 @@ UintType SDBMHash(std::string_view str) {
 
 // https://www.programmingalgorithms.com/algorithm/pjw-hash/cpp/
 template<typename UintT, uint8_t BitsInUnsignedInt = sizeof(UintT) * 8>
-UintT PJWHash(std::string_view str) {
+static inline UintT PJWHash(std::string_view str) {
     const uint8_t ThreeQuarters     = (BitsInUnsignedInt  * 3) / 4;
     const uint8_t OneEighth         = BitsInUnsignedInt / 8;
     const auto MaxUintT = std::numeric_limits<UintT>::max();

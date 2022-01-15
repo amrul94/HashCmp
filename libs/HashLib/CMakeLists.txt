@@ -10,9 +10,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 set(CITY_HASH cityhash/citycrc.h cityhash/config.h cityhash/city.h cityhash/city.cc)
 set(FARM_HASH farmhash/farmhash.h farmhash/farmhash.cc)
 set(FAST_HASH fasthash/fasthash.h fasthash/fasthash.c)
-file(GLOB HIGHWAYHASH "*.h" "*.cpp")
+file(GLOB HIGHWAYHASH "*.h" "*.cpp" "*.cc")
 set(JENKINS_HASH spooky_hash/spooky.h spooky_hash/spooky.c)
 set(METRO_HASH metro_hash/metrohash64.h metro_hash/metrohash64.cpp metro_hash/platform.h)
+set(MUM_MIR mum-mir/mum.h mum-mir/mum.cc mum-mir/mir-hash.h)
 set(MURMUR_HASH murmur_hash/MurmurHash1.h murmur_hash/MurmurHash1.cpp
         murmur_hash/MurmurHash2.h murmur_hash/MurmurHash2.cpp
         murmur_hash/MurmurHash3.h murmur_hash/MurmurHash3.cpp)
@@ -33,9 +34,8 @@ set(T1HA_HASH t1ha/t1ha.h t1ha/t1ha0.c t1ha/t1ha0_ia32aes_a.h t1ha/t1ha0_ia32aes
         t1ha/t1ha_selfcheck.h t1ha/t1ha_selfcheck_all.c)
 set(WY_HASH wyhash/wyhash.h wyhash/wyhash32.h)
 set(XX_HASH xx_hash/xxhash.h xx_hash/xxhash.c xx_hash/xxh3.h)
-set(OTHERS_HASH hash_functions.h hash_functions.cpp)
+set(OTHERS_HASH hash_functions.h)
 
-add_library(HashLib STATIC ${CITY_HASH} ${FARM_HASH} ${FAST_HASH} ${HIGHWAYHASH} ${JENKINS_HASH} ${METRO_HASH} ${MURMUR_HASH}
-        ${MX3} ${NMHASH} ${PEARSON_HASH} ${PENGY_HASH} ${ROLLING_HASH} ${SIPHASH} ${SUPER_FAST_HASH} ${T1HA_HASH}
-        ${XX_HASH} ${WY_HASH}
-        ${OTHERS_HASH})
+add_library(HashLib STATIC ${CITY_HASH} ${FARM_HASH} ${FAST_HASH} ${HIGHWAYHASH} ${JENKINS_HASH} ${METRO_HASH}
+        ${MUM_MIR} ${MURMUR_HASH} ${MX3} ${NMHASH} ${PEARSON_HASH} ${PENGY_HASH} ${ROLLING_HASH} ${SIPHASH}
+        ${SUPER_FAST_HASH} ${T1HA_HASH} ${XX_HASH} ${WY_HASH} ${OTHERS_HASH})

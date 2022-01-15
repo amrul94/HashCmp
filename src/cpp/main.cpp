@@ -39,12 +39,8 @@ void LocalSpeedTest(tests::ReportsRoot& report_root) {
 }
 
 void TempTests(tests::ReportsRoot& report_root) {
-    std::string str = "test_string";
+    std::vector<std::string> strings = {"key", "key2", "key3", "key4", "key5"};
 
-    using namespace highwayhash;
-    const highwayhash::HH_U64 key2[2] = {1234, 5678};
-    char in[8] = {1};
-    std::cout << SipHash(key2, in, 8) << std::endl;
     LocalSpeedTest(report_root);
 }
 
