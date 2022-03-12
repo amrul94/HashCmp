@@ -384,42 +384,58 @@ namespace hfl {
 
 //---------- PearsonHashes ---------
 
-    class [[maybe_unused]] PearsonHash16Wrapper : public BaseHash16Wrapper {
+    class [[maybe_unused]] PearsonHash16 {
+    public:
+        uint16_t operator()(std::string_view str) const;
+        void Init() const;
     private:
-        void PearsonHashInit() const;
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
 
-        mutable std::once_flag init_flag_;
         mutable std::vector<uint16_t> t16_;
         const uint32_t table_size_ = 65536;
         const uint32_t mask_ = 65535;
     };
 
-    class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
-
+    class [[maybe_unused]] PearsonHash16Wrapper : public BaseHash16Wrapper {
     private:
-        void PearsonHashInit() const;
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
-
+        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
 
         mutable std::once_flag init_flag_;
+        PearsonHash16 hash_;
+    };
+
+    class [[maybe_unused]] PearsonHash24 {
+    public:
+        [[nodiscard]] uint24_t operator()(std::string_view str) const;
+
+        void Init() const;
+    private:
+
         mutable std::vector<uint32_t> t24_;
         const uint32_t table_size_ = 16'777'216;
         const uint32_t mask_ = 16'777'215;
-
     };
+
+    class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
+    private:
+        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+
+        mutable std::once_flag init_flag_;
+        PearsonHash24 hash_;
+    };
+
+
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
 
-        mutable std::once_flag init_flag;
+        mutable std::once_flag init_flag_;
     };
 
     class [[maybe_unused]] PearsonHash64Wrapper : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
 
-        mutable std::once_flag init_flag;
+        mutable std::once_flag init_flag_;
     };
 
 //----------- PengyHash ------------
@@ -486,7 +502,14 @@ namespace hfl {
     private:
         [[nodiscard]] uint64_t Hash(std::string_view str) const override;
 
-        const highwayhash::HH_U64 key2_[2] = {1234, 5678};
+        const highwayhash::HH_U64 key_[2] = {1234, 5678};
+    };
+
+    class [[maybe_unused]] SipHash13AVX2Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+
+        const highwayhash::HH_U64 key_[2] = {1234, 5678};
     };
 
     class [[maybe_unused]] HalfSipHashWrapper : public BaseHash32Wrapper {
@@ -507,6 +530,11 @@ namespace hfl {
     class [[maybe_unused]] T1HA0_32beWrapper : public BaseHash32Wrapper {
     private:
         [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+    };
+
+    class [[maybe_unused]] T1HA0_AVX2_Wrapper : public BaseHash64Wrapper {
+    private:
+        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
     };
 
     class [[maybe_unused]] T1HA1LeWrapper : public BaseHash64Wrapper {

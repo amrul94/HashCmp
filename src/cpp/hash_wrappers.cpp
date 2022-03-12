@@ -141,7 +141,7 @@ namespace hfl {
     uint64_t HighwayHashWrapper::Hash(std::string_view str) const {
         using namespace highwayhash;
 
-        const HHKey key HH_ALIGNAS(32) = {1, 2, 3, 4};
+        static const HHKey key HH_ALIGNAS(32) = {1, 2, 3, 4};
         HHStateT<HH_TARGET> state(key);
         HHResult64 result;
         HighwayHashT(&state, str.data(), str.size(), &result);
@@ -220,23 +220,21 @@ namespace hfl {
         return mir_hash(str.data(), str.size(), 0);
     }
 
-
-
 //-------------- MX3 ---------------
 
     uint64_t MX3HashWrapper::Hash(std::string_view str) const {
-        const auto* const key = reinterpret_cast<const uint8_t*>(str.data());
-        return mx3::hash(key, static_cast<int>(str.size()), 0);
+        const auto* key = reinterpret_cast<const uint8_t*>(str.data());
+        return mx3::hash(key, str.size(), 0);
     }
 
 //------------- NMHASH -------------
 
     uint32_t nmHash32Wrapper::Hash(std::string_view str) const {
-        return NMHASH32(str.data(), static_cast<int>(str.size()), 0);
+        return NMHASH32(str.data(), str.size(), 0);
     }
 
     uint32_t nmHash32XWrapper::Hash(std::string_view str) const {
-        return NMHASH32X(str.data(), static_cast<int>(str.size()), 0);
+        return NMHASH32X(str.data(), str.size(), 0);
     }
 
 //--- Paul Hsieh's SuperFastHash ---
@@ -246,14 +244,13 @@ namespace hfl {
     }
 
 //---------- PearsonHashes ---------
-    void PearsonHash16Wrapper::PearsonHashInit() const {
+    void PearsonHash16::Init() const {
         t16_.resize(table_size_);
         iota(t16_.begin(), t16_.end(), uint16_t(0));
         shuffle(t16_.begin(), t16_.end(), std::mt19937(std::random_device()()));
     }
 
-    uint16_t PearsonHash16Wrapper::Hash(std::string_view str) const {
-        std::call_once(init_flag_, &PearsonHash16Wrapper::PearsonHashInit, this);
+    uint16_t PearsonHash16::operator()(std::string_view str) const {
         uint16_t hash;
         for (auto c : str) {
             hash = t16_[hash ^ (65535 & c)];
@@ -261,14 +258,18 @@ namespace hfl {
         return hash;
     }
 
-    void PearsonHash24Wrapper::PearsonHashInit() const {
+    uint16_t PearsonHash16Wrapper::Hash(std::string_view str) const {
+        std::call_once(init_flag_, &PearsonHash16::Init, &hash_);
+        return hash_(str);
+    }
+
+    void PearsonHash24::Init() const {
         t24_.resize(table_size_);
         iota(t24_.begin(), t24_.end(), uint32_t(0));
         shuffle(t24_.begin(), t24_.end(), std::mt19937(std::random_device()()));
     }
 
-    uint24_t PearsonHash24Wrapper::Hash(std::string_view str) const {
-        std::call_once(init_flag_, &PearsonHash24Wrapper::PearsonHashInit, this);
+    uint24_t PearsonHash24::operator()(std::string_view str) const {
         uint24_t hash;
         for (auto c : str) {
             uint24_t index = hash ^ (mask_ & c);
@@ -277,13 +278,18 @@ namespace hfl {
         return hash;
     }
 
+    uint24_t PearsonHash24Wrapper::Hash(std::string_view str) const {
+        std::call_once(init_flag_, &PearsonHash24::Init, &hash_);
+        return hash_(str);
+    }
+
     uint32_t PearsonHash32Wrapper::Hash(std::string_view str) const {
-        std::call_once(init_flag, pearson_hash_init);
+        std::call_once(init_flag_, pearson_hash_init);
         return pearson_hash_32(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
     }
 
     uint64_t PearsonHash64Wrapper::Hash(std::string_view str) const {
-        std::call_once(init_flag, pearson_hash_init);
+        std::call_once(init_flag_, pearson_hash_init);
         return pearson_hash_64(reinterpret_cast<const uint8_t*>(str.data()), str.size(), 0);
     }
 
@@ -304,7 +310,11 @@ namespace hfl {
     }
 
     uint64_t SipHashAVX2Wrapper::Hash(std::string_view str) const {
-        return highwayhash::SipHash(key2_, str.data(), str.size());
+        return highwayhash::SipHash(key_, str.data(), str.size());
+    }
+
+    uint64_t SipHash13AVX2Wrapper::Hash(std::string_view str) const {
+        return highwayhash::SipHash13(key_, str.data(), str.size());
     }
 
     uint32_t HalfSipHashWrapper::Hash(std::string_view str) const {
@@ -320,6 +330,11 @@ namespace hfl {
     uint32_t T1HA0_32beWrapper::Hash(std::string_view str) const {
         return t1ha0_32be(str.data(), str.size(), 0);
     }
+
+    uint64_t T1HA0_AVX2_Wrapper::Hash(std::string_view str) const {
+        return t1ha0_ia32aes_avx2(str.data(), str.size(), 0);
+    }
+
 
     uint64_t T1HA1LeWrapper::Hash(std::string_view str) const {
         return t1ha1_le(str.data(), str.size(), 0);

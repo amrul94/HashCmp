@@ -16,13 +16,12 @@ public:
     [[nodiscard]] double GetTotalTime() const;
 
 private:
-    clock_t GetTime();
+    static double GetTime();
 
     tms tms_time_{};
-    clock_t start_time_ = 0;
-    clock_t stop_time_ = 0;
-    clock_t total_time = 0;
-    const long double sc_clk_tck_ = static_cast<long double>(sysconf(_SC_CLK_TCK));
+    double start_time_ = 0;
+    double stop_time_ = 0;
+    double total_time = 0;
 };
 
 std::ostream& operator<< (std::ostream& out, const Timer& point);
@@ -37,13 +36,15 @@ class LogDuration {
 public:
     using Clock = std::chrono::steady_clock;
 
-    explicit LogDuration(std::string_view id, std::ostream& out = std::cerr);
+    explicit LogDuration(std::string_view id, std::ostream& out = std::cerr)
+            : id_(id), out_(out) {
+    }
 
     ~LogDuration();
 
 private:
     const std::string id_;
-    Timer timer_;
+    const Clock::time_point start_time_ = Clock::now();
     std::ostream& out_;
 };
 

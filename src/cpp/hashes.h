@@ -88,6 +88,7 @@ namespace hfl {
     [[maybe_unused]] inline constinit SipHashWrapper siphash;
     [[maybe_unused]] inline constinit SipHash13Wrapper siphash13;
     [[maybe_unused]] inline constinit SipHashAVX2Wrapper siphash_avx2;
+    [[maybe_unused]] inline constinit SipHash13AVX2Wrapper siphash13_avx2;
     [[maybe_unused]] inline constinit HalfSipHashWrapper halfsiphash;
 
     [[maybe_unused]] inline constinit SpookyHash16Wrapper spooky_hash_16;
@@ -98,6 +99,7 @@ namespace hfl {
 
     [[maybe_unused]] inline constinit T1HA0_32leWrapper t1ha0_32le_hash;
     [[maybe_unused]] inline constinit T1HA0_32beWrapper t1ha0_32be_hash;
+    [[maybe_unused]] inline constinit T1HA0_AVX2_Wrapper t1ha0_avx2_hash;
     [[maybe_unused]] inline constinit T1HA1LeWrapper t1ha1_le_hash;
     [[maybe_unused]] inline constinit T1HA1BeWrapper t1ha1_be_hash;
     [[maybe_unused]] inline constinit T1HA2AtonceWrapper t1ha2_atonce_hash;

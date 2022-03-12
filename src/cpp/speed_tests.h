@@ -18,32 +18,44 @@ namespace tests {
         double sec_time{};
     };
 
-    template<typename HashStruct>
-    double InnerLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    template<typename HashFunc>
+    double InnerLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                              ReportsRoot& reports_root);
 
-    template<typename HashStruct>
-    double OuterLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    template<typename HashFunc>
+    double OuterLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                              ReportsRoot& reports_root);
 
-    template<typename HashStruct>
-    HashSpeed HashSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    template<typename HashFunc>
+    HashSpeed HashSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                            ReportsRoot& reports_root);
+
+    [[maybe_unused]] boost::json::object SpeedTests16(const std::vector<std::string>& words, ReportsRoot& reports_root);
+
+    [[maybe_unused]] boost::json::object SpeedTests24(const std::vector<std::string>& words, ReportsRoot& reports_root);
+
+    [[maybe_unused]] boost::json::object SpeedTests32(const std::vector<std::string>& words, ReportsRoot& reports_root);
+
+    [[maybe_unused]] boost::json::object SpeedTests48(const std::vector<std::string>& words, ReportsRoot& reports_root);
+
+    [[maybe_unused]] boost::json::object SpeedTests64(const std::vector<std::string>& words, ReportsRoot& reports_root);
 
     template<typename HashStructs>
-    void SpeedTests([[maybe_unused]] const HashStructs& hashes, const std::vector<std::string>& words, ReportsRoot& reports_root);
+    void SpeedTests(const HashStructs& hashes, const std::vector<std::string>& words, ReportsRoot& reports_root);
 
     void RunSpeedTests(uint64_t num_blocks, uint32_t block_length, ReportsRoot& reports_root);
 
 // ====================================
 
-    template<typename HashStruct>
-    double InnerLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
-        const auto sc_clk_tck = static_cast<long double>(sysconf(_SC_CLK_TCK));
-
+    template<typename HashFunc>
+    double InnerLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                              ReportsRoot& reports_root) {
         Timer timer;
-        auto sum_hashes = static_cast<uint64_t>(hs.hasher("initial hash"));
+        auto sum_hashes = static_cast<uint64_t>(func("initial hash"));
 
         for (const std::string& word : words) {
             timer.Start();
-            sum_hashes += static_cast<uint64_t>(hs.hasher(word));
+            sum_hashes += static_cast<uint64_t>(func(word));
             timer.End();
         }
 
@@ -53,14 +65,15 @@ namespace tests {
         return timer.GetTotalTime();
     }
 
-    template<typename HashStruct>
-    double OuterLoopSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
-        auto sum_hashes = static_cast<uint64_t>(hs.hasher("initial hash"));
+    template<typename HashFunc>
+    double OuterLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                              ReportsRoot& reports_root) {
+        auto sum_hashes = static_cast<uint64_t>(func("initial hash"));
 
         Timer timer1;
         timer1.Start();
         for (const auto & word : words) {
-            sum_hashes += static_cast<uint64_t>(hs.hasher(word));
+            sum_hashes += static_cast<uint64_t>(func(word));
         }
         timer1.End();
 
@@ -83,36 +96,18 @@ namespace tests {
     }
 
 
-    template<typename HashStruct>
-    HashSpeed HashSpeedTest(const HashStruct& hs, const std::vector<std::string>& words, ReportsRoot& reports_root) {
+    template<typename HashFunc>
+    HashSpeed HashSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                            ReportsRoot& reports_root) {
         LOG_DURATION_STREAM("\tlog duration all time", reports_root.logger);
-        reports_root.logger << boost::format("\n%1%:") % hs.name << std::endl;
+        reports_root.logger << boost::format("\n%1%:") % hash_name << std::endl;
 
-        const double total_time_1 = InnerLoopSpeedTest(hs, words, reports_root);
-        const double total_time_2 = OuterLoopSpeedTest(hs, words, reports_root);
+        const double total_time_1 = InnerLoopSpeedTest(func, hash_name, words, reports_root);
+        const double total_time_2 = OuterLoopSpeedTest(func, hash_name, words, reports_root);
         const double best_total_time = total_time_1 < total_time_2 ? total_time_1 : total_time_2;
 
         reports_root.logger << boost::format("\tbest timer: %1% sec\n") % best_total_time;
-        return HashSpeed{hs.name, best_total_time};
-    }
-
-    template<typename HashStructs>
-    void SpeedTests(const HashStructs& hashes, const std::vector<std::string>& words, ReportsRoot& reports_root) {
-        [[maybe_unused]] const auto hash_bits = hashes.front().bits;
-
-        reports_root.logger << boost::format("start %1% bits") % hash_bits;
-
-        auto out_json = detail::GetSpeedTestJson(hash_bits, words.size(), reports_root);
-        boost::json::object speed;
-        for (const auto& current_hash : hashes) {
-            HashSpeed hs = HashSpeedTest(current_hash, words, reports_root);
-            speed[hs.name] = std::to_string(hs.sec_time) + " sec";
-        }
-
-        out_json.obj["Speed"] = speed;
-        out_json.out << out_json.obj;
-
-        reports_root.logger << boost::format("end %1% bits\n\n") % hash_bits;
+        return HashSpeed{std::string{hash_name}, best_total_time};
     }
 }
 

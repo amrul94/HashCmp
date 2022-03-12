@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "log_duration.h"
+#include "cpu_and_wall_time.h"
 
 void Timer::Start() {
     start_time_ = GetTime();
@@ -12,32 +13,41 @@ void Timer::End() {
 }
 
 double Timer::GetTotalTime() const {
-    return static_cast<double>(total_time / sc_clk_tck_);
+    return total_time;
 }
 
-clock_t Timer::GetTime() {
-    return times(&tms_time_);
+double Timer::GetTime() {
+    //return times(&tms_time_);
+    return get_cpu_time();
 }
 
 std::ostream& operator<< (std::ostream& out, const Timer& timer) {
-    static double sec_per_min = 60;
-    double time = timer.GetTotalTime();
+    const double time = timer.GetTotalTime();
+    const long round_time = static_cast<long>(std::round(time));
 
-    if (time < sec_per_min) {
+    static const long sec_per_min = 60;
+    if (round_time < sec_per_min) {
         out << time << " sec";
     } else {
-        out << std::round(time) / sec_per_min << " min";
+        out << round_time / sec_per_min << " min ";
+        out << round_time % sec_per_min << " sec";
+        out << " (" << time << " sec)";
     }
 
     return out;
 }
 
-LogDuration::LogDuration(std::string_view id, std::ostream &out)
-    : id_(id), out_(out) {
-    timer_.Start();
-}
-
 LogDuration::~LogDuration() {
-    timer_.End();
-    out_ << id_ << ": " << timer_ << std::endl;
+    using namespace std::chrono;
+    using namespace std::literals;
+
+    const auto end_time = Clock::now();
+    const auto dur = end_time - start_time_;
+    if (duration_cast<milliseconds>(dur).count() < 1000) {
+        out_ << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
+    } else if (duration_cast<seconds>(dur).count() < 60) {
+        out_ << id_ << ": "s << duration_cast<seconds>(dur).count() << " sec"s << std::endl;
+    } else {
+        out_ << id_ << ": "s << duration_cast<minutes>(dur).count() << " min"s << std::endl;
+    }
 }

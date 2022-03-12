@@ -11,7 +11,7 @@
 //=============================================================================
 
 // https://github.com/rurban/smhasher/blob/master/Hashes.cpp
-static inline uint32_t FNV32a(const void *key, int len, uint32_t seed) {
+static inline uint32_t FNV32a(const char *key, int len, uint32_t seed) {
     uint32_t h = seed;
     const auto  *data = (const uint8_t *)key;
 

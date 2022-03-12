@@ -15,32 +15,19 @@
 
 #include "hashes.h"
 
-#include <pengyhash/pengyhash.h>
-
-#include "siphash/siphash.h"
-
-#include <highwayhash/sip_hash.h>
-
 void LocalSpeedTest(tests::ReportsRoot& report_root) {
     pcg64 rng;
     const auto words = GenerateRandomDataBlocks(rng, 1'000'000, FOUR_KILOBYTES);
 
     hfl::Hash32Struct city_hash_32s {"CityHash32", hfl::city_hash_32, 32};
-    tests::HashSpeedTest(city_hash_32s, words, report_root);
 
     const auto hashes32 = hfl::Build32bitsHashes();
-    tests::HashSpeedTest(hashes32.back(), words, report_root);
 
     const auto hashes64 = hfl::Build64bitsHashes();
-    tests::HashSpeedTest(hashes64[hashes64.size() - 4], words, report_root);
-    tests::HashSpeedTest(hashes64[hashes64.size() - 3], words, report_root);
-    tests::HashSpeedTest(hashes64[hashes64.size() - 2], words, report_root);
-    tests::HashSpeedTest(hashes64.back(), words, report_root);
 }
 
 void TempTests(tests::ReportsRoot& report_root) {
     std::vector<std::string> strings = {"key", "key2", "key3", "key4", "key5"};
-
     LocalSpeedTest(report_root);
 }
 
@@ -70,7 +57,7 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
                 break;
             case 5:
                 reports_root.logger << "start speed test\n\n";
-                tests::RunSpeedTests(200'000, FOUR_KILOBYTES, reports_root);
+                tests::RunSpeedTests(2'000'000, FOUR_KILOBYTES, reports_root);
                 reports_root.logger << "end speed test\n\n\n";
                 break;
             default:
@@ -89,9 +76,11 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{50};
+    const std::vector test_numbers{5};
     tests::ReportsRoot reports_root = CreateReportsRoot();
 
     RunTests(test_numbers, reports_root);
+    std::vector<int> vec;
+    std::sort(std::execution::par, vec.begin(), vec.end());
 }
 

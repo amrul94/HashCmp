@@ -88,6 +88,7 @@ namespace hfl {
         hashes.emplace_back("CityHash64"s, city_hash_64, bits);
         hashes.emplace_back("FarmHash64"s, farm_hash_64, bits);
         hashes.emplace_back("MetroHash64"s, metro_hash_64, bits);
+        hashes.emplace_back("T1HA0 AVX2 hash", t1ha0_avx2_hash, bits);
         hashes.emplace_back("T1HA1 le hash", t1ha1_le_hash, bits);
         hashes.emplace_back("T1HA1 be hash", t1ha1_be_hash, bits);
         hashes.emplace_back("T1HA2 atonce hash", t1ha2_atonce_hash, bits);
@@ -100,6 +101,7 @@ namespace hfl {
         hashes.emplace_back("SipHash", siphash, bits);
         hashes.emplace_back("SipHash13", siphash13, bits);
         hashes.emplace_back("SipHash (Google Impl)", siphash_avx2, bits);
+        hashes.emplace_back("SipHash13 (Google Impl)", siphash13_avx2, bits);
         hashes.emplace_back("HighwayHash", highway_hash, bits);
         hashes.emplace_back("MUM hash", mum_hash, bits);
         hashes.emplace_back("mir hash", mir_hash, bits);

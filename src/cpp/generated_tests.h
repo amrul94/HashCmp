@@ -1,6 +1,7 @@
 #ifndef THESIS_WORK_WORDS_TESTS_H
 #define THESIS_WORK_WORDS_TESTS_H
 
+#include <deque>
 #include <execution>
 #include <fstream>
 #include <future>
