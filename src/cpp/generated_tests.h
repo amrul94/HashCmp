@@ -49,7 +49,7 @@ namespace tests {
     // ===============================================================================
 
     template<typename HashStruct>
-    auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs, const GenBlocksParameters& gbp,
+    auto HashTestWithGenBlocks(pcg64& generator, const HashStruct& hs, const GenBlocksParameters& gbp,
                                ReportsRoot& reports_root) {
         LOG_DURATION_STREAM(hs.name, reports_root.logger);
 
@@ -63,7 +63,7 @@ namespace tests {
         auto num_words = static_cast<uint64_t>(pow(2, gbp.test_bits / 2));
         for (uint64_t i = 0; num_words <= gbp.num_keys; num_words *= 2) {
             for (; i < num_words; ++i) {
-                std::string str = GenerateRandomDataBlock(generators.back(), gbp.words_length);
+                std::string str = GenerateRandomDataBlock(generator, gbp.words_length);
                 const auto hash = static_cast<uint64_t>(hs.hasher(str));
                 const uint64_t modified = ModifyHash(gbp, hash);
                 bool& coll_flag = coll_flags[modified];
@@ -87,9 +87,9 @@ namespace tests {
 
 // Возможно стоит поделить эту функции на части, так как она очень большая
     template<typename HashStructs>
-    void TestWithGeneratedBlocks(const std::vector<pcg64>& generators, const HashStructs& hash_vec,
+    void TestWithGeneratedBlocks(pcg64& generator, const HashStructs& hash_vec,
                                  const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
-        reports_root.logger << "start " << gbp.hash_bits << " bits" << std::endl;
+        reports_root.logger << "--- START " << gbp.hash_bits << " BITS TEST ---" << std::endl;
 
         auto out_json = detail::GetGenTestJson(gbp, reports_root);
 
@@ -97,15 +97,15 @@ namespace tests {
         std::mutex local_mutex;
 
         for (const auto& current_hash : hash_vec) {
-            std::vector<pcg64> copy_gens = generators;
-            auto [hash_name, counters] = HashTestWithGenBlocks(copy_gens, current_hash, gbp, reports_root);
+            pcg64 copy_gen = generator;
+            auto [hash_name, counters] = HashTestWithGenBlocks(copy_gen, current_hash, gbp, reports_root);
             collisions[hash_name] = std::move(counters);
         }
 
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;
 
-        reports_root.logger << "end " << gbp.hash_bits << " bits" << std::endl << std::endl;
+        reports_root.logger << "--- END " << gbp.hash_bits << " BITS TEST ---" << std::endl << std::endl;
     }
 }
 

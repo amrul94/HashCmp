@@ -68,11 +68,11 @@ namespace hfl {
 //----------- FarmHashes ----------
 
     uint32_t FarmHash32Wrapper::Hash(std::string_view str) const {
-        return util::Hash32(str);
+        return NAMESPACE_FOR_HASH_FUNCTIONS::Hash32(str);
     }
 
     uint64_t FarmHash64Wrapper::Hash(std::string_view str) const {
-        return util::Hash64(str);
+        return NAMESPACE_FOR_HASH_FUNCTIONS::Hash64(str);
     }
 
 //------------ FastHash ------------

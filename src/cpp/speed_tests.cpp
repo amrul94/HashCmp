@@ -412,12 +412,12 @@ namespace tests {
     }
 
     #define RUN_SPEED_TESTS_IMPL(BITS, WORDS, ROOT)                                 \
-        (ROOT).logger << boost::format("start %1% bits") % (BITS);                  \
+        (ROOT).logger << boost::format("--- START %1% BITS TEST ---") % (BITS);                  \
         auto out_json##BITS = detail::GetSpeedTestJson(BITS, (WORDS).size(), ROOT); \
         boost::json::object speed##BITS = SpeedTests##BITS(WORDS, ROOT);            \
         out_json##BITS.obj["Speed"] = speed##BITS;                                  \
         out_json##BITS.out << out_json##BITS.obj;                                   \
-        (ROOT).logger << boost::format("end %1% bits\n\n") % (BITS)
+        (ROOT).logger << boost::format("--- END %1% BITS TEST ---\n\n") % (BITS)
 
 
     void RunSpeedTests(uint64_t num_blocks, uint32_t block_length, ReportsRoot& reports_root) {

@@ -32,33 +32,33 @@ void TempTests(tests::ReportsRoot& report_root) {
 }
 
 void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_root) {
-    LOG_DURATION_STREAM("Full time", reports_root.logger);
+    LOG_DURATION_STREAM("FULL TIME", reports_root.logger);
     for (int test_number : test_numbers) {
         switch (test_number) {
             case 1:
-                reports_root.logger << "start DistributionTest\n\n";
+                reports_root.logger << "=== START DISTRIBUTION TEST ===\n\n";
                 tests::RunDistributionTests(reports_root);
-                reports_root.logger << "end DistributionTest\n\n\n";
+                reports_root.logger << "=== END DISTRIBUTION TEST ===\n\n\n";
                 break;
             case 2:
-                reports_root.logger << "start generated blocks test (length = 16)\n\n";
+                reports_root.logger << "=== START GENERATED BLOCKS TEST (length = 16) ===\n\n";
                 tests::RunTestWithGeneratedBlocks(16, reports_root);
-                reports_root.logger << "end generated blocks test (length = 16)\n\n\n";
+                reports_root.logger << "=== END GENERATED BLOCKS TEST (length = 16) ===\n\n\n";
                 break;
             case 3:
-                reports_root.logger << "start generated blocks test (length = 4096)\n\n";
+                reports_root.logger << "=== START GENERATED BLOCKS TEST (length = 4096) ===\n\n";
                 tests::RunTestWithGeneratedBlocks(FOUR_KILOBYTES, reports_root);
-                reports_root.logger << "end generated blocks test (length = 4096)\n\n\n";
+                reports_root.logger << "=== END GENERATED BLOCKS TEST (length = 4096) ===\n\n\n";
                 break;
             case 4:
-                reports_root.logger << "start english words test\n\n";
+                reports_root.logger << "=== START ENGLISH WORDS TEST ===\n\n";
                 tests::RunTestWithEnglishWords(reports_root);
-                reports_root.logger << "end english words test\n\n\n";
+                reports_root.logger << "=== END ENGLISH WORDS TEST ===\n\n\n";
                 break;
             case 5:
-                reports_root.logger << "start speed test\n\n";
+                reports_root.logger << "=== START SPEED TEST ===\n\n";
                 tests::RunSpeedTests(2'000'000, FOUR_KILOBYTES, reports_root);
-                reports_root.logger << "end speed test\n\n\n";
+                reports_root.logger << "=== END SPEED TEST ===\n\n\n";
                 break;
             default:
                 TempTests(reports_root);
@@ -76,11 +76,8 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{5};
+    const std::vector test_numbers{1, 2, 3, 4, 5};
     tests::ReportsRoot reports_root = CreateReportsRoot();
-
     RunTests(test_numbers, reports_root);
-    std::vector<int> vec;
-    std::sort(std::execution::par, vec.begin(), vec.end());
 }
 

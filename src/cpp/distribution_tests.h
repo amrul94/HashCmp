@@ -38,24 +38,24 @@ namespace tests {
 
     template<typename HashStruct>
     void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM(hs.name, reports_root.logger);
+        LOG_DURATION_STREAM('\t' + hs.name, reports_root.logger);
 
         // Выделить buckets, max_bucket и мьютекс в отдельный класс (например, Distributor).
         // При этом добавление нового элемента вынести в метод класса AddHash
-        std::vector<Bucket> buckets(dtp.num_buckets, 0);
+        std::vector<std::atomic<Bucket>> buckets(dtp.num_buckets);
         const auto max_bucket = std::numeric_limits<Bucket>::max();
 
-        std::mutex mutex;
-        auto lambda = [&mutex, &hs, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
-            // Создать строку длины sizeof(number), записывать числа в эту строку
-            // и хешировать эту строку. Это должно избавить от лишних выделений памяти
+        auto lambda = [&hs, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
             for (uint64_t number = start; number < end; ++number) {
                 const uint64_t hash = hs.hasher(number);
                 const uint64_t modified = ModifyHash(dtp, hash);
-                std::lock_guard guard{mutex};
-                Bucket& bucket = buckets[modified];
-                const uint64_t tmp = (bucket != max_bucket) ? 1 : 0;
-                bucket += tmp;
+                std::atomic<Bucket>& current_bucket = buckets[modified];
+                Bucket old_bucket, new_bucket;
+                do {
+                    old_bucket = current_bucket.load();
+                    const Bucket tmp = (old_bucket != max_bucket) ? 1 : 0;
+                    new_bucket = old_bucket + tmp;
+                } while (!current_bucket.compare_exchange_weak(old_bucket, new_bucket));
             }
         };
 
@@ -79,11 +79,11 @@ namespace tests {
 
     template<typename HashStructs>
     void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-        reports_root.logger << "start " << dtp.hash_bits << " bits" << std::endl;
+        reports_root.logger << "--- START " << dtp.hash_bits << " BITS TEST ---\n";
         for (const auto& current_hash : funcs) {
             HashDistTest(current_hash, dtp, reports_root);
         }
-        reports_root.logger << "end " << dtp.hash_bits << " bits" << std::endl << std::endl;
+        reports_root.logger << "--- END " << dtp.hash_bits << " BITS TEST ---\n\n";
     }
 }
 

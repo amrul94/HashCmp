@@ -90,7 +90,7 @@ namespace tests {
 
         const double total_time = timer1.GetTotalTime() - timer2.GetTotalTime();
         std::cout << boost::format("\tsum k: %1%\n") % sum_k;
-        reports_root.logger << boost::format("\tsecond timer: %1% sec\n") % total_time;
+        reports_root.logger << boost::format("\t\tsecond timer: %1% sec\n") % total_time;
 
         return total_time;
     }
@@ -99,8 +99,8 @@ namespace tests {
     template<typename HashFunc>
     HashSpeed HashSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
                             ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM("\tlog duration all time", reports_root.logger);
-        reports_root.logger << boost::format("\n%1%:") % hash_name << std::endl;
+        LOG_DURATION_STREAM("\t\tlog duration all time", reports_root.logger);
+        reports_root.logger << boost::format("\n%1%:\n") % hash_name;
 
         const double total_time_1 = InnerLoopSpeedTest(func, hash_name, words, reports_root);
         const double total_time_2 = OuterLoopSpeedTest(func, hash_name, words, reports_root);

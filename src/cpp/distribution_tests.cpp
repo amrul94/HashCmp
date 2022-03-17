@@ -28,7 +28,7 @@ namespace tests {
             return med_index * bin_size;
         }
 
-        boost::json::object ProcessingStatistics(const std::vector<Bucket>& buckets,
+        boost::json::object ProcessingStatistics(const std::vector<std::atomic<Bucket>>& buckets,
                                                  const DistTestParameters& dtp, const std::string& hash_name) {
             // Разгрузить эту функцию разделив ее на части
             // Возможно стоит сделать структуру для хранения json данных
@@ -102,7 +102,7 @@ namespace tests {
         }
     }
 
-    void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& dtp, const std::string& hash_name,
+    void PrintReports(const std::vector<std::atomic<Bucket>>& buckets, const DistTestParameters& dtp, const std::string& hash_name,
                       ReportsRoot& reports_root) {
 
         auto out_json = GetDistTestJson(dtp, hash_name, reports_root);
@@ -134,14 +134,11 @@ namespace tests {
     }
 
     void RunDistributionTests(ReportsRoot& reports_root) {
-        {
-            const size_t hardware_threads = std::thread::hardware_concurrency();
-            //const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
-            const size_t num_threads = 1;
-            reports_root.logger << boost::format("num_threads = %1%\n") % num_threads;
+        const size_t hardware_threads = std::thread::hardware_concurrency();
+        const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+        reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
-            RunDistTestNormal(num_threads, reports_root);
-            RunDistTestWithBins(num_threads, reports_root);
-        }
+        RunDistTestNormal(num_threads, reports_root);
+        RunDistTestWithBins(num_threads, reports_root);
     }
 }

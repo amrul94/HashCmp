@@ -42,9 +42,9 @@ namespace hfl {
     namespace detail {
         template<class Type>
         std::string WriteToString(Type source) {
-            auto size = sizeof(Type);
-            std::string str;
-            str.resize(size);
+            constexpr auto size = sizeof(Type);
+            static thread_local std::string str;
+            str.resize(sizeof(Type));
             memcpy(str.data(), &source, size);
             return str;
         }

@@ -48,7 +48,7 @@ namespace tests {
     template <typename HashStruct>
     void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vector<std::string>& words,
                               const TestParameters& tp, ReportsRoot& reports_root) {
-        reports_root.logger << boost::format("start test with %1% bits hashes\n") % tp.hash_bits;
+        reports_root.logger << boost::format("--- START TEST WITH %1% BITS HASHES ---\n") % tp.hash_bits;
 
         auto out_json = detail::GetEnglishTestJson(tp, words.size(), reports_root);
         boost::json::object collisions;
@@ -58,7 +58,7 @@ namespace tests {
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;
 
-        reports_root.logger << boost::format("end test with %1% bits hashes\n\n") % tp.hash_bits;
+        reports_root.logger << boost::format("--- END TEST WITH %1% BITS HASHES ---\n\n") % tp.hash_bits;
     }
 
 }
