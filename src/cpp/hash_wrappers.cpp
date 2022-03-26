@@ -23,6 +23,8 @@
 #include <wyhash/wyhash.h>
 #include <wyhash/wyhash32.h>
 
+#include <pcg_random.hpp>
+
 #include "hash_wrappers.h"
 
 
@@ -247,7 +249,7 @@ namespace hfl {
     void PearsonHash16::Init() const {
         t16_.resize(table_size_);
         iota(t16_.begin(), t16_.end(), uint16_t(0));
-        shuffle(t16_.begin(), t16_.end(), std::mt19937(std::random_device()()));
+        shuffle(t16_.begin(), t16_.end(), pcg64{});
     }
 
     uint16_t PearsonHash16::operator()(std::string_view str) const {
@@ -266,7 +268,7 @@ namespace hfl {
     void PearsonHash24::Init() const {
         t24_.resize(table_size_);
         iota(t24_.begin(), t24_.end(), uint32_t(0));
-        shuffle(t24_.begin(), t24_.end(), std::mt19937(std::random_device()()));
+        shuffle(t24_.begin(), t24_.end(), pcg64{});
     }
 
     uint24_t PearsonHash24::operator()(std::string_view str) const {

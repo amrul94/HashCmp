@@ -26,7 +26,7 @@
 #include "speed_tests.h"
 
 namespace tests {
-    namespace detail {
+    namespace out {
         OutputJson GetSpeedTestJson(uint16_t hash_bits, size_t num_words, ReportsRoot& reports_root) {
             const std::filesystem::path report_test_dir = "Speed tests";
             const auto report_test_path = reports_root.root_path / report_test_dir;
@@ -413,7 +413,7 @@ namespace tests {
 
     #define RUN_SPEED_TESTS_IMPL(BITS, WORDS, ROOT)                                 \
         (ROOT).logger << boost::format("--- START %1% BITS TEST ---") % (BITS);                  \
-        auto out_json##BITS = detail::GetSpeedTestJson(BITS, (WORDS).size(), ROOT); \
+        auto out_json##BITS = out::GetSpeedTestJson(BITS, (WORDS).size(), ROOT); \
         boost::json::object speed##BITS = SpeedTests##BITS(WORDS, ROOT);            \
         out_json##BITS.obj["Speed"] = speed##BITS;                                  \
         out_json##BITS.out << out_json##BITS.obj;                                   \

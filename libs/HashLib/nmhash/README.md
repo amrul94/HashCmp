@@ -9,7 +9,7 @@ Collect interesting hashes
 ### integer bijections in `NMHASH32`/`NMHASH32X`
 
 
-except common [operations](https://marc-b-reynolds.github.io/math/2017/10/13/IntegerBijections.html), some compound ones are used:
+except common [operations](https://marc-b-reynolds.github.out/math/2017/10/13/IntegerBijections.html), some compound ones are used:
 
 ```c
 x ^= x << a | x << b; // a != b

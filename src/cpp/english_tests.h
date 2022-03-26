@@ -11,7 +11,7 @@
 #include "test_parameters.h"
 
 namespace tests {
-    namespace detail {
+    namespace out {
         OutputJson GetEnglishTestJson(const TestParameters& tp, size_t num_words, ReportsRoot& reports_root);
     }
 
@@ -50,7 +50,7 @@ namespace tests {
                               const TestParameters& tp, ReportsRoot& reports_root) {
         reports_root.logger << boost::format("--- START TEST WITH %1% BITS HASHES ---\n") % tp.hash_bits;
 
-        auto out_json = detail::GetEnglishTestJson(tp, words.size(), reports_root);
+        auto out_json = out::GetEnglishTestJson(tp, words.size(), reports_root);
         boost::json::object collisions;
         for (const auto& hs : hashes) {
             collisions[hs.name] = HashTestWithEngWords(hs, words, tp, reports_root);

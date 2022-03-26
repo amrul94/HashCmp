@@ -3,6 +3,7 @@
 #include "english_tests.h"
 #include "log_duration.h"
 #include "speed_tests.h"
+#include "avalanche_tests.h"
 
 #include <boost/format.hpp>
 #include <boost/container/static_vector.hpp>
@@ -12,18 +13,18 @@
 #include <algorithm>
 #include <execution>
 #include <set>
+#include <unordered_set>
 
 #include "hashes.h"
 
 void LocalSpeedTest(tests::ReportsRoot& report_root) {
-    pcg64 rng;
-    const auto words = GenerateRandomDataBlocks(rng, 1'000'000, FOUR_KILOBYTES);
-
-    hfl::Hash32Struct city_hash_32s {"CityHash32", hfl::city_hash_32, 32};
-
-    const auto hashes32 = hfl::Build32bitsHashes();
-
-    const auto hashes64 = hfl::Build64bitsHashes();
+    for (int i = 0; i < 10; ++i) {
+        std::cout << hfl::buz_hash_64(i) << std::endl;
+    }
+    std::cout << std::endl;
+    for (int i = 0; i < 10; ++i) {
+        std::cout << hfl::buz_hash_64(i) << std::endl;
+    }
 }
 
 void TempTests(tests::ReportsRoot& report_root) {
@@ -60,6 +61,11 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
                 tests::RunSpeedTests(2'000'000, FOUR_KILOBYTES, reports_root);
                 reports_root.logger << "=== END SPEED TEST ===\n\n\n";
                 break;
+            case 6:
+                reports_root.logger << "=== START AVALANCHE TEST ===\n\n";
+                tests::RunAvalancheTests(reports_root);
+                reports_root.logger << "=== END AVALANCHE TEST ===\n\n\n";
+                break;
             default:
                 TempTests(reports_root);
                 break;
@@ -76,7 +82,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{1, 2, 3, 4, 5};
+    const std::vector test_numbers{6};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

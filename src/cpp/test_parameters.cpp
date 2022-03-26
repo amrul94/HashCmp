@@ -60,7 +60,7 @@ namespace tests {
             , test_bits(test_bits)
             , num_keys(key_counts)
             , num_threads(num_threads)
-            , mode(mode){
+            , mode(mode) {
 
     }
 

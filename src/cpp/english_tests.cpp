@@ -2,7 +2,7 @@
 #include "hashes.h"
 
 namespace tests {
-    namespace detail {
+    namespace out {
         OutputJson GetEnglishTestJson(const TestParameters& tp, size_t num_words, ReportsRoot& reports_root) {
                 const std::string test_name = "English words tests";
                 const std::filesystem::path report_test_dir = test_name;

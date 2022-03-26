@@ -15,7 +15,7 @@
 
 #include <pcg_random.hpp>
 
-#include "blocks_generator.h"
+#include "generator.h"
 #include "test_parameters.h"
 #include "log_duration.h"
 
@@ -23,7 +23,7 @@ constexpr int KILOBYTE = 1024;
 constexpr int FOUR_KILOBYTES = KILOBYTE * 4;
 
 namespace tests {
-    namespace detail {
+    namespace out {
         OutputJson GetGenTestJson(const GenBlocksParameters& gbp, ReportsRoot& reports_root);
     }
 
@@ -91,7 +91,7 @@ namespace tests {
                                  const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
         reports_root.logger << "--- START " << gbp.hash_bits << " BITS TEST ---" << std::endl;
 
-        auto out_json = detail::GetGenTestJson(gbp, reports_root);
+        auto out_json = out::GetGenTestJson(gbp, reports_root);
 
         boost::json::object collisions;
         std::mutex local_mutex;

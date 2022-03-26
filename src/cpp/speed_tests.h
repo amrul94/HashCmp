@@ -4,12 +4,12 @@
 #include "boost/format.hpp"
 #include "boost/json.hpp"
 
-#include "blocks_generator.h"
+#include "generator.h"
 #include "log_duration.h"
 #include "test_parameters.h"
 
 namespace tests {
-    namespace detail {
+    namespace out {
         OutputJson GetSpeedTestJson(uint16_t hash_bits, size_t num_words, ReportsRoot& reports_root);
     }
 

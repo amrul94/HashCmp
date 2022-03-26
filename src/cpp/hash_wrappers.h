@@ -30,21 +30,14 @@ namespace hfl {
             boost::multiprecision::unsigned_magnitude,
             boost::multiprecision::unchecked, void>>;
 
-
-    class [[maybe_unused]] bitfield24 {
-    private:
-        uint32_t value : 24;
-    };
-
-
     std::string ReadFile(std::ifstream& file);
 
     namespace detail {
         template<class Type>
         std::string WriteToString(Type source) {
-            constexpr auto size = sizeof(Type);
+            static constexpr auto size = sizeof(Type);
             static thread_local std::string str;
-            str.resize(sizeof(Type));
+            str.resize(size);
             memcpy(str.data(), &source, size);
             return str;
         }
@@ -52,6 +45,8 @@ namespace hfl {
         template<typename UintT>
         class BaseHashWrapper {
         public:
+            using HashType = UintT;
+
             UintT operator()(std::string_view str) const {
                 return Hash(str);
             }

@@ -6,7 +6,7 @@
 #include "hashes.h"
 
 namespace tests {
-    namespace detail {
+    namespace out {
         OutputJson GetGenTestJson(const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
             using namespace std::literals;
             const std::filesystem::path gen_tests_dir = "Generated blocks tests";

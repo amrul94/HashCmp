@@ -114,7 +114,9 @@ namespace hfl {
     namespace detail {
         template<typename UintT>
         struct HashStruct {
+            using HashType = UintT;
             using HashFunction = const BaseHashWrapper<UintT>&;
+
             HashStruct(std::string name, HashFunction function, uint16_t bits)
                     : name(std::move(name))
                     , hasher(function)

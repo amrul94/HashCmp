@@ -13,7 +13,7 @@
 
 namespace tests {
 
-    namespace detail {
+    namespace out {
         struct OutputJson {
             boost::json::object obj;
             std::ofstream out;
@@ -51,7 +51,7 @@ namespace tests {
     struct TestParameters {
         const uint16_t hash_bits{}; // Количество битов, которые выдает хеш-функция
         const uint16_t test_bits{}; // Количество битов для тестов (иногда задается маской)
-        uint64_t num_keys{};       // Количество входных данных для хешей
+        uint64_t num_keys{};        // Количество входных данных для хешей
         const size_t num_threads{}; // Количество потоков выполнения
         const TestFlag mode;        // Тип подсчета
 

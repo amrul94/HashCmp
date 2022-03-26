@@ -7,8 +7,8 @@
 
 namespace tests {
     namespace {
-        detail::OutputJson GetDistTestJson(const DistTestParameters& dtp, const std::string& hash_name,
-                                           ReportsRoot& reports_root) {
+        out::OutputJson GetDistTestJson(const DistTestParameters& dtp, const std::string& hash_name,
+                                        ReportsRoot& reports_root) {
             using namespace std::literals;
             const std::filesystem::path check_dist_dir = "Distribution tests";
             const std::filesystem::path hash_bits_dir = std::to_string(dtp.hash_bits);
@@ -18,7 +18,7 @@ namespace tests {
 
             const std::filesystem::path hash_out_path = hash_bits_path / report_name;
             std::ofstream out(hash_out_path);
-            return detail::OutputJson{boost::json::object{}, std::move(out)};
+            return out::OutputJson{boost::json::object{}, std::move(out)};
         }
 
         // потом переделаю
@@ -111,26 +111,26 @@ namespace tests {
 
     }
 
-    #define RUN_DIST_TEST_NORMAL_IMPL(BITS, NUM_THREADS)                        \
+    #define RUN_DIST_TEST_NORMAL_IMPL(BITS, NUM_THREADS, ROOT)                  \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();               \
         const DistTestParameters cp##BITS{BITS, NUM_THREADS, TestFlag::NORMAL}; \
-        DistributionTest(hashes##BITS, cp##BITS, reports_root)
+        DistributionTest(hashes##BITS, cp##BITS, ROOT)
 
     void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
-        RUN_DIST_TEST_NORMAL_IMPL(16, num_threads);
-        RUN_DIST_TEST_NORMAL_IMPL(24, num_threads);
-        RUN_DIST_TEST_NORMAL_IMPL(32, num_threads);
+        RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
+        RUN_DIST_TEST_NORMAL_IMPL(24, num_threads, reports_root);
+        RUN_DIST_TEST_NORMAL_IMPL(32, num_threads, reports_root);
     }
 
-    #define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS)                     \
+    #define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS, ROOT)                     \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();               \
         const DistTestParameters cp##BITS{BITS, NUM_THREADS, TestFlag::BINS};   \
-        DistributionTest(hashes##BITS, cp##BITS, reports_root)
+        DistributionTest(hashes##BITS, cp##BITS, ROOT)
 
 
     void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
-        RUN_DIST_TEST_WITH_BINS_IMPL(48, num_threads);
-        RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads);
+        RUN_DIST_TEST_WITH_BINS_IMPL(48, num_threads, reports_root);
+        RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
     }
 
     void RunDistributionTests(ReportsRoot& reports_root) {

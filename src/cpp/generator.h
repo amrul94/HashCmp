@@ -2,8 +2,11 @@
 #define THESISWORK_GENERATORS_H
 
 #include <string>
+#include <vector>
 
 #include <pcg_random.hpp>
+
+std::vector<pcg64> GetGenerators(size_t count);
 
 // в будущем возможно объединю эту функцию с WriteToHash из hash_wrappers
 std::string UintToString(uint64_t src, uint64_t size);
