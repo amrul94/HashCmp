@@ -253,9 +253,9 @@ namespace hfl {
     }
 
     uint16_t PearsonHash16::operator()(std::string_view str) const {
-        uint16_t hash;
+        uint16_t hash = 0;
         for (auto c : str) {
-            hash = t16_[hash ^ (65535 & c)];
+            hash = t16_[hash ^ (mask_ & c)];
         }
         return hash;
     }
@@ -268,11 +268,11 @@ namespace hfl {
     void PearsonHash24::Init() const {
         t24_.resize(table_size_);
         iota(t24_.begin(), t24_.end(), uint32_t(0));
-        shuffle(t24_.begin(), t24_.end(), pcg64{});
+        shuffle(t24_.begin(), t24_.end(), pcg32{});
     }
 
     uint24_t PearsonHash24::operator()(std::string_view str) const {
-        uint24_t hash;
+        uint24_t hash = 0;
         for (auto c : str) {
             uint24_t index = hash ^ (mask_ & c);
             hash = t24_[static_cast<size_t>(index)];

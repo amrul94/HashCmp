@@ -1,5 +1,7 @@
 #include "img.h"
 
+#include <stdexcept>
+
 namespace img {
 
     Image::Image(int w, int h, Color fill)
@@ -10,6 +12,11 @@ namespace img {
     }
 
     Color* Image::GetLine(int y) {
+        // Временное изменение
+        if (!(y >= 0 && y < height_)) {
+            throw std::length_error("Empty image");
+        }
+
         assert(y >= 0 && y < height_);
         return pixels_.data() + step_ * y;
     }

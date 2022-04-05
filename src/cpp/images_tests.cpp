@@ -1,57 +1,41 @@
-#include <filesystem>
-#include <iostream>
-
-#include "count_collisions.h"
-#include "img.h"
-#include "jpeg_image.h"
+#include "images_tests.h"
 #include "hashes.h"
-#include "log_duration.h"
 
+namespace tests {
+    namespace out {
+        OutputJson GetImagesTestJson(const TestParameters& tp, ReportsRoot& reports_root) {
+            const std::string test_name = "Images tests";
+            const std::filesystem::path report_test_dir = test_name;
+            const auto report_test_path = reports_root.root_path / report_test_dir;
+            std::filesystem::create_directories(report_test_path);
 
-using namespace std;
-using namespace img;
+            const std::filesystem::path report_name = std::to_string(tp.hash_bits) + " bits.json";
+            const std::filesystem::path out_path = report_test_path / report_name;
+            std::ofstream out(out_path);
+            assert(out);
 
-
-template <typename HashStruct>
-[[maybe_unused]] void TestImagesInDir(const HashStruct& hash_struct, const std::filesystem::path& p, std::ostream& report) {
-    std::unordered_map<size_t, size_t> hashes;
-    for (const auto& dir_entry: std::filesystem::directory_iterator(p)) {
-        Image image = LoadJPEG(dir_entry.path());
-        auto hash = hash_struct.hasher(image);
-        ++hashes[hash];
+            boost::json::object obj;
+            obj["Test name"] = test_name;
+            obj["Bits"] = tp.hash_bits;
+            return OutputJson{std::move(obj), std::move(out)};
+        }
     }
 
-    report << hash_struct.name << " collisions = " << CountCollisions(hashes) << std::endl;
-}
+    #define RUN_IMAGES_TEST_IMPL(BITS, NUM_THREADS, ROOT) \
+        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();   \
+        const TestParameters tp##BITS{BITS, NUM_THREADS};     \
+        TestWithImages(hashes##BITS, tp##BITS, ROOT)
 
-template <typename HashStruct>
-void TestImages(const std::vector<HashStruct>& hashes, const std::filesystem::path& p, std::ostream& report) {
-    for (const auto& hash_struct : hashes) {
-        LOG_DURATION_STREAM(hash_struct.name, std::cout);
-        TestImagesInDir(hash_struct, p, report);
-    }
-}
-
-void RunTests(const filesystem::path& image_dir) {
-    std::cout << "Test with 32 bits hashes START" << std::endl;
-    const auto hashes_32_bits = hashes::Build32bitsHashes();
-    std::ofstream file_report_32_hashes("reports/test_with_images_with_32_bits_hashes.txt");
-    TestImages(hashes_32_bits, image_dir, file_report_32_hashes);
-    std::cout << "Test with 32 bits hashes END\n" << std::endl;
-
-    std::cout << "Test with 64 bits hashes START" << std::endl;
-    const auto hashes_64_bits = hashes::Build64bitsHashes();
-    std::ofstream file_report_64_hashes("reports/test_with_images_with_64_bits_hashes.txt");
-    TestImages(hashes_64_bits, image_dir, file_report_64_hashes);
-    std::cout << "Test with 64 bits hashes END\n" << std::endl;
-}
-
-int main(int argc, const char** argv) {
-    if (argc != 2) {
-        cerr << "Usage: "sv << argv[0] << " <folder with images>"sv << endl;
-        return 1;
+    void RunImagesTests(ReportsRoot& reports_root) {
+        const size_t hardware_threads = std::thread::hardware_concurrency();
+        //const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+        const size_t num_threads = 1;
+        RUN_IMAGES_TEST_IMPL(16, num_threads, reports_root);
+        RUN_IMAGES_TEST_IMPL(24, num_threads, reports_root);
+        RUN_IMAGES_TEST_IMPL(32, num_threads, reports_root);
+        RUN_IMAGES_TEST_IMPL(48, num_threads, reports_root);
+        RUN_IMAGES_TEST_IMPL(64, num_threads, reports_root);
     }
 
-    filesystem::path image_dir = argv[1];
-    RunTests(image_dir);
 }
+

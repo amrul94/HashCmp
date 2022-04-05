@@ -70,10 +70,10 @@ namespace tests {
         RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 16, num_threads, reports_root);
 
         num_keys = static_cast<uint64_t>(std::numeric_limits<hfl::uint24_t>::max()) + 1ull;
-        //RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 24, num_threads, reports_root);
+        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 24, num_threads, reports_root);
 
         num_keys = std::numeric_limits<uint32_t>::max() + 1ull;
-        //RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 32, num_threads, reports_root);
+        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 32, num_threads, reports_root);
     }
 
     void RunTestWithGenerateNumbers(size_t num_threads, ReportsRoot& reports_root) {
@@ -89,8 +89,9 @@ namespace tests {
     void RunAvalancheTests(ReportsRoot& reports_root) {
         const size_t hardware_threads = std::thread::hardware_concurrency();
         const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+        //const size_t num_threads = 1;
         reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
         RunTestWithAllNumbers(num_threads, reports_root);
-        //RunTestWithGenerateNumbers(num_threads, reports_root);
+        RunTestWithGenerateNumbers(num_threads, reports_root);
     }
 }

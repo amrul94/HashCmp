@@ -4,3 +4,4 @@
 /reports/
 /venv/
 .idea
+/cmake-build-debug/

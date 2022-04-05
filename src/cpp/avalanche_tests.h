@@ -8,12 +8,14 @@
 #include <thread>
 
 #include <boost/format.hpp>
+#include <boost/assert.hpp>
 
 #include <pcg_random.hpp>
 
 #include "concurrency.h"
 #include "generator.h"
 #include "hashes.h"
+#include "my_assert.h"
 #include "test_parameters.h"
 #include "log_duration.h"
 
@@ -45,7 +47,7 @@ namespace tests {
         if (best_result.hamming_distance == current_result.hamming_distance) {
             best_result.frequency_occurrence += current_result.frequency_occurrence;
         } else if (best_result.hamming_distance > current_result.hamming_distance) {
-            best_result = current_result;
+            std::swap(best_result, current_result);
         }
     };
 
@@ -106,7 +108,12 @@ namespace tests {
         };
 
         ThreadTasks<AvalancheInfo> tasks(lambda, MergeResults, tp.num_threads, tp.num_keys);
-        return tasks.GetResult();
+        const auto result = tasks.GetResult();
+        ASSERT_EQUAL_HINT(result.original_hash, static_cast<uint64_t>(hs.hasher(result.original_number)),
+                          hs.name + " is not correct");
+        ASSERT_EQUAL_HINT(result.modified_hash, static_cast<uint64_t>(hs.hasher(result.modified_number)),
+                          hs.name + " is not correct");
+        return result;
     }
 
     template<typename HashStruct>
@@ -127,7 +134,12 @@ namespace tests {
         };
 
         ThreadTasks<AvalancheInfo> tasks(lambda, MergeResults, tp.num_threads, tp.num_keys);
-        return tasks.GetResult();
+        const auto result = tasks.GetResult();
+        ASSERT_EQUAL_HINT(result.original_hash, static_cast<uint64_t>(hs.hasher(result.original_number)),
+                          hs.name + " is not correct");
+        ASSERT_EQUAL_HINT(result.modified_hash, static_cast<uint64_t>(hs.hasher(result.modified_number)),
+                          hs.name + " is not correct");
+        return result;
     }
 
 

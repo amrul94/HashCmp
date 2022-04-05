@@ -4,33 +4,83 @@
 #include "log_duration.h"
 #include "speed_tests.h"
 #include "avalanche_tests.h"
-
-#include <boost/format.hpp>
-#include <boost/container/static_vector.hpp>
+#include "images_tests.h"
 
 #include <pcg_random.hpp>
-#include <random>
 #include <algorithm>
-#include <execution>
-#include <set>
-#include <unordered_set>
 
 #include "hashes.h"
+#include "img.h"
+#include "jpeg_image.h"
+#include "my_assert.h"
 
-void LocalSpeedTest(tests::ReportsRoot& report_root) {
-    for (int i = 0; i < 10; ++i) {
-        std::cout << hfl::buz_hash_64(i) << std::endl;
-    }
-    std::cout << std::endl;
-    for (int i = 0; i < 10; ++i) {
-        std::cout << hfl::buz_hash_64(i) << std::endl;
-    }
-}
+
+#include <libcuckoo/cuckoohash_map.hh>
 
 void TempTests(tests::ReportsRoot& report_root) {
-    std::vector<std::string> strings = {"key", "key2", "key3", "key4", "key5"};
-    LocalSpeedTest(report_root);
+    namespace fs = std::filesystem;
+    fs::path images_dir = std::filesystem::current_path() / "data/images (new)/Original/Checked (Part 2)";
+
+/*
+    const tests::TestParameters tp(32, 1);
+    libcuckoo::cuckoohash_map<uint64_t, std::atomic_uint64_t> hashes;
+    for (const auto& dir_entry: fs::recursive_directory_iterator(images_dir)) {
+        const auto& path = dir_entry.path();
+        const auto status = fs::status(path);
+        if (!fs::is_directory(status)) {
+            img::Image image = img::LoadJPEG(path);
+            const auto hash = hfl::murmur_hash1(image);
+            const uint64_t modify = ModifyHash(tp, hash);
+            hashes.;
+        }
+    }
+
+    std::cout << "Collisions " << tests::CountCollisions(hashes) << std::endl;
+    */
 }
+
+void HashIsCorrectTest() {
+    auto lambda = [](const auto& hs, const std::vector<uint64_t>& numbers) {
+        for (uint64_t number : numbers) {
+            ASSERT_EQUAL_HINT(hs.hasher(number), hs.hasher(number), hs.name + " is not correct");
+        }
+        std::cout << hs.name + " is correct" << std::endl;
+    };
+
+    uint64_t count = 100000;
+    pcg64 rng;
+    std::vector<uint64_t> numbers;
+    numbers.reserve(count);
+    for (int i = 0; i < count; ++i) {
+        numbers.emplace_back(rng());
+    }
+
+    const auto hashes16 = hfl::Build16bitsHashes();
+    for (const auto& hs : hashes16) {
+        lambda(hs, numbers);
+    }
+
+    const auto hashes24 = hfl::Build24bitsHashes();
+    for (const auto& hs : hashes24) {
+        lambda(hs, numbers);
+    }
+
+    const auto hashes32 = hfl::Build32bitsHashes();
+    for (const auto& hs : hashes32) {
+        lambda(hs, numbers);
+    }
+
+    const auto hashes48 = hfl::Build48bitsHashes();
+    for (const auto& hs : hashes48) {
+        lambda(hs, numbers);
+    }
+
+    const auto hashes64 = hfl::Build64bitsHashes();
+    for (const auto& hs : hashes64) {
+        lambda(hs, numbers);
+    }
+}
+
 
 void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_root) {
     LOG_DURATION_STREAM("FULL TIME", reports_root.logger);
@@ -66,8 +116,14 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
                 tests::RunAvalancheTests(reports_root);
                 reports_root.logger << "=== END AVALANCHE TEST ===\n\n\n";
                 break;
+            case 7:
+                reports_root.logger << "=== START IMAGES TEST ===\n\n";
+                tests::RunImagesTests(reports_root);
+                reports_root.logger << "=== END IMAGES TEST ===\n\n\n";
+                break;
             default:
                 TempTests(reports_root);
+                //HashIsCorrectTest();
                 break;
         }
     }
@@ -82,7 +138,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{6};
+    const std::vector test_numbers{7, 6, 5, 4, 2, 3, 1};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

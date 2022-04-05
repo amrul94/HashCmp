@@ -42,7 +42,7 @@ typedef unsigned long long HH_U64;  // NOLINT
 // (size % kPacketSize).
 //
 // Primary template; the specialization for AVX-2 is faster. Intended as an
-// implementation out, do not call directly.
+// implementation detail, do not call directly.
 template <class State>
 HH_INLINE void PaddedUpdate(const HH_U64 size, const char* remaining_bytes,
                             const HH_U64 remaining_size, State* state) {

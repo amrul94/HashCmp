@@ -60,13 +60,13 @@ namespace hfl {
             UintT operator()(const img::Image& image) const {
 
                 // Возможно стоит сделать так:
-                // const char* bytes = reinterpret_cast<const char*>(image.GetLine(0);
-                // const size_t size = image.GetHeight() * image.GetWidth();
-                // const std::string_view str(bytes, size);
-                // return Hash(str);
-
                 const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
-                return Hash(bytes);
+                const size_t size = image.GetHeight() * image.GetWidth() * sizeof(img::Color);
+                const std::string_view str(bytes, size);
+                return Hash(str);
+
+                //const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
+                //return Hash(bytes);
             }
 
             UintT operator()(int8_t number) const {
@@ -147,11 +147,9 @@ namespace hfl {
 
     private:
         UintT Hash(std::string_view str) const override {
-            std::scoped_lock guard{hash_mutex_};
             return hasher_.hash(str);
         }
 
-        mutable std::mutex hash_mutex_;
         mutable CyclicHash<UintT> hasher_{4096, sizeof(UintT) * 8};
     };
 
@@ -162,11 +160,9 @@ namespace hfl {
 
     private:
         uint24_t Hash(std::string_view str) const override {
-            std::scoped_lock guard{hash_mutex_};
             return hasher_.hash(str);
         }
 
-        mutable std::mutex hash_mutex_;
         mutable CyclicHash<uint32_t> hasher_{4096, 24};
     };
 
@@ -177,11 +173,9 @@ namespace hfl {
 
     private:
         uint48_t Hash(std::string_view str) const override {
-            std::scoped_lock guard{hash_mutex_};
             return hasher_.hash(str);
         }
 
-        mutable std::mutex hash_mutex_;
         mutable CyclicHash<uint64_t> hasher_{4096, 48};
     };
 
@@ -387,7 +381,7 @@ namespace hfl {
 
         mutable std::vector<uint16_t> t16_;
         const uint32_t table_size_ = 65536;
-        const uint32_t mask_ = 65535;
+        const uint16_t mask_ = 65535;
     };
 
     class [[maybe_unused]] PearsonHash16Wrapper : public BaseHash16Wrapper {
