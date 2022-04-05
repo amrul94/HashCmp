@@ -45,78 +45,34 @@ namespace hfl {
         template<typename UintT>
         class BaseHashWrapper {
         public:
-            using HashType = UintT;
-
             UintT operator()(std::string_view str) const {
-                return Hash(str);
+                return Hash(str.data(), str.size());
             }
 
             UintT operator()(std::ifstream& file) const {
                 std::string binary_file = ReadFile(file);
                 assert(!binary_file.empty());
-                return Hash(binary_file);
+                return operator()(binary_file);
             }
 
             UintT operator()(const img::Image& image) const {
-
-                // Возможно стоит сделать так:
                 const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
                 const size_t size = image.GetHeight() * image.GetWidth() * sizeof(img::Color);
                 const std::string_view str(bytes, size);
-                return Hash(str);
-
-                //const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
-                //return Hash(bytes);
-            }
-
-            UintT operator()(int8_t number) const {
-                uint8_t number8 = number;
-                uint64_t number64 = number8;
-                return operator()(number64);
-            }
-
-            UintT operator()(int16_t number) const {
-                uint64_t number64 = number;
-                return operator()(number64);
-            }
-
-            UintT operator()(int32_t number) const {
-                uint64_t number64 = number;
-                return operator()(number64);
-            }
-
-            UintT operator()(int64_t number) const {
-                uint64_t number64 = number;
-                return operator()(number64);
-            }
-
-
-            UintT operator()(uint8_t number) const {
-                uint64_t number64 = number;
-                return operator()(number64);
-            }
-
-            UintT operator()(uint16_t number) const {
-                uint64_t number64 = number;
-                return operator()(number64);
-            }
-
-            UintT operator()(uint32_t number) const {
-                uint64_t number64 = number;
-                return operator()(number64);
+                return operator()(str);
             }
 
             UintT operator()(uint64_t number) const {
                 std::string bytes = WriteToString<uint64_t>(number);
                 assert(sizeof(bytes[0]) == 1);
                 assert((&bytes[1] - &bytes[0]) == 1);
-                return Hash(bytes);
+                return operator()(bytes);
             }
 
             virtual ~BaseHashWrapper() = default;
 
         private:
-            [[nodiscard]] virtual UintT Hash(std::string_view str) const = 0;
+            [[nodiscard]] virtual UintT Hash(const char *message, size_t length) const = 0;
         };
     }
 
@@ -132,8 +88,8 @@ namespace hfl {
     template<typename UintT>
     class [[maybe_unused]] DJB2HashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] UintT Hash(std::string_view str) const override {
-            return DJB2Hash<UintT>(str);
+        [[nodiscard]] UintT Hash(const char *message, size_t length) const override {
+            return DJB2Hash<UintT>(message, length);
         }
     };
 
@@ -146,11 +102,12 @@ namespace hfl {
         BuzHashWrapper() noexcept = default;
 
     private:
-        UintT Hash(std::string_view str) const override {
+        UintT Hash(const char *message, size_t length) const override {
+            std::string_view str(message, length);
             return hasher_.hash(str);
         }
 
-        mutable CyclicHash<UintT> hasher_{4096, sizeof(UintT) * 8};
+        mutable CyclicHash<UintT, char> hasher_{4096, sizeof(UintT) * 8};
     };
 
     template<>
@@ -159,11 +116,12 @@ namespace hfl {
         BuzHashWrapper() noexcept = default;
 
     private:
-        uint24_t Hash(std::string_view str) const override {
+        uint24_t Hash(const char *message, size_t length) const override {
+            std::string_view str(message, length);
             return hasher_.hash(str);
         }
 
-        mutable CyclicHash<uint32_t> hasher_{4096, 24};
+        mutable CyclicHash<uint64_t, char> hasher_{4096, 24};
     };
 
     template<>
@@ -172,96 +130,97 @@ namespace hfl {
         BuzHashWrapper() noexcept = default;
 
     private:
-        uint48_t Hash(std::string_view str) const override {
+        uint48_t Hash(const char *message, size_t length) const override {
+            std::string_view str(message, length);
             return hasher_.hash(str);
         }
 
-        mutable CyclicHash<uint64_t> hasher_{4096, 48};
+        mutable CyclicHash<uint64_t, char> hasher_{4096, 48};
     };
 
 //----------- CityHashes ----------
 
     class [[maybe_unused]] CityHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] CityHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //----------- FarmHashes ----------
 
     class [[maybe_unused]] FarmHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FarmHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //------------ FastHash ------------
 
     class [[maybe_unused]] FastHash16Wrapper : public BaseHash16Wrapper {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint16_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FastHash24Wrapper : public BaseHash24Wrapper {
     private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint24_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FastHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FastHash48Wrapper : public BaseHash48Wrapper {
     private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint48_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FastHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //---------- FNV-1a hash -----------
 
     class [[maybe_unused]] FNV1aHash16Wrapper : public BaseHash16Wrapper {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint16_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FNV1aHash24Wrapper : public BaseHash24Wrapper {
     private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint24_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FNV1aHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FNV1aHash48Wrapper : public BaseHash48Wrapper {
     private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint48_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] FNV1aHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //---------- HighwayHash -----------
 
     class [[maybe_unused]] HighwayHashWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //--------- Jenkins hash -----------
@@ -269,34 +228,34 @@ namespace hfl {
     template<typename UintT>
     class [[maybe_unused]] OneTimeHashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] UintT Hash(std::string_view str) const override {
-            return one_at_a_time_hash<UintT>(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+        [[nodiscard]] UintT Hash(const char *message, size_t length) const override {
+            return one_at_a_time_hash<UintT>(reinterpret_cast<const uint8_t*>(message), length);
         }
     };
 
     class [[maybe_unused]] SpookyHash16Wrapper : public BaseHash16Wrapper {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint16_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] SpookyHash24Wrapper : public BaseHash24Wrapper {
     private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint24_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] SpookyHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] SpookyHash48Wrapper : public BaseHash48Wrapper {
     private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint48_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] SpookyHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 
@@ -304,78 +263,79 @@ namespace hfl {
 
     class [[maybe_unused]] MetroHash64_Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //---------- MurmurHashes ---------
 
     class [[maybe_unused]] MurmurHash1Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] MurmurHash2Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
     class [[maybe_unused]] MurmurHash2AWrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] MurmurHash64AWrapper: public BaseHash64Wrapper  {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] MurmurHash3Wrapper: public BaseHash32Wrapper  {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
 //----------- MUM/mir -----------
 
     class [[maybe_unused]] MumHashWrapper: public BaseHash64Wrapper  {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] MirHashWrapper: public BaseHash64Wrapper  {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //------------- MX3 --------------
 
     class [[maybe_unused]] MX3HashWrapper: public BaseHash64Wrapper  {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //------------ NMHASH ------------
 
     class [[maybe_unused]] nmHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] nmHash32XWrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
 //--- Paul Hsieh's SuperFastHash ---
 
     class [[maybe_unused]] SuperFastHashWrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
 //---------- PearsonHashes ---------
 
     class [[maybe_unused]] PearsonHash16 {
     public:
-        uint16_t operator()(std::string_view str) const;
+        uint16_t operator()(const char *message, size_t length) const;
+        uint16_t operator()(const std::string& message) const;
         void Init() const;
     private:
 
@@ -386,7 +346,7 @@ namespace hfl {
 
     class [[maybe_unused]] PearsonHash16Wrapper : public BaseHash16Wrapper {
     private:
-        [[nodiscard]] uint16_t Hash(std::string_view str) const override;
+        uint16_t Hash(const char *message, size_t length) const override;
 
         mutable std::once_flag init_flag_;
         PearsonHash16 hash_;
@@ -394,7 +354,8 @@ namespace hfl {
 
     class [[maybe_unused]] PearsonHash24 {
     public:
-        [[nodiscard]] uint24_t operator()(std::string_view str) const;
+        uint24_t operator()(const char *message, size_t length) const;
+        uint24_t operator()(const std::string& message) const;
 
         void Init() const;
     private:
@@ -406,7 +367,7 @@ namespace hfl {
 
     class [[maybe_unused]] PearsonHash24Wrapper : public BaseHash24Wrapper {
     private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint24_t Hash(const char *message, size_t length) const override;
 
         mutable std::once_flag init_flag_;
         PearsonHash24 hash_;
@@ -415,14 +376,14 @@ namespace hfl {
 
     class [[maybe_unused]] PearsonHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
 
         mutable std::once_flag init_flag_;
     };
 
     class [[maybe_unused]] PearsonHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
 
         mutable std::once_flag init_flag_;
     };
@@ -431,7 +392,7 @@ namespace hfl {
 
     class [[maybe_unused]] PengyHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //------------ PJW Hash ------------
@@ -439,24 +400,24 @@ namespace hfl {
     template<typename UintT>
     class [[maybe_unused]] PJWHashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] UintT Hash(std::string_view str) const override {
-            return PJWHash<UintT>(str);
+        [[nodiscard]] UintT Hash(const char *message, size_t length) const override {
+            return PJWHash<UintT>(message, length);
         }
     };
 
     template<>
     class [[maybe_unused]] PJWHashWrapper<uint24_t>: public detail::BaseHashWrapper<uint24_t> {
     private:
-        [[nodiscard]] uint24_t Hash(std::string_view str) const override {
-            return PJWHash<uint24_t, 24>(str);
+        [[nodiscard]] uint24_t Hash(const char *message, size_t length) const override {
+            return PJWHash<uint24_t, 24>(message, length);
         }
     };
 
     template<>
     class [[maybe_unused]] PJWHashWrapper<uint48_t>: public detail::BaseHashWrapper<uint48_t> {
     private:
-        [[nodiscard]] uint48_t Hash(std::string_view str) const override {
-            return PJWHash<uint48_t, 48>(str);
+        [[nodiscard]] uint48_t Hash(const char *message, size_t length) const override {
+            return PJWHash<uint48_t, 48>(message, length);
         }
     };
 
@@ -465,8 +426,8 @@ namespace hfl {
     template<typename UintT>
     class [[maybe_unused]] SDBMHashWrapper : public detail::BaseHashWrapper<UintT> {
     private:
-        [[nodiscard]] UintT Hash(std::string_view str) const override {
-            return SDBMHash<UintT>(str);
+        [[nodiscard]] UintT Hash(const char *message, size_t length) const override {
+            return SDBMHash<UintT>(message, length);
         }
     };
 
@@ -474,7 +435,7 @@ namespace hfl {
 
     class [[maybe_unused]] SipHashWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
 
         const unsigned char key_[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     };
@@ -482,28 +443,28 @@ namespace hfl {
 
     class [[maybe_unused]] SipHash13Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
 
         const unsigned char key_[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     };
 
     class [[maybe_unused]] SipHashAVX2Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
 
         const highwayhash::HH_U64 key_[2] = {1234, 5678};
     };
 
     class [[maybe_unused]] SipHash13AVX2Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
 
         const highwayhash::HH_U64 key_[2] = {1234, 5678};
     };
 
     class [[maybe_unused]] HalfSipHashWrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
 
         const unsigned char key_[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     };
@@ -513,33 +474,33 @@ namespace hfl {
 
     class [[maybe_unused]] T1HA0_32leWrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] T1HA0_32beWrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] T1HA0_AVX2_Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] T1HA1LeWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] T1HA1BeWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 
     class [[maybe_unused]] T1HA2AtonceWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //------------ wyHashes -----------
@@ -547,34 +508,34 @@ namespace hfl {
 
     class [[maybe_unused]] wyHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] wyHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
 //------------ xxHashes -----------
 
     class [[maybe_unused]] xxHash32Wrapper : public BaseHash32Wrapper {
     private:
-        [[nodiscard]] uint32_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint32_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] xxHash64Wrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] XXH3_64BitsWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 
     class [[maybe_unused]] XXH3_64BitsWithSeedWrapper : public BaseHash64Wrapper {
     private:
-        [[nodiscard]] uint64_t Hash(std::string_view str) const override;
+        [[nodiscard]] uint64_t Hash(const char *message, size_t length) const override;
     };
 }
 

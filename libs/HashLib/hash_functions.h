@@ -54,27 +54,27 @@ static inline UintT one_at_a_time_hash(const uint8_t* key, size_t length) {
 
 // http://www.cse.yorku.ca/~oz/hash.html
 template<typename UintT>
-static inline UintT DJB2Hash(std::string_view str) {
+static inline UintT DJB2Hash(const char *message, size_t length) {
     UintT hash = 5381;
-    for (uint8_t c : str) {
-        hash = hash * 33 + c;
+    for (size_t i = 0; i < length; ++i) {
+        hash = hash * 33 + message[i];
     }
     return hash;
 }
 
 // https://www.programmingalgorithms.com/algorithm/sdbm-hash/cpp/
 template<typename UintType>
-static inline UintType SDBMHash(std::string_view str) {
+static inline UintType SDBMHash(const char *message, size_t length) {
     UintType hash = 0;
-    for (char c : str) {
-        hash = c + (hash << 6) + (hash << 16) - hash;
+    for (size_t i = 0; i < length; ++i) {
+        hash = message[i] + (hash << 6) + (hash << 16) - hash;
     }
     return hash;
 }
 
 // https://www.programmingalgorithms.com/algorithm/pjw-hash/cpp/
 template<typename UintT, uint8_t BitsInUnsignedInt = sizeof(UintT) * 8>
-static inline UintT PJWHash(std::string_view str) {
+static inline UintT PJWHash(const char *message, size_t length) {
     const uint8_t ThreeQuarters     = (BitsInUnsignedInt  * 3) / 4;
     const uint8_t OneEighth         = BitsInUnsignedInt / 8;
     const auto MaxUintT = std::numeric_limits<UintT>::max();
@@ -82,8 +82,8 @@ static inline UintT PJWHash(std::string_view str) {
     UintT hash = 0;
     UintT test{};
 
-    for (char c : str) {
-        hash = (hash << OneEighth) + c;
+    for (size_t i = 0; i < length; ++i) {
+        hash = (hash << OneEighth) + message[i];
         if ((test = hash & HighBits) != 0) {
             hash = ((hash ^ (test >> ThreeQuarters)) & (~HighBits));
         }

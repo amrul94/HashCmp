@@ -79,9 +79,12 @@ public:
     template<class container>
     hashvaluetype  hash(container & c) {
         hashvaluetype answer(0);
+        auto size = c.size();
         for(uint k = 0; k<c.size(); ++k) {
             fastleftshift1(answer);
-            answer ^= hasher.hashvalues[static_cast<unsigned int>(static_cast<chartype>(c[k]))];
+            auto ch = c[k];
+            auto index = static_cast<chartype>(c[k]);
+            answer ^= hasher.hashvalues[static_cast<chartype>(c[k])];
         }
         return answer;
     }

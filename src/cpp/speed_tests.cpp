@@ -164,10 +164,11 @@ namespace tests {
         void BuzHashTest(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
             std::string hash_name = "BuzHash";
 
-            auto lambda = [](std::string_view str) {
-                static CyclicHash<UintT> hasher{4096, sizeof(UintT) * 8};
+            CyclicHash<UintT> hasher{4096, sizeof(UintT) * 8};
+            auto lambda = [&hasher](std::string_view str) {
                 return hasher.hash(str);
             };
+
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
 
@@ -175,10 +176,11 @@ namespace tests {
         void BuzHashTest<hfl::uint24_t>(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
             std::string hash_name = "BuzHash";
 
-            auto lambda = [](std::string_view str) {
-                static CyclicHash<uint32_t> hasher{4096, 24};
+            CyclicHash<uint32_t> hasher{4096, 24};
+            auto lambda = [&hasher](std::string_view str) {
                 return static_cast<hfl::uint24_t>(hasher.hash(str));
             };
+
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
 
@@ -186,10 +188,11 @@ namespace tests {
         void BuzHashTest<hfl::uint48_t>(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
             std::string hash_name = "BuzHash";
 
-            auto lambda = [](std::string_view str) {
-                static CyclicHash<uint64_t> hasher{4096, 48};
+            CyclicHash<uint64_t> hasher{4096, 48};
+            auto lambda = [&hasher](std::string_view str) {
                 return static_cast<hfl::uint48_t>(hasher.hash(str));
             };
+
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
 
@@ -302,9 +305,9 @@ namespace tests {
         void SpeedTestT(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
             using namespace std::literals;
 
-            HashTest(DJB2Hash<UintT>, args::str_view, "DJB2 Hash"s, words, reports_root, obj);
-            HashTest(SDBMHash<UintT>, args::str_view, "SDBM Hash"s, words, reports_root, obj);
-            HashTest(PJWHash<UintT>, args::str_view, "PJW Hash"s, words, reports_root, obj);
+            HashTest(DJB2Hash<UintT>, args::char_key_uint_len, "DJB2 Hash"s, words, reports_root, obj);
+            HashTest(SDBMHash<UintT>, args::char_key_uint_len, "SDBM Hash"s, words, reports_root, obj);
+            HashTest(PJWHash<UintT>, args::char_key_uint_len, "PJW Hash"s, words, reports_root, obj);
             BuzHashTest<UintT>(words, reports_root, obj);
             HashTest(one_at_a_time_hash<UintT>, args::uchar_key_uint_len, "One at a time"s, words, reports_root, obj);
             SpookyHashTest<UintT>(words, reports_root, obj);

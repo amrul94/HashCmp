@@ -44,7 +44,7 @@ void HashIsCorrectTest() {
         for (uint64_t number : numbers) {
             ASSERT_EQUAL_HINT(hs.hasher(number), hs.hasher(number), hs.name + " is not correct");
         }
-        std::cout << hs.name + " is correct" << std::endl;
+        std::cout << boost::format("\t%1% is correct\n") % hs.name;
     };
 
     uint64_t count = 100000;
@@ -86,6 +86,11 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
     LOG_DURATION_STREAM("FULL TIME", reports_root.logger);
     for (int test_number : test_numbers) {
         switch (test_number) {
+            case 0:
+                reports_root.logger << "=== CHECK HASHES ===\n\n";
+                HashIsCorrectTest();
+                reports_root.logger << "=== CHECH HASHES ===\n\n\n";
+                break;
             case 1:
                 reports_root.logger << "=== START DISTRIBUTION TEST ===\n\n";
                 tests::RunDistributionTests(reports_root);
@@ -123,7 +128,6 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
                 break;
             default:
                 TempTests(reports_root);
-                //HashIsCorrectTest();
                 break;
         }
     }
@@ -138,7 +142,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{7, 6, 5, 4, 2, 3, 1};
+    const std::vector test_numbers{0};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }
