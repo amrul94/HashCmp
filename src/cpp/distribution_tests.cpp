@@ -107,7 +107,7 @@ namespace tests {
 
         auto out_json = GetDistTestJson(dtp, hash_name, reports_root);
         out_json.obj = ProcessingStatistics(buckets, dtp, hash_name);
-        out_json.out << out_json.obj ;
+        out_json.out << out_json.obj;
 
     }
 
@@ -118,7 +118,6 @@ namespace tests {
 
     void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
         RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
-        RUN_DIST_TEST_NORMAL_IMPL(24, num_threads, reports_root);
         RUN_DIST_TEST_NORMAL_IMPL(32, num_threads, reports_root);
     }
 
@@ -129,7 +128,6 @@ namespace tests {
 
 
     void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
-        RUN_DIST_TEST_WITH_BINS_IMPL(48, num_threads, reports_root);
         RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
     }
 

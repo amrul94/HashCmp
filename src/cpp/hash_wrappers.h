@@ -2,6 +2,7 @@
 #define THESIS_WORK_HASH_WRAPPERS_H
 
 #include <array>
+#include <concepts>
 #include <cstring>
 #include <fstream>
 #include <filesystem>
@@ -18,7 +19,6 @@
 
 #include "img.h"
 
-
 // HFL = Hash function library
 namespace hfl {
 
@@ -33,15 +33,6 @@ namespace hfl {
     std::string ReadFile(std::ifstream& file);
 
     namespace detail {
-        template<class Type>
-        std::string WriteToString(Type source) {
-            static constexpr auto size = sizeof(Type);
-            static thread_local std::string str;
-            str.resize(size);
-            memcpy(str.data(), &source, size);
-            return str;
-        }
-
         template<typename UintT>
         class BaseHashWrapper {
         public:
@@ -62,11 +53,11 @@ namespace hfl {
                 return operator()(str);
             }
 
-            UintT operator()(uint64_t number) const {
-                std::string bytes = WriteToString<uint64_t>(number);
-                assert(sizeof(bytes[0]) == 1);
-                assert((&bytes[1] - &bytes[0]) == 1);
-                return operator()(bytes);
+            template <std::integral Number>
+            UintT operator()(Number number) const {
+                const char* bytes = reinterpret_cast<const char*>(reinterpret_cast<const void*>(&number));
+                static const size_t length = sizeof(Number);
+                return Hash(bytes, length);
             }
 
             virtual ~BaseHashWrapper() = default;

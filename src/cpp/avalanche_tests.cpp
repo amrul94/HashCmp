@@ -69,9 +69,6 @@ namespace tests {
         uint64_t num_keys = std::numeric_limits<uint16_t>::max() + 1ull;
         RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 16, num_threads, reports_root);
 
-        num_keys = static_cast<uint64_t>(std::numeric_limits<hfl::uint24_t>::max()) + 1ull;
-        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 24, num_threads, reports_root);
-
         num_keys = std::numeric_limits<uint32_t>::max() + 1ull;
         RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 32, num_threads, reports_root);
     }
@@ -82,7 +79,6 @@ namespace tests {
         };
 
         const uint64_t num_keys = std::numeric_limits<uint32_t>::max() + 1ull;
-        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 48, num_threads, reports_root);
         RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 64, num_threads, reports_root);
     }
 

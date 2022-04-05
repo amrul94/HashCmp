@@ -84,13 +84,14 @@ void HashIsCorrectTest() {
 
 void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_root) {
     LOG_DURATION_STREAM("FULL TIME", reports_root.logger);
+    std::cout << "=== CHECK HASHES ===\n\n";
+    HashIsCorrectTest();
+    std::cout << "=== CHECH HASHES ===\n\n\n";
+    break;
+
     for (int test_number : test_numbers) {
         switch (test_number) {
-            case 0:
-                reports_root.logger << "=== CHECK HASHES ===\n\n";
-                HashIsCorrectTest();
-                reports_root.logger << "=== CHECH HASHES ===\n\n\n";
-                break;
+
             case 1:
                 reports_root.logger << "=== START DISTRIBUTION TEST ===\n\n";
                 tests::RunDistributionTests(reports_root);
@@ -135,7 +136,7 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
 
 tests::ReportsRoot CreateReportsRoot() {
     const auto current_path = std::filesystem::current_path();
-    const std::filesystem::path reports_dir{"reports"};
+    const std::filesystem::path reports_dir {"reports"};
     const auto reports_path = current_path / reports_dir / CurrentTime() / "cpp";
     std::filesystem::create_directories(reports_path);
     return tests::ReportsRoot{reports_path};
