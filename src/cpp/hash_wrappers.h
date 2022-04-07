@@ -30,8 +30,6 @@ namespace hfl {
             boost::multiprecision::unsigned_magnitude,
             boost::multiprecision::unchecked, void>>;
 
-    std::string ReadFile(std::ifstream& file);
-
     namespace detail {
         template<typename UintT>
         class BaseHashWrapper {
@@ -64,7 +62,24 @@ namespace hfl {
 
         private:
             [[nodiscard]] virtual UintT Hash(const char *message, size_t length) const = 0;
+
+            static std::string ReadFile(std::ifstream& file);
         };
+
+        template<typename UintT>
+        std::string BaseHashWrapper<UintT>::ReadFile(std::ifstream& file) {
+            assert(file);
+            std::string result;
+            size_t source_size = 0;
+            do {
+                char buff[1024];
+                file.read(buff, sizeof buff);
+                size_t read_size = file.gcount();
+                source_size += read_size;
+                result.append(buff, read_size);
+            } while (file);
+            return result;
+        }
     }
 
 

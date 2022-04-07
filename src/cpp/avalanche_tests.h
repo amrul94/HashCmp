@@ -52,8 +52,6 @@ namespace tests {
 
         bool operator==(const DistanceAndFrequency& other) const { return value == other.value; };
         bool operator==(std::integral auto other_distance) const { return value == other_distance; };
-
-
     };
 
     struct HammingDistance {
@@ -167,14 +165,14 @@ namespace tests {
     }
 
 
-    template<typename TestFunc, typename HashStructs>
-    void AvalancheTest(TestFunc func, const HashStructs& hashes, const TestParameters& tp, ReportsRoot& reports_root) {
+    template<typename HashStructs>
+    void AvalancheTest(const HashStructs& hashes, const TestParameters& tp, ReportsRoot& reports_root) {
         reports_root.logger << "--- START " << tp.hash_bits << " BITS TEST ---" << std::endl;
 
         auto out_json = out::GetAvalancheTestJson(tp, reports_root);
         boost::json::object avalanche_statistics;
         for (const auto& hs : hashes) {
-            AvalancheInfo avalanche_info = func(hs, tp, reports_root);
+            AvalancheInfo avalanche_info = HashAvalancheTest(hs, tp, reports_root);
             avalanche_statistics[hs.name] = out::AvalancheInfoToJson(avalanche_info);
         }
 

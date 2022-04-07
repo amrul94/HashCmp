@@ -6,12 +6,11 @@
 
 #include <boost/format.hpp>
 
+#include "concurrency.h"
 #include "jpeg_image.h"
 #include "log_duration.h"
 #include "test_parameters.h"
 #include "english_tests.h"
-
-
 
 namespace tests {
     namespace out {
@@ -20,24 +19,43 @@ namespace tests {
 
     template <typename HashStruct>
     uint64_t HashTestWithImages(const HashStruct& hs, const TestParameters& tp, ReportsRoot& reports_root) {
+        namespace fs = std::filesystem;
+        using HashMap = std::map<uint64_t, uint64_t>;
+
         LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
         reports_root.logger << boost::format("\n\t%1%: \n") % hs.name;
-        namespace fs = std::filesystem;
-        fs::path images_dir = std::filesystem::current_path() / "data/images (new)/Original/Checked (Part 2)";
 
-        // Этот код частично повторяется с HashTestWithEngWords()
-        std::map<uint64_t, uint64_t> hashes;
-        for (const auto& dir_entry: fs::recursive_directory_iterator(images_dir)) {
-            const auto& path = dir_entry.path();
-            const auto status = fs::status(path);
-            if (!fs::is_directory(status)) {
-                img::Image image = img::LoadJPEG(path);
-                const auto hash = static_cast<uint64_t>(hs.hasher(image));
-                const uint64_t modify = ModifyHash(tp, hash);
-                ++hashes[modify];
+        fs::path general_images_dir = std::filesystem::current_path() / "data/images";
+        std::atomic_uint8_t dir_number;
+
+        auto thread_task = [&hs, &tp, &dir_number, general_images_dir](uint64_t, uint64_t) {
+            fs::path current_images_dir = general_images_dir / std::to_string(dir_number++);
+            HashMap hashes;
+
+            for (const auto& dir_entry: fs::recursive_directory_iterator(current_images_dir)) {
+                const auto& path = dir_entry.path();
+                const auto status = fs::status(path);
+                if (!fs::is_directory(status)) {
+                    std::ifstream image_file = std::ifstream(path, std::ios_base::binary);
+                    const auto hash = static_cast<uint64_t>(hs.hasher(image_file));
+                    const uint64_t modify = ModifyHash(tp, hash);
+                    ++hashes[modify];
+                }
             }
-        }
+
+            return std::move(hashes);
+        };
+
+        auto merge_results = [](HashMap& all_hashes, const HashMap& part_hashes) {
+            for (const auto& [hash, count] : part_hashes) {
+                all_hashes[hash] += count;
+            }
+        };
+
+        ThreadTasks<HashMap> tasks(thread_task, merge_results, tp.num_threads, tp.num_threads);
+        const auto hashes = tasks.GetResult();
         const auto num_collisions = CountCollisions(hashes);
+
         reports_root.logger << boost::format("\t\tcollisions: %1%\n") % num_collisions;
         return num_collisions;
     }

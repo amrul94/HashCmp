@@ -43,18 +43,7 @@ namespace hfl {
             return GenerateTwoSeeds().first;
         }
 
-        std::string ReadFile(std::ifstream& file) {
-            std::string result;
-            size_t source_size = 0;
-            do {
-                char buff[1024];
-                file.read(buff, sizeof buff);
-                size_t read_size = file.gcount();
-                source_size += read_size;
-                result.append(buff, read_size);
-            } while (file);
-            return result;
-        }
+
     }
 
 //----------- CityHashes ----------
@@ -106,7 +95,7 @@ namespace hfl {
 
     uint16_t FNV1aHash16Wrapper::Hash(const char *message, size_t length) const {
         static const uint32_t mask16 = (((uint32_t)1<<16)-1); /* i.e., (u_int32_t)0xffff */
-        uint32_t hash = FNV32a(message, length, 0);
+        uint32_t hash = FNV32a(message, static_cast<int>(length), 0);
         hash = (hash>>16) ^ (hash & mask16);
         return hash;
     }

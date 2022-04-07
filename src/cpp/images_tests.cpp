@@ -30,11 +30,11 @@ namespace tests {
         const size_t hardware_threads = std::thread::hardware_concurrency();
         //const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
         const size_t num_threads = 1;
-        RUN_IMAGES_TEST_IMPL(16, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(24, num_threads, reports_root);
+        //RUN_IMAGES_TEST_IMPL(16, num_threads, reports_root);
+        //RUN_IMAGES_TEST_IMPL(24, num_threads, reports_root);
         RUN_IMAGES_TEST_IMPL(32, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(48, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(64, num_threads, reports_root);
+        //RUN_IMAGES_TEST_IMPL(48, num_threads, reports_root);
+        //RUN_IMAGES_TEST_IMPL(64, num_threads, reports_root);
     }
 
 }

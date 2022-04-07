@@ -89,23 +89,19 @@ namespace tests {
         }
     }
 
-    #define RUN_AVALANCHE_TEST_IMPL(FUNC, NUM_KEYS, BITS, NUM_THREADS, ROOT) \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();   \
-        const TestParameters tp##BITS{BITS, NUM_KEYS, NUM_THREADS, TestFlag::NORMAL};     \
-        AvalancheTest(FUNC, hashes##BITS, tp##BITS, ROOT)
+    #define RUN_AVALANCHE_TEST_IMPL(NUM_KEYS, BITS, NUM_THREADS, ROOT)                  \
+        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                       \
+        const TestParameters tp##BITS{BITS, NUM_KEYS, NUM_THREADS, TestFlag::NORMAL};   \
+        AvalancheTest(hashes##BITS, tp##BITS, ROOT)
 
     void RunAvalancheTests(ReportsRoot& reports_root) {
         const size_t hardware_threads = std::thread::hardware_concurrency();
         const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
         reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
-        auto lambda = [](const auto& hs, const TestParameters& tp, ReportsRoot& reports_root) {
-            return HashAvalancheTest(hs, tp, reports_root);
-        };
-
         const uint64_t num_keys = std::numeric_limits<uint32_t>::max() + 1ull;
-        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 16, num_threads, reports_root);
-        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 32, num_threads, reports_root);
-        RUN_AVALANCHE_TEST_IMPL(lambda, num_keys, 64, num_threads, reports_root);
+        RUN_AVALANCHE_TEST_IMPL(num_keys, 16, num_threads, reports_root);
+        RUN_AVALANCHE_TEST_IMPL(num_keys, 32, num_threads, reports_root);
+        RUN_AVALANCHE_TEST_IMPL(num_keys, 64, num_threads, reports_root);
     }
 }
