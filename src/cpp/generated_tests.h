@@ -42,7 +42,6 @@ namespace tests {
     void RunCollTestWithMask(const std::vector<pcg64>& generators, uint16_t words_length, size_t num_threads,
                              ReportsRoot& reports_root);
 
-    std::vector<pcg64> GetGenerators(uint16_t words_length);
     void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root);
 
 

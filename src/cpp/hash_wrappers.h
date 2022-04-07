@@ -53,7 +53,7 @@ namespace hfl {
                 return operator()(str);
             }
 
-            template <std::integral Number>
+            template<std::integral Number>
             UintT operator()(Number number) const {
                 const char* bytes = reinterpret_cast<const char*>(reinterpret_cast<const void*>(&number));
                 static const size_t length = sizeof(Number);

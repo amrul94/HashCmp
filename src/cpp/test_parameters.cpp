@@ -6,18 +6,10 @@
 #include "log_duration.h"
 
 namespace tests {
+
     ReportsRoot::ReportsRoot(const std::filesystem::path& root_path)
             : root_path(root_path)
-            , log_file_(root_path / "Log.txt")
-            , output_device_(std::cout, log_file_)
-            , logger(output_device_) {
-
-        assert(log_file_);
-    }
-
-    ReportsRoot::~ReportsRoot() {
-        logger.flush();
-        logger.close();
+            , logger(root_path / "Log.txt") {
     }
 
     std::string TestFlagToString(TestFlag mode) {

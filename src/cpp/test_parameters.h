@@ -10,6 +10,7 @@
 #include <boost/iostreams/tee.hpp>
 
 #include "hash_wrappers.h"
+#include "log_duration.h"
 
 namespace tests {
 
@@ -25,16 +26,9 @@ namespace tests {
         typedef boost::iostreams::stream<TeeDevice> TeeStream;
 
         explicit ReportsRoot(const std::filesystem::path& root_path);
-        ~ReportsRoot();
 
         const std::filesystem::path root_path;
-
-    private:
-        std::ofstream log_file_;
-        TeeDevice output_device_;
-
-    public:
-        TeeStream logger;
+        Logger logger;
     };
 
     enum class TestFlag {
@@ -49,6 +43,7 @@ namespace tests {
     uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
 
     struct TestParameters {
+        // думаю стоит заменить uint16_t на uint8_t
         const uint16_t hash_bits{}; // Количество битов, которые выдает хеш-функция
         const uint16_t test_bits{}; // Количество битов для тестов (иногда задается маской)
         uint64_t num_keys{};        // Количество входных данных для хешей

@@ -14,14 +14,11 @@
 #include "jpeg_image.h"
 #include "my_assert.h"
 
-
-#include <libcuckoo/cuckoohash_map.hh>
-
 void TempTests(tests::ReportsRoot& report_root) {
     namespace fs = std::filesystem;
     fs::path images_dir = std::filesystem::current_path() / "data/images (new)/Original/Checked (Part 2)";
 
-/*
+    /*
     const tests::TestParameters tp(32, 1);
     libcuckoo::cuckoohash_map<uint64_t, std::atomic_uint64_t> hashes;
     for (const auto& dir_entry: fs::recursive_directory_iterator(images_dir)) {
@@ -37,6 +34,21 @@ void TempTests(tests::ReportsRoot& report_root) {
 
     std::cout << "Collisions " << tests::CountCollisions(hashes) << std::endl;
     */
+
+    int steps = 10001;
+
+    long double avg = 0;
+    for (int i = 1; i < steps; ++i) {
+        avg = tests::CalculateArithmeticMean(avg, i*100, i);
+    }
+    std::cout << avg << std::endl;
+
+    long double sum = 0;
+    for (int i = 1; i < steps; ++i) {
+        sum += i*100;
+    }
+    std::cout << sum / (long double)steps << std::endl;
+
 }
 
 void HashIsCorrectTest() {
@@ -84,14 +96,15 @@ void HashIsCorrectTest() {
 
 void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_root) {
     LOG_DURATION_STREAM("FULL TIME", reports_root.logger);
-    std::cout << "=== CHECK HASHES ===\n\n";
-    HashIsCorrectTest();
-    std::cout << "=== CHECH HASHES ===\n\n\n";
-    break;
+
 
     for (int test_number : test_numbers) {
         switch (test_number) {
-
+            case 0:
+                std::cout << "=== CHECK HASHES ===\n\n";
+                HashIsCorrectTest();
+                std::cout << "=== CHECK HASHES ===\n\n\n";
+                break;
             case 1:
                 reports_root.logger << "=== START DISTRIBUTION TEST ===\n\n";
                 tests::RunDistributionTests(reports_root);
@@ -129,6 +142,8 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
                 break;
             default:
                 TempTests(reports_root);
+                std::filesystem::remove_all(reports_root.root_path);
+                std::cout << reports_root.root_path << " removed\n";
                 break;
         }
     }
@@ -143,7 +158,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{0};
+    const std::vector test_numbers{6};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

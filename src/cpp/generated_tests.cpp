@@ -53,20 +53,6 @@ namespace tests {
         RUN_COLL_TEST_WITH_MASK_IMPL(generator, 64, 24, words_length, num_threads, TestFlag::MASK, reports_root);
     }
 
-    std::vector<pcg64> GetGenerators(uint16_t words_length) {
-        const size_t hardware_threads = std::thread::hardware_concurrency();
-        const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
-        std::vector<pcg64> generators(num_threads);
-
-        for (auto& generator : generators) {
-            pcg_extras::seed_seq_from<std::random_device> seed_source;
-            generator.seed(seed_source);
-        }
-
-        std::cout << boost::format("\tnum_threads = %1%\n") % num_threads;
-        return generators;
-    }
-
     void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root) {
         pcg64 generator;
 

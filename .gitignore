@@ -2,6 +2,6 @@
 /data/images/
 /data/csv/
 /reports/
-/venv/
 .idea
-/cmake-build-debug/
+/data/images (new)/
+/data/images (old)/

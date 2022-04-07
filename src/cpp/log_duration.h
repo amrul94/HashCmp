@@ -3,11 +3,15 @@
 
 #include <atomic>
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <utility>
 
 
 #include <sys/times.h>
+
+#include "logger.h"
 
 class Timer {
 public:
@@ -36,7 +40,7 @@ class LogDuration {
 public:
     using Clock = std::chrono::steady_clock;
 
-    explicit LogDuration(std::string_view id, std::ostream& out = std::cerr)
+    explicit LogDuration(std::string_view id, Logger& out)
             : id_(id), out_(out) {
     }
 
@@ -45,7 +49,7 @@ public:
 private:
     const std::string id_;
     const Clock::time_point start_time_ = Clock::now();
-    std::ostream& out_;
+    Logger& out_;
 };
 
 inline std::string CurrentTime() {
