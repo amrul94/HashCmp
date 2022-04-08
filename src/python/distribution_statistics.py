@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from helper import *
 
-HIST_CHECK_DIST_PATH = 'graphics/check_dist/'
-
 
 class DistributionStatistics:
     def __init__(self, js: dict, tests_dir_path: str):
@@ -100,12 +98,11 @@ def open_sub_dir(root_path: str, sub_dir_name, report: Document, save_path: str)
 
 def process_distribution_statistics(tests_dir_name):
     report_heading = 'Таблицы распределений'
-    path_to_test_dir = get_report_path(tests_dir_name)
+    path_to_test_dir = get_cpp_report_path(tests_dir_name)
     test_name = "Distribution tests"
     path_to_dist_dir = os.path.join(path_to_test_dir, test_name)
-    save_path = os.path.join('graphics', tests_dir_name)
+    save_path = get_python_report_path(tests_dir_name)
     make_dir(save_path)
     save_path = os.path.join(save_path, test_name)
     make_dir(save_path)
-    print(save_path)
     process_statistics(open_sub_dir, report_heading, path_to_dist_dir, save_path)

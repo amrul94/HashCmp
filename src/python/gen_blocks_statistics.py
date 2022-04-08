@@ -5,8 +5,6 @@ import matplotlib.ticker as ticker
 
 from helper import *
 
-PLOT_GEN_BLOCKS_PATH = 'graphics/gen_words/'
-
 
 class GeneratedBlocksStatistics(CollisionsStatistics):
     def __init__(self, js: dict, tests_dir_path: str):
@@ -56,7 +54,6 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
             file_name = f'{hash_name} {self.bits} bits (log).png'
 
         file_path = os.path.join(self.plot_path, file_name)
-        print(file_path)
         fig.savefig(file_path)
         plt.cla()
         plt.clf()
@@ -64,7 +61,6 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
 
     def plot(self):
         for hash_name in self.collisions:
-            print(hash_name, self.collisions[hash_name])
             self.__plot_hash_collisions(hash_name)
 
     def get_collisions(self):
@@ -100,13 +96,12 @@ def open_sub_dir(root_path: str, sub_dir_name, report: Document, save_path: str)
 
 def process_collision_statistics(tests_dir_name):
     report_heading = 'Таблицы коллизий'
-    path_to_test_dir = get_report_path(tests_dir_name)
+    path_to_test_dir = get_cpp_report_path(tests_dir_name)
     test_name = "Generated blocks tests"
     path_to_gen_dir = os.path.join(path_to_test_dir, test_name)
-    save_path = os.path.join('graphics', tests_dir_name)
+    save_path = get_python_report_path(tests_dir_name)
     make_dir(save_path)
     save_path = os.path.join(save_path, test_name)
     make_dir(save_path)
-    print(save_path)
     process_statistics(open_sub_dir, report_heading, path_to_gen_dir, save_path)
 

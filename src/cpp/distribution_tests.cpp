@@ -62,6 +62,8 @@ namespace tests {
 
                     // Указатели стоит заменить на итераторы
                     const std::span y_block(buckets.data() + begin, buckets.data() + end);
+
+                    // думаю стоит сделать long double вместо double
                     const double sum_value = std::accumulate(y_block.begin(), y_block.end(), static_cast<double>(0));
                     const double avg_value = sum_value / static_cast<double>(step);
                     y_mean[bar] = avg_value;

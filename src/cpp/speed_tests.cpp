@@ -67,7 +67,7 @@ namespace tests {
         void HashTest(Function func, StrView, const std::string& hash_name, const std::vector<std::string>& words,
                       ReportsRoot& reports_root, boost::json::object& obj) {
             HashSpeed hs = HashSpeedTest(func, hash_name, words, reports_root);
-            obj[hash_name] = std::to_string(hs.sec_time) + " sec";
+            obj[hash_name] = hs.sec_time;
         }
 
         template <typename Function>

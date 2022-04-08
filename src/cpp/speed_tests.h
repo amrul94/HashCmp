@@ -59,8 +59,8 @@ namespace tests {
             timer.End();
         }
 
-        std::cout << boost::format("\tsum hashes: %1%\n") % sum_hashes;
-        reports_root.logger << boost::format("\tfirst timer: %1%\n") % timer;
+        std::cout << boost::format("\t\tsum hashes: %1%\n") % sum_hashes;
+        reports_root.logger << boost::format("\t\tfirst timer: %1%\n") % timer;
 
         return timer.GetTotalTime();
     }
@@ -77,7 +77,7 @@ namespace tests {
         }
         timer1.End();
 
-        std::cout << boost::format("\tsum hashes: %1%\n") % sum_hashes;
+        std::cout << boost::format("\t\tsum hashes: %1%\n") % sum_hashes;
         uint64_t sum_k = 0;
 
         Timer timer2;
@@ -89,7 +89,7 @@ namespace tests {
 
 
         const double total_time = timer1.GetTotalTime() - timer2.GetTotalTime();
-        std::cout << boost::format("\tsum k: %1%\n") % sum_k;
+        std::cout << boost::format("\t\tsum k: %1%\n") % sum_k;
         reports_root.logger << boost::format("\t\tsecond timer: %1% sec\n") % total_time;
 
         return total_time;
@@ -100,13 +100,13 @@ namespace tests {
     HashSpeed HashSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
                             ReportsRoot& reports_root) {
         LOG_DURATION_STREAM("\t\tlog duration all time", reports_root.logger);
-        reports_root.logger << boost::format("\n%1%:\n") % hash_name;
+        reports_root.logger << boost::format("\n\t%1%:\n") % hash_name;
 
         const double total_time_1 = InnerLoopSpeedTest(func, hash_name, words, reports_root);
         const double total_time_2 = OuterLoopSpeedTest(func, hash_name, words, reports_root);
         const double best_total_time = total_time_1 < total_time_2 ? total_time_1 : total_time_2;
 
-        reports_root.logger << boost::format("\tbest timer: %1% sec\n") % best_total_time;
+        reports_root.logger << boost::format("\t\tbest timer: %1% sec\n") % best_total_time;
         return HashSpeed{std::string{hash_name}, best_total_time};
     }
 }

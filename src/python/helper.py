@@ -5,10 +5,19 @@ from docx import Document
 import docx_report as dr
 
 
-def get_report_path(reports_dir_name):
-    reports_path = 'reports'
-    result = os.path.join(reports_path, reports_dir_name)
-    return result
+def get_reports_path(reports_dir_name):
+    all_reports_path = 'reports'
+    return os.path.join(all_reports_path, reports_dir_name)
+
+
+def get_cpp_report_path(reports_dir_name):
+    current_reports_path = get_reports_path(reports_dir_name)
+    return os.path.join(current_reports_path, 'cpp')
+
+
+def get_python_report_path(reports_dir_name):
+    current_reports_path = get_reports_path(reports_dir_name)
+    return os.path.join(current_reports_path, 'python')
 
 
 def make_dir(path_to_dir):
