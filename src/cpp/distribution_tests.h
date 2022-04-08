@@ -11,6 +11,7 @@
 
 #include <boost/format.hpp>
 
+#include "concurrency.h"
 #include "hashes.h"
 #include "test_parameters.h"
 #include "log_duration.h"
@@ -59,22 +60,8 @@ namespace tests {
             }
         };
 
-        uint64_t start = 0;
-        uint64_t step = dtp.num_keys / dtp.num_threads;
-        std::vector<std::thread> threads(dtp.num_threads - 1);
-
-        for (auto& t : threads) {
-            t = std::thread{lambda, start, start + step};
-            start += step;
-        }
-        lambda(start, dtp.num_keys);
-
-        for (auto& t : threads) {
-            t.join();
-        }
-
+        ThreadTasks<void> thread_tasks(lambda, dtp.num_threads, dtp.num_keys);
         PrintReports(buckets, dtp, hs.name, reports_root);
-
     }
 
     template<typename HashStructs>

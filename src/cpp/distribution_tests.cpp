@@ -39,20 +39,20 @@ namespace tests {
             result["Bits"] = dtp.hash_bits;
             result["Hash name"] = hash_name;
 
-            uint16_t bar_count = 16;
-            boost::json::array x_bars(bar_count);
+            const uint16_t num_bars = 16;
+            boost::json::array x_bars(num_bars);
             std::iota(x_bars.begin(), x_bars.end(), 1);
 
-            boost::json::array x_ranges(bar_count);
-            boost::json::array y_mean(bar_count);
-            boost::json::array y_err_min(bar_count);
-            boost::json::array y_err_max(bar_count);
-            boost::json::array y_min(bar_count);
-            boost::json::array y_max(bar_count);
+            boost::json::array x_ranges(num_bars);
+            boost::json::array y_mean(num_bars);
+            boost::json::array y_err_min(num_bars);
+            boost::json::array y_err_max(num_bars);
+            boost::json::array y_min(num_bars);
+            boost::json::array y_max(num_bars);
 
             // возможно стоит вынести в отдельную функцию
             auto lambda = [&](uint64_t start_bar, uint64_t end_bar) {
-                uint64_t step = buckets.size() / bar_count;
+                uint64_t step = buckets.size() / num_bars;
                 for (uint32_t bar = start_bar; bar < end_bar; ++bar) {
                     const uint64_t begin = bar * step;
                     const uint64_t end = (bar + 1) * step;
@@ -78,21 +78,9 @@ namespace tests {
                 }
             };
 
-            uint64_t start_bar = 0;
-            uint64_t step_bar = bar_count / dtp.num_threads;
-            std::vector<std::thread> threads(dtp.num_threads - 1);
+            ThreadTasks<void> thread_tasks(lambda, dtp.num_threads, num_bars);
 
-            for (auto& t : threads) {
-                t = std::thread{lambda, start_bar, start_bar + step_bar};
-                start_bar += step_bar;
-            }
-            lambda(start_bar, bar_count);
-
-            for (auto& t : threads) {
-                t.join();
-            }
-
-            result["Bar count"] = bar_count;
+            result["Bar count"] = num_bars;
             result["Bin size"] = dtp.divisor;
             result["X ranges"] = x_ranges;
             result["Y mean"] = y_mean;
@@ -119,7 +107,7 @@ namespace tests {
         DistributionTest(hashes##BITS, cp##BITS, ROOT)
 
     void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
-        RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
+        //RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
         RUN_DIST_TEST_NORMAL_IMPL(32, num_threads, reports_root);
     }
 
@@ -130,7 +118,7 @@ namespace tests {
 
 
     void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
-        RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
+        //RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
     }
 
     void RunDistributionTests(ReportsRoot& reports_root) {

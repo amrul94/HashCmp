@@ -37,8 +37,8 @@ namespace tests {
         TestWithGeneratedBlocks(GEN, hashes##BITS, wp##BITS, ROOT)
 
     void RunCollTestNormal(pcg64& generator, uint16_t words_length, size_t num_threads, ReportsRoot& reports_root) {
-        RUN_COLL_TEST_NORMAL_IMPL(generator, 16, 16, words_length, num_threads, TestFlag::NORMAL, reports_root);
-        RUN_COLL_TEST_NORMAL_IMPL(generator, 24, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
+        //RUN_COLL_TEST_NORMAL_IMPL(generator, 16, 16, words_length, num_threads, TestFlag::NORMAL, reports_root);
+        //RUN_COLL_TEST_NORMAL_IMPL(generator, 24, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
         RUN_COLL_TEST_NORMAL_IMPL(generator, 32, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
     }
 
@@ -57,6 +57,6 @@ namespace tests {
         pcg64 generator;
 
         RunCollTestNormal(generator, words_length, 1, reports_root);
-        RunCollTestWithMask(generator, words_length, 1, reports_root);
+        //RunCollTestWithMask(generator, words_length, 1, reports_root);
     }
 }

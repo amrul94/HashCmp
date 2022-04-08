@@ -14,8 +14,6 @@ class SpeedStatistics:
         self.graphics_path = 'graphics'
         self.bits = tests_data['Bits']
         self.speeds = tests_data["Speed"]
-        print(self.bits)
-        print(self.speeds)
         self.tests_dir_path = get_python_report_path(tests_dir_name)
         self.test_name = tests_data["Test name"]
         self.hist_path = os.path.join(self.tests_dir_path, self.test_name)

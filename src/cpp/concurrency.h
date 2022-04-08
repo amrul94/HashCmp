@@ -7,21 +7,24 @@
 
 template<typename ResultType>
 class ThreadTasks {
-    using TaskFunction = std::function<ResultType(size_t, size_t)>;
+    using TaskFunction = std::function<ResultType(uint64_t, uint64_t)>;
     using MergeResultFunction = std::function<void(ResultType&, const ResultType&)>;
     using Future = std::future<ResultType>;
-    using PackagedTask = std::packaged_task<ResultType(size_t, size_t)>;
+    using PackagedTask = std::packaged_task<ResultType(uint64_t, uint64_t)>;
 
 public:
     ThreadTasks(const ThreadTasks&) = delete;
+    ThreadTasks(ThreadTasks&&) = default;
+
+    ThreadTasks& operator=(const ThreadTasks&) = delete;
+    ThreadTasks& operator=(ThreadTasks&&) = default;
+
     ThreadTasks(TaskFunction task, MergeResultFunction merge_results, uint16_t num_threads, size_t num_iterations)
         : task_(task)
         , merge_results_(merge_results)
         , num_par_threads_(num_threads - 1)
         , num_iterations_(num_iterations)
-        , block_size_(num_iterations / num_threads)
-        , futures_(num_par_threads_)
-        , threads_(num_par_threads_) {
+        , block_size_(num_iterations / num_threads) {
         StartThreads();
     }
 
@@ -36,10 +39,10 @@ public:
 
 private:
     void StartThreads()  {
-        for (size_t i = 0; i < num_par_threads_; ++i) {
+        for (uint64_t i = 0; i < num_par_threads_; ++i) {
             PackagedTask current_task(task_);
-            futures_[i] = current_task.get_future();
-            threads_[i] = std::jthread(std::move(current_task), 0, block_size_);
+            futures_.emplace_back(std::move(current_task.get_future()));
+            threads_.emplace_back(std::move(current_task), 0, block_size_);
         }
 
         const uint64_t last_block_size = num_iterations_ - block_size_ * num_par_threads_;
@@ -48,13 +51,58 @@ private:
 
     TaskFunction task_;
     MergeResultFunction merge_results_;
-    const uint16_t num_par_threads_;
-    const size_t num_iterations_;
-    const size_t block_size_;
+    uint16_t num_par_threads_;
+    size_t num_iterations_;
+    size_t block_size_;
     std::vector<Future> futures_;
     std::vector<std::jthread> threads_;
     ResultType result_;
 
+};
+
+template<>
+class ThreadTasks<void> {
+    using TaskFunction = std::function<void(uint64_t, uint64_t)>;
+
+public:
+    ThreadTasks(const ThreadTasks&) = delete;
+    ThreadTasks(ThreadTasks&&) = default;
+
+    ThreadTasks& operator=(const ThreadTasks&) = delete;
+    ThreadTasks& operator=(ThreadTasks&&) = default;
+
+    ThreadTasks(TaskFunction task, uint16_t num_threads, size_t num_iterations)
+            : task_(task)
+            , num_par_threads_(num_threads - 1)
+            , num_iterations_(num_iterations)
+            , block_size_(num_iterations / num_threads)
+            , threads_(num_par_threads_){
+        StartThreads();
+        JoinThreads();
+    }
+
+private:
+    void StartThreads()  {
+        uint64_t start_block = 0;
+        for (auto& t : threads_) {
+            uint64_t end_block = start_block + block_size_;
+            t = std::thread(task_, start_block, end_block);
+            start_block = end_block;
+        }
+        task_(start_block, num_iterations_);
+    }
+
+    void JoinThreads() {
+        for (auto& t : threads_) {
+            t.join();
+        }
+    }
+
+    TaskFunction task_;
+    uint16_t num_par_threads_;
+    size_t num_iterations_;
+    size_t block_size_;
+    std::vector<std::thread> threads_;
 };
 
 #endif //THESISWORK_CONCURRENCY_H

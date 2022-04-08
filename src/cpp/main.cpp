@@ -158,7 +158,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{5};
+    const std::vector test_numbers{3};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }
