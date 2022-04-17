@@ -41,7 +41,7 @@ namespace hfl {
         uint16_t bits = 32;
         std::vector<Hash32Struct> hashes;
 
-        /*if (bf == BuildFlag::ALL) {
+        if (bf == BuildFlag::ALL) {
             hashes.emplace_back("PearsonHash"s, pearson_hash_32, bits);
             ADD_UNIVERSAL_HASHES(32);
         }
@@ -57,10 +57,10 @@ namespace hfl {
         hashes.emplace_back("T1HA0 32be hash"s, t1ha0_32be_hash, bits);
         hashes.emplace_back("xxHash32"s, xx_hash_32, bits);
 
-        hashes.emplace_back("wyhash32"s, wyhash32, bits);*/
+        hashes.emplace_back("wyhash32"s, wyhash32, bits);
         hashes.emplace_back("nmhash32"s, nmhash32, bits);
-        /*hashes.emplace_back("nmhash32x"s, nmhash32x, bits);
-        hashes.emplace_back("halfsiphash"s, halfsiphash, bits);*/
+        hashes.emplace_back("nmhash32x"s, nmhash32x, bits);
+        hashes.emplace_back("halfsiphash"s, halfsiphash, bits);
 
         return hashes;
     }

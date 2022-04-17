@@ -5,6 +5,11 @@
 #include <vector>
 #include <thread>
 
+static inline size_t GetNumThreads() {
+    static const size_t hardware_threads = std::thread::hardware_concurrency();
+    return hardware_threads != 0 ? hardware_threads : 1;
+}
+
 template<typename ResultType>
 class ThreadTasks {
     using TaskFunction = std::function<ResultType(uint64_t, uint64_t)>;

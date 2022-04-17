@@ -55,7 +55,7 @@ namespace tests {
                 uint64_t step = buckets.size() / num_bars;
                 for (uint32_t bar = start_bar; bar < end_bar; ++bar) {
                     const uint64_t begin = bar * step;
-                    const uint64_t end = (bar + 1) * step;
+                    const uint64_t end = (bar + 1) * step; // begin + step
 
                     const uint64_t median = Median(begin, end, dtp.divisor);
                     x_ranges[bar] = median;
@@ -122,8 +122,7 @@ namespace tests {
     }
 
     void RunDistributionTests(ReportsRoot& reports_root) {
-        const size_t hardware_threads = std::thread::hardware_concurrency();
-        const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+        const size_t num_threads = GetNumThreads();
         reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
         RunDistTestNormal(num_threads, reports_root);

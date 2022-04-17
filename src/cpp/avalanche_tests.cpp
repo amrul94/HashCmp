@@ -34,6 +34,8 @@ namespace tests {
             best_case["Frequency"] = avalanche_info.hamming_distance.max.frequency;
             avalanche_statistics["Best case"] = best_case;
 
+            avalanche_statistics["Average case"] = static_cast<double>(avalanche_info.hamming_distance.avg);
+
             boost::json::object original_pair;
             original_pair["Number"] = avalanche_info.original_pair.number;
             original_pair["Hash"] = avalanche_info.original_pair.hash;
@@ -95,8 +97,7 @@ namespace tests {
         AvalancheTest(hashes##BITS, tp##BITS, ROOT)
 
     void RunAvalancheTests(ReportsRoot& reports_root) {
-        const size_t hardware_threads = std::thread::hardware_concurrency();
-        const size_t num_threads = hardware_threads != 0 ? hardware_threads : 1;
+        const size_t num_threads = GetNumThreads();
         reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
         const uint64_t num_keys = std::numeric_limits<uint32_t>::max() + 1ull;

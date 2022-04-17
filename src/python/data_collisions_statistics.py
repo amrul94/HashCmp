@@ -60,10 +60,10 @@ def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes)
 
 
 def process_collision_statistics(tests_dir_name, test_name):
-    path_to_test_dir = get_cpp_report_path(tests_dir_name)
-    path_to_eg_dir = os.path.join(path_to_test_dir, test_name)
-    list_of_files = os.listdir(path_to_eg_dir)
+    path_to_tests_dir = get_cpp_report_path(tests_dir_name)
+    path_to_cur_test_dir = os.path.join(path_to_tests_dir, test_name)
+    list_of_files = os.listdir(path_to_cur_test_dir)
     for file_name in list_of_files:
-        create_histogram(tests_dir_name, path_to_eg_dir, file_name)
+        create_histogram(tests_dir_name, path_to_cur_test_dir, file_name)
 
 

@@ -129,7 +129,7 @@ namespace tests {
     template<typename HashStruct>
     AvalancheInfo HashAvalancheTest(const HashStruct& hs, const TestParameters& tp, ReportsRoot& reports_root) {
         LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\t%1%: \n") % hs.name;
+        reports_root.logger << boost::format("\n\t%1%: \n") % hs.name;
 
         auto generators = GetGenerators(tp.num_threads, tp.num_keys);
         std::atomic_uint16_t gen_index = 0;
@@ -178,7 +178,7 @@ namespace tests {
 
         out_json.obj["Avalanche effect"] = avalanche_statistics;
         out_json.out << out_json.obj;
-        reports_root.logger << "--- END " << tp.hash_bits << " BITS TEST ---\n" << std::endl;
+        reports_root.logger << "\n--- END " << tp.hash_bits << " BITS TEST ---\n" << std::endl;
     }
 }
 
