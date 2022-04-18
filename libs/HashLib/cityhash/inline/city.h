@@ -221,6 +221,21 @@ namespace city::s_inline {
                          HashLen16(v.second, w.second) + x);
     }
 
+
+    // Hash function for a byte array. For convenience, two seeds are also
+    // hashed into the result.
+    static inline uint64 CityHash64WithSeeds(const char *s, size_t len,
+                               uint64 seed0, uint64 seed1) {
+        return HashLen16(CityHash64(s, len) - seed0, seed1);
+    }
+
+    // Hash function for a byte array.  For convenience, a 64-bit seed is also
+    // hashed into the result.
+    static inline uint64 CityHash64WithSeed(const char *s, size_t len, uint64 seed) {
+        return CityHash64WithSeeds(s, len, k2, seed);
+    }
+
+
     // A 32-bit to 32-bit integer hash copied from Murmur3.
     static inline uint32 fmix(uint32 h)
     {

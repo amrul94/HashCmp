@@ -4,7 +4,6 @@
 #include <cityhash/city.h>
 #include <farmhash/farmhash.h>
 #include <fasthash/fasthash.h>
-#include <highwayhash/highwayhash.h>
 #include <murmur_hash/MurmurHash1.h>
 #include <murmur_hash/MurmurHash2.h>
 #include <murmur_hash/MurmurHash3.h>
@@ -26,25 +25,9 @@
 #include <pcg_random.hpp>
 
 #include "hash_wrappers.h"
-
+#include "generators.h"
 
 namespace hfl {
-    namespace {
-        std::pair<uint64_t, uint64_t> GenerateTwoSeeds() {
-            std::random_device rd;
-            std::default_random_engine dre{rd()};
-            std::uniform_int_distribution<uint64_t> di;
-            static uint64_t seed1 = di(dre);
-            static uint64_t seed2 = di(dre);
-            return {seed1, seed2};
-        }
-
-        uint64_t GenerateSeed() {
-            return GenerateTwoSeeds().first;
-        }
-
-
-    }
 
 //----------- CityHashes ----------
 
@@ -56,82 +39,99 @@ namespace hfl {
         return city::CityHash64(message, length);
     }
 
+    uint64_t CityHash64WithSeedWrapper::Hash(const char *message, size_t length) const {
+        return city::CityHash64WithSeed(message, length, SEED_64_1);
+    }
+
+    uint64_t CityHash64WithSeedsWrapper::Hash(const char *message, size_t length) const {
+        return city::CityHash64WithSeeds(message, length, SEED_64_1, SEED_64_2);
+    }
+
 //----------- FarmHashes ----------
 
     uint32_t FarmHash32Wrapper::Hash(const char *message, size_t length) const {
         return NAMESPACE_FOR_HASH_FUNCTIONS::Hash32(message, length);
     }
 
+    uint32_t FarmHash32WithSeedWrapper::Hash(const char *message, size_t length) const {
+        return NAMESPACE_FOR_HASH_FUNCTIONS::Hash32WithSeed(message, length, SEED_32);
+    }
+
     uint64_t FarmHash64Wrapper::Hash(const char *message, size_t length) const {
         return NAMESPACE_FOR_HASH_FUNCTIONS::Hash64(message, length);
+    }
+
+    uint64_t FarmHash64WithSeedWrapper::Hash(const char *message, size_t length) const {
+        return NAMESPACE_FOR_HASH_FUNCTIONS::Hash64WithSeed(message, length, SEED_64_1);
+    }
+
+    uint64_t FarmHash64WithSeedsWrapper::Hash(const char *message, size_t length) const {
+        return NAMESPACE_FOR_HASH_FUNCTIONS::Hash64WithSeeds(message, length, SEED_64_1, SEED_64_2);
     }
 
 //------------ FastHash ------------
 
     uint16_t FastHash16Wrapper::Hash(const char *message, size_t length) const {
-        uint32_t h = fasthash32(message, length, 0);
+        uint32_t h = fasthash32(message, length, SEED_32);
         return h - (h >> 16);
     }
 
     uint24_t FastHash24Wrapper::Hash(const char *message, size_t length) const {
-        uint32_t h = fasthash32(message, length, 0);
+        uint32_t h = fasthash32(message, length, SEED_32);
         return h - (h >> 16);
     }
 
     uint32_t FastHash32Wrapper::Hash(const char *message, size_t length) const {
-        return fasthash32(message, length, 0);
+        return fasthash32(message, length, SEED_32);
     }
 
     uint48_t FastHash48Wrapper::Hash(const char *message, size_t length) const {
-        uint64_t h = fasthash64(message, length, 0);
+        uint64_t h = fasthash64(message, length, SEED_64_1);
         return h - (h >> 32);
     }
 
     uint64_t FastHash64Wrapper::Hash(const char *message, size_t length) const {
-        return fasthash64(message, length, 0);
+        return fasthash64(message, length, SEED_64_1);
     }
 
 //---------- FNV-1a hash -----------
 
     uint16_t FNV1aHash16Wrapper::Hash(const char *message, size_t length) const {
         static const uint32_t mask16 = (((uint32_t)1<<16)-1); /* i.e., (u_int32_t)0xffff */
-        uint32_t hash = FNV32a(message, static_cast<int>(length), 0);
+        uint32_t hash = FNV32a(message, static_cast<int>(length), SEED_32);
         hash = (hash>>16) ^ (hash & mask16);
         return hash;
     }
 
     uint24_t FNV1aHash24Wrapper::Hash(const char *message, size_t length) const {
         static const uint32_t mask24 = (((uint32_t)1<<24)-1); /* i.e., (u_int32_t)0xffffff */
-        uint32_t hash = FNV32a(message, static_cast<int>(length), 0);
+        uint32_t hash = FNV32a(message, static_cast<int>(length), SEED_32);
         hash = (hash>>24) ^ (hash & mask24);
         return hash;
     }
 
     uint32_t FNV1aHash32Wrapper::Hash(const char *message, size_t length) const {
-        return FNV32a(message, static_cast<int>(length), 0);
+        return FNV32a(message, static_cast<int>(length), SEED_32);
     }
 
     uint48_t FNV1aHash48Wrapper::Hash(const char *message, size_t length) const {
         static const uint64_t mask48 = (((uint64_t)1<<48)-1); /* i.e., (u_int32_t)0xffffff */
-        uint64_t hash = FNV64a(message, static_cast<int>(length), 0);
+        uint64_t hash = FNV64a(message, static_cast<int>(length), SEED_64_1);
         hash = (hash>>48) ^ (hash & mask48);
         return hash;
     }
 
     uint64_t FNV1aHash64Wrapper::Hash(const char *message, size_t length) const {
-        return FNV64a(message, static_cast<int>(length), 0);
+        return FNV64a(message, static_cast<int>(length), SEED_64_1);
     }
 
 //---------- HighwayHash -----------
 
     uint64_t HighwayHashWrapper::Hash(const char *message, size_t length) const {
-        using namespace highwayhash;
-
-        static const HHKey key HH_ALIGNAS(32) = {1, 2, 3, 4};
-        HHStateT<HH_TARGET> state(key);
-        HHResult64 result;
-        HighwayHashT(&state, message, length, &result);
-
+        static const highwayhash::HHKey key HH_ALIGNAS(32) = {SEED_64_1, SEED_64_2, SEED_64_3, SEED_64_4};
+        highwayhash::HHStateT<HH_TARGET> state{key};
+        highwayhash::HHResult64 result;
+        highwayhash::HighwayHashT(&state, message, length, &result);
         return result;
     }
 
@@ -139,26 +139,26 @@ namespace hfl {
 //--------- Jenkins hash -----------
 
     uint16_t SpookyHash16Wrapper::Hash(const char *message, size_t length) const {
-        auto hash = spooky_hash32(message, length, 0);
+        auto hash = spooky_hash32(message, length, SEED_32);
         return static_cast<uint32_t>(hash);
     }
 
     uint24_t SpookyHash24Wrapper::Hash(const char *message, size_t length) const {
-        auto hash = spooky_hash32(message, length, 0);
+        auto hash = spooky_hash32(message, length, SEED_32);
         return static_cast<uint24_t>(hash);
     }
 
     uint32_t SpookyHash32Wrapper::Hash(const char *message, size_t length) const {
-        return spooky_hash32(message, length, 0);
+        return spooky_hash32(message, length, SEED_32);
     }
 
     uint48_t SpookyHash48Wrapper::Hash(const char *message, size_t length) const {
-        auto hash = spooky_hash64(message, length, 0);
+        auto hash = spooky_hash64(message, length, SEED_64_1);
         return static_cast<uint48_t>(hash);
     }
 
     uint64_t SpookyHash64Wrapper::Hash(const char *message, size_t length) const {
-        return spooky_hash64(message, length, 0);
+        return spooky_hash64(message, length, SEED_64_1);
     }
 
 //------------ MetroHash -----------
@@ -166,7 +166,7 @@ namespace hfl {
     uint64_t MetroHash64_Wrapper::Hash(const char *message, size_t length) const {
         uint64_t hash = 0;
         std::vector<uint8_t> hash_array(8, 0);
-        MetroHash64::Hash(reinterpret_cast<const uint8_t*>(message), length, hash_array.data(), 0);
+        MetroHash64::Hash(reinterpret_cast<const uint8_t*>(message), length, hash_array.data(), SEED_64_1);
         memcpy(&hash, hash_array.data(), 8);
         return hash;
     }
@@ -174,24 +174,24 @@ namespace hfl {
 //---------- MurmurHashes ---------
 
     uint32_t MurmurHash1Wrapper::Hash(const char *message, size_t length) const {
-        return MurmurHash1(message, static_cast<int>(length), 0);
+        return MurmurHash1(message, static_cast<int>(length), SEED_32);
     }
 
     uint32_t MurmurHash2Wrapper::Hash(const char *message, size_t length) const {
-        return MurmurHash2(message, static_cast<int>(length), 0);
+        return MurmurHash2(message, static_cast<int>(length), SEED_32);
     }
 
     uint32_t MurmurHash2AWrapper::Hash(const char *message, size_t length) const {
-        return MurmurHash2A(message, static_cast<int>(length), 0);
+        return MurmurHash2A(message, static_cast<int>(length), SEED_32);
     }
 
     uint64_t MurmurHash64AWrapper::Hash(const char *message, size_t length) const {
-        return MurmurHash64A(message, static_cast<int>(length), 0);
+        return MurmurHash64A(message, static_cast<int>(length), SEED_64_1);
     }
 
     uint32_t MurmurHash3Wrapper::Hash(const char *message, size_t length) const {
         uint32_t hash = 0;
-        MurmurHash3_x86_32(message, static_cast<int>(length), 0, &hash);
+        MurmurHash3_x86_32(message, static_cast<int>(length), SEED_32, &hash);
         return hash;
     }
 
@@ -199,28 +199,28 @@ namespace hfl {
 //------------ MUM/mir -------------
 
     uint64_t MumHashWrapper::Hash(const char *message, size_t length) const {
-        return mum_hash(message, length, 0);
+        return mum_hash(message, length, SEED_64_1);
     }
 
     uint64_t MirHashWrapper::Hash(const char *message, size_t length) const {
-        return mir_hash(message, length, 0);
+        return mir_hash(message, length, SEED_64_1);
     }
 
 //-------------- MX3 ---------------
 
     uint64_t MX3HashWrapper::Hash(const char *message, size_t length) const {
         const auto* key = reinterpret_cast<const uint8_t*>(message);
-        return mx3::hash(key, length, 0);
+        return mx3::hash(key, length, SEED_64_1);
     }
 
 //------------- NMHASH -------------
 
     uint32_t nmHash32Wrapper::Hash(const char *message, size_t length) const {
-        return NMHASH32(message, length, 0);
+        return NMHASH32(message, length, SEED_32);
     }
 
     uint32_t nmHash32XWrapper::Hash(const char *message, size_t length) const {
-        return NMHASH32X(message, length, 0);
+        return NMHASH32X(message, length, SEED_32);
     }
 
 //--- Paul Hsieh's SuperFastHash ---
@@ -230,6 +230,7 @@ namespace hfl {
     }
 
 //---------- PearsonHashes ---------
+
     void PearsonHash16::Init() const {
         t16_.resize(table_size_);
         iota(t16_.begin(), t16_.end(), uint16_t(0));
@@ -280,40 +281,54 @@ namespace hfl {
 
     uint32_t PearsonHash32Wrapper::Hash(const char *message, size_t length) const {
         std::call_once(init_flag_, pearson_hash_init);
-        return pearson_hash_32(reinterpret_cast<const uint8_t*>(message), length, 0);
+        return pearson_hash_32(reinterpret_cast<const uint8_t*>(message), length, SEED_32);
     }
 
     uint64_t PearsonHash64Wrapper::Hash(const char *message, size_t length) const {
         std::call_once(init_flag_, pearson_hash_init);
-        return pearson_hash_64(reinterpret_cast<const uint8_t*>(message), length, 0);
+        return pearson_hash_64(reinterpret_cast<const uint8_t*>(message), length, SEED_64_1);
     }
 
 //----------- PengyHash ------------
 
     uint64_t PengyHash64Wrapper::Hash(const char *message, size_t length) const {
-        return pengyhash(message, length, 0);
+        return pengyhash(message, length, SEED_32);
     }
 
 //------------- SIPHASH ------------
 
     uint64_t SipHashWrapper::Hash(const char *message, size_t length) const {
-        return siphash(key_, reinterpret_cast<const uint8_t*>(message), length);
+        static const uint8_t key[16] = {SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
+                                        SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,
+                                        SEED_8_9, SEED_8_10, SEED_8_11, SEED_8_12,
+                                        SEED_8_13, SEED_8_14, SEED_8_15, SEED_8_16};
+        return siphash(key, reinterpret_cast<const uint8_t*>(message), length);
     }
 
     uint64_t SipHash13Wrapper::Hash(const char *message, size_t length) const {
-        return siphash13(key_, reinterpret_cast<const uint8_t*>(message), length);
+        static const uint8_t key[16] = {SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
+                                        SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,
+                                        SEED_8_9, SEED_8_10, SEED_8_11, SEED_8_12,
+                                        SEED_8_13, SEED_8_14, SEED_8_15, SEED_8_16};
+        return siphash13(key, reinterpret_cast<const uint8_t*>(message), length);
     }
 
     uint64_t SipHashAVX2Wrapper::Hash(const char *message, size_t length) const {
-        return highwayhash::SipHash(key_, message, length);
+        static const highwayhash::HH_U64 key[2] = {SEED_64_1, SEED_64_2};
+        return highwayhash::SipHash(key, message, length);
     }
 
     uint64_t SipHash13AVX2Wrapper::Hash(const char *message, size_t length) const {
-        return highwayhash::SipHash13(key_, message, length);
+        static const highwayhash::HH_U64 key[2] = {SEED_64_1, SEED_64_2};
+        return highwayhash::SipHash13(key, message, length);
     }
 
     uint32_t HalfSipHashWrapper::Hash(const char *message, size_t length) const {
-        return halfsiphash(key_, reinterpret_cast<const uint8_t*>(message), length);
+        static const uint8_t key[16] = {SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
+                                        SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,
+                                        SEED_8_9, SEED_8_10, SEED_8_11, SEED_8_12,
+                                        SEED_8_13, SEED_8_14, SEED_8_15, SEED_8_16};
+        return halfsiphash(key, reinterpret_cast<const uint8_t*>(message), length);
     }
 
 //-------------- T1HA --------------
@@ -346,11 +361,11 @@ namespace hfl {
 //------------ wyHashes -----------
 
     uint32_t wyHash32Wrapper::Hash(const char *message, size_t length) const {
-        return wyhash32(message, length, 0);
+        return wyhash32(message, length, SEED_32);
     }
 
     uint64_t wyHash64Wrapper::Hash(const char *message, size_t length) const {
-        return wyhash(message, length, 0, _wyp);
+        return wyhash(message, length, SEED_64_1, _wyp);
     }
 
 //------------ xxHashes -----------
@@ -365,5 +380,9 @@ namespace hfl {
 
     uint64_t XXH3_64BitsWrapper::Hash(const char *message, size_t length) const {
         return XXH3_64bits(message, length);
+    }
+
+    uint64_t XXH3_64bits_withSeedWrapper::Hash(const char *message, size_t length) const {
+        return XXH3_64bits_withSeed(message, length, SEED_64_1);
     }
 }

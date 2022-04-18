@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "siphash_impl.h"
+#include "siphash/siphash_impl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,37 +18,59 @@ U8TO64_LE(const unsigned char *p) {
 }
 #endif
 
-#define SIPCOMPRESS \
-	v0 += v1; v2 += v3; \
-	v1 = ROTL64(v1,13); v3 = ROTL64(v3,16); \
-	v1 ^= v0; v3 ^= v2; \
-	v0 = ROTL64(v0,32); \
-	v2 += v1; v0 += v3; \
-	v1 = ROTL64(v1,17); v3 = ROTL64(v3,21); \
-	v1 ^= v2; v3 ^= v0; \
-	v2 = ROTL64(v2,32)
+/* 0,2,1,3 */
+static const packedelem64 siphash_init[2] = {
+        {{0x736f6d6570736575ull,0x6c7967656e657261ull}},
+        {{0x646f72616e646f6dull,0x7465646279746573ull}}
+};
+
+static const packedelem64 siphash_final = {
+        {0x0000000000000000ull,0x00000000000000ffull}
+};
+
+static const packedelem8 siphash_rot16v3 = {
+        {14,15,8,9,10,11,12,13,8,9,10,11,12,13,14,15}
+};
 
 static inline uint64_t siphash(const unsigned char key[16], const unsigned char *m, size_t len) {
-    uint64_t v0, v1, v2, v3;
-    uint64_t mi, k0, k1;
+    xmmi k,v02,v20,v13,v11,v33,mi;
     uint64_t last7;
+    uint32_t lo, hi;
     size_t i, blocks;
 
-    k0 = U8TO64_LE(key + 0);
-    k1 = U8TO64_LE(key + 8);
-    v0 = k0 ^ 0x736f6d6570736575ull;
-    v1 = k1 ^ 0x646f72616e646f6dull;
-    v2 = k0 ^ 0x6c7967656e657261ull;
-    v3 = k1 ^ 0x7465646279746573ull;
+    k = _mm_loadu_si128((xmmi *)(key + 0));
+    v02 = siphash_init[0].v;
+    v13 = siphash_init[1].v;
+    v02 = _mm_xor_si128(v02, _mm_unpacklo_epi64(k, k));
+    v13 = _mm_xor_si128(v13, _mm_unpackhi_epi64(k, k));
 
     last7 = (uint64_t)(len & 0xff) << 56;
 
+#define sipcompress() \
+	v11 = v13; \
+	v33 = v13; \
+	v11 = _mm_or_si128(_mm_slli_epi64(v11, 13), _mm_srli_epi64(v11, 64-13)); \
+	v02 = _mm_add_epi64(v02, v13); \
+	v33 = _mm_shuffle_epi8(v33, siphash_rot16v3.v); \
+	v13 = _mm_unpacklo_epi64(v11, v33); \
+	v13 = _mm_xor_si128(v13, v02); \
+	v20 = _mm_shuffle_epi32(v02, _MM_SHUFFLE(0,1,3,2)); \
+	v11 = v13; \
+	v33 = _mm_shuffle_epi32(v13, _MM_SHUFFLE(1,0,3,2)); \
+	v11 = _mm_or_si128(_mm_slli_epi64(v11, 17), _mm_srli_epi64(v11, 64-17)); \
+	v20 = _mm_add_epi64(v20, v13); \
+	v33 = _mm_or_si128(_mm_slli_epi64(v33, 21), _mm_srli_epi64(v33, 64-21)); \
+	v13 = _mm_unpacklo_epi64(v11, v33); \
+	v13 = _mm_unpacklo_epi64(v11, v33); \
+	v02 = _mm_shuffle_epi32(v20, _MM_SHUFFLE(0,1,3,2)); \
+	v13 = _mm_xor_si128(v13, v20);
+
     for (i = 0, blocks = (len & ~7); i < blocks; i += 8) {
-        mi = U8TO64_LE(m + i);
-        v3 ^= mi;
-        SIPCOMPRESS; /* 2 c rounds */
-        SIPCOMPRESS;
-        v0 ^= mi;
+        mi = _mm_loadl_epi64((xmmi *)(m + i));
+        v13 = _mm_xor_si128(v13, _mm_slli_si128(mi, 8));
+        sipcompress()
+        sipcompress()
+        v02 = _mm_xor_si128(v02, mi);
     }
 
     switch (len - blocks) {
@@ -62,38 +84,44 @@ static inline uint64_t siphash(const unsigned char key[16], const unsigned char 
         case 0:
         default:;
     };
-    v3 ^= last7;
-    SIPCOMPRESS; /* 2 more c rounds */
-    SIPCOMPRESS;
-    v0 ^= last7;
-    v2 ^= 0xff;
-    SIPCOMPRESS; /* and 4 final d rounds */
-    SIPCOMPRESS;
-    SIPCOMPRESS;
-    SIPCOMPRESS;
-    return v0 ^ v1 ^ v2 ^ v3;
+
+    mi = _mm_unpacklo_epi32(_mm_cvtsi32_si128((uint32_t)last7),_mm_cvtsi32_si128((uint32_t)(last7 >> 32)));
+    v13 = _mm_xor_si128(v13, _mm_slli_si128(mi, 8));
+    sipcompress()
+    sipcompress()
+    v02 = _mm_xor_si128(v02, mi);
+    v02 = _mm_xor_si128(v02, siphash_final.v);
+    sipcompress()
+    sipcompress()
+    sipcompress()
+    sipcompress()
+
+    v02 = _mm_xor_si128(v02, v13);
+    v02 = _mm_xor_si128(v02, _mm_shuffle_epi32(v02, _MM_SHUFFLE(1,0,3,2)));
+    lo = _mm_cvtsi128_si32(v02);
+    hi = _mm_cvtsi128_si32(_mm_srli_si128(v02, 4));
+    return ((uint64_t)hi << 32) | lo;
 }
 
 static inline uint64_t siphash13(const unsigned char key[16], const unsigned char *m, size_t len) {
-    uint64_t v0, v1, v2, v3;
-    uint64_t mi, k0, k1;
+    xmmi k,v02,v20,v13,v11,v33,mi;
     uint64_t last7;
+    uint32_t lo, hi;
     size_t i, blocks;
 
-    k0 = U8TO64_LE(key + 0);
-    k1 = U8TO64_LE(key + 8);
-    v0 = k0 ^ 0x736f6d6570736575ull;
-    v1 = k1 ^ 0x646f72616e646f6dull;
-    v2 = k0 ^ 0x6c7967656e657261ull;
-    v3 = k1 ^ 0x7465646279746573ull;
+    k = _mm_loadu_si128((xmmi *)(key + 0));
+    v02 = siphash_init[0].v;
+    v13 = siphash_init[1].v;
+    v02 = _mm_xor_si128(v02, _mm_unpacklo_epi64(k, k));
+    v13 = _mm_xor_si128(v13, _mm_unpackhi_epi64(k, k));
 
     last7 = (uint64_t)(len & 0xff) << 56;
 
     for (i = 0, blocks = (len & ~7); i < blocks; i += 8) {
-        mi = U8TO64_LE(m + i);
-        v3 ^= mi;
-        SIPCOMPRESS; /* 1 c round */
-        v0 ^= mi;
+        mi = _mm_loadl_epi64((xmmi *)(m + i));
+        v13 = _mm_xor_si128(v13, _mm_slli_si128(mi, 8));
+        sipcompress()
+        v02 = _mm_xor_si128(v02, mi);
     }
 
     switch (len - blocks) {
@@ -107,14 +135,21 @@ static inline uint64_t siphash13(const unsigned char key[16], const unsigned cha
         case 0:
         default:;
     };
-    v3 ^= last7;
-    SIPCOMPRESS; /* 1 more c round */
-    v0 ^= last7;
-    v2 ^= 0xff;
-    SIPCOMPRESS; /* and 3 final d rounds */
-    SIPCOMPRESS;
-    SIPCOMPRESS;
-    return v0 ^ v1 ^ v2 ^ v3;
+
+    mi = _mm_unpacklo_epi32(_mm_cvtsi32_si128((uint32_t)last7),_mm_cvtsi32_si128((uint32_t)(last7 >> 32)));
+    v13 = _mm_xor_si128(v13, _mm_slli_si128(mi, 8));
+    sipcompress()
+    v02 = _mm_xor_si128(v02, mi);
+    v02 = _mm_xor_si128(v02, siphash_final.v);
+    sipcompress()
+    sipcompress()
+    sipcompress()
+
+    v02 = _mm_xor_si128(v02, v13);
+    v02 = _mm_xor_si128(v02, _mm_shuffle_epi32(v02, _MM_SHUFFLE(1,0,3,2)));
+    lo = _mm_cvtsi128_si32(v02);
+    hi = _mm_cvtsi128_si32(_mm_srli_si128(v02, 4));
+    return ((uint64_t)hi << 32) | lo;
 }
 
 #define ROTL(x, b) (uint32_t)(((x) << (b)) | ((x) >> (32 - (b))))

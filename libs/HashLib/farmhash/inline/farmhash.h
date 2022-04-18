@@ -511,6 +511,10 @@ inline uint128_t Uint128(uint64_t lo, uint64_t hi) {
                  31);
     }
 
+    STATIC_INLINE uint64_t Hash64WithSeed(const char* s, size_t len, uint64_t seed) {
+        return Hash64WithSeeds(s, len, k2, seed);
+    }
+
     STATIC_INLINE uint64_t HashLen257to512(const char *s, size_t len) {
         return len <= 64 ? HashLen33to64(s, len) :
                Hash64WithSeeds(s, len, 81, 0);
@@ -725,7 +729,11 @@ inline uint128_t Uint128(uint64_t lo, uint64_t hi) {
     // May change from time to time, may differ on different platforms, may differ
     // depending on NDEBUG.
     STATIC_INLINE uint32_t Hash32(const char* s, size_t len) {
-        return DebugTweak(static_cast<uint32_t>(Hash64(s, len)));
+        return static_cast<uint32_t>(Hash64(s, len));
+    }
+
+    STATIC_INLINE uint32_t Hash32WithSeed(const char *s, size_t len, uint32_t seed) {
+        return static_cast<uint32_t>(Hash64WithSeed(s, len, seed));
     }
 
 }  // namespace NAMESPACE_FOR_HASH_FUNCTIONS

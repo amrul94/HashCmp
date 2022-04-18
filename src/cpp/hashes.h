@@ -11,13 +11,14 @@ namespace hfl {
 
     // Hashes
     [[maybe_unused]] inline const BuzHashWrapper<uint16_t> buz_hash_16;
-    [[maybe_unused]] inline const BuzHashWrapper<uint24_t> buz_hash_24;
     [[maybe_unused]] inline const BuzHashWrapper<uint32_t> buz_hash_32;
-    [[maybe_unused]] inline const BuzHashWrapper<uint48_t> buz_hash_48;
     [[maybe_unused]] inline const BuzHashWrapper<uint64_t> buz_hash_64;
 
     [[maybe_unused]] inline constinit CityHash32Wrapper city_hash_32;
     [[maybe_unused]] inline constinit CityHash64Wrapper city_hash_64;
+    [[maybe_unused]] inline constinit CityHash64WithSeedWrapper city_hash_64_with_seed;
+    [[maybe_unused]] inline constinit CityHash64WithSeedsWrapper city_hash_64_with_seeds;
+
 
     [[maybe_unused]] inline constinit DJB2HashWrapper<uint16_t> djb2_hash_16;
     [[maybe_unused]] inline constinit DJB2HashWrapper<uint24_t> djb2_hash_24;
@@ -26,7 +27,10 @@ namespace hfl {
     [[maybe_unused]] inline constinit DJB2HashWrapper<uint64_t> djb2_hash_64;
 
     [[maybe_unused]] inline constinit FarmHash32Wrapper farm_hash_32;
+    [[maybe_unused]] inline constinit FarmHash32WithSeedWrapper farm_hash_32_with_seed;
     [[maybe_unused]] inline constinit FarmHash64Wrapper farm_hash_64;
+    [[maybe_unused]] inline constinit FarmHash64WithSeedWrapper farm_hash_64_with_seed;
+    [[maybe_unused]] inline constinit FarmHash64WithSeedsWrapper farm_hash_64_with_seeds;
 
     [[maybe_unused]] inline constinit FastHash16Wrapper fast_hash_16;
     [[maybe_unused]] inline constinit FastHash24Wrapper fast_hash_24;
@@ -107,6 +111,7 @@ namespace hfl {
     [[maybe_unused]] inline constinit xxHash32Wrapper xx_hash_32;
     [[maybe_unused]] inline constinit xxHash64Wrapper xx_hash_64;
     [[maybe_unused]] inline constinit XXH3_64BitsWrapper xxh3_64bits;
+    [[maybe_unused]] inline constinit XXH3_64bits_withSeedWrapper xxh3_64bits_with_seed;
 
     [[maybe_unused]] inline constinit wyHash32Wrapper wyhash32;
     [[maybe_unused]] inline constinit wyHash64Wrapper wy_hash_64;

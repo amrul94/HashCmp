@@ -11,7 +11,7 @@ set(LIBS libs)
 add_subdirectory(${LIBS}/HashLib HashLibBuildDir)
 
 set(SRC "src/cpp")
-set(UTILITIES ${SRC}/log_duration.h ${SRC}/log_duration.cpp ${SRC}/generator.h ${SRC}/generator.cpp)
+set(UTILITIES ${SRC}/log_duration.h ${SRC}/log_duration.cpp ${SRC}/generators.h ${SRC}/generators.cpp)
 set(WRAPPERS ${SRC}/hash_wrappers.h ${SRC}/hash_wrappers.cpp ${SRC}/hashes.h ${SRC}/hashes.cpp)
 set(HELP_STRUCTS ${SRC}/test_parameters.h ${SRC}/test_parameters.cpp)
 set(CONCURRENCY ${SRC}/concurrency.h)

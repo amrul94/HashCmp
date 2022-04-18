@@ -4,7 +4,7 @@
 #include "boost/format.hpp"
 #include "boost/json.hpp"
 
-#include "generator.h"
+#include "generators.h"
 #include "log_duration.h"
 #include "test_parameters.h"
 

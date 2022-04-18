@@ -1,21 +1,21 @@
 #include <random>
 
-#include <cityhash/city_inline.h>
-#include <farmhash/farmhash_inline.h>
-#include <fasthash/fasthash_inline.h>
+#include "cityhash/inline/city.h"
+#include "farmhash/inline/farmhash.h"
+#include "fasthash/inline/fasthash.h"
 #include <metro_hash/metrohash64.h>
-#include <murmur_hash/MurmurHashInline.h>
+#include "murmur_hash/inline/MurmurHash.h"
 #include <nmhash/nmhash.h>
 #include <mx3/mx3.h>
-#include <pearson/pearson_inline.h>
+#include "pearson/inline/pearson.h"
 #include <pengyhash/pengyhash.h>
-#include <spooky_hash/spooky_inline.h>
+#include "spooky_hash/inline/spooky.h"
 #include <super_fast_hash/super_fast_hash.h>
 #include <t1ha/t1ha.h>
 #include <wyhash/wyhash.h>
 #include <wyhash/wyhash32.h>
 #include <xx_hash/xxhash.h>
-#include <siphash/siphash_inline.h>
+#include "siphash/inline/siphash.h"
 #include <highwayhash/sip_hash.h>
 #include <highwayhash/highwayhash.h>
 
@@ -24,6 +24,7 @@
 
 #include "hashes.h"
 #include "speed_tests.h"
+#include "generators.h"
 
 namespace tests {
     namespace out {
@@ -50,7 +51,9 @@ namespace tests {
     struct UcharKeyUintLen{};
     struct CharKeyIntLenSeed{};
     struct CharKeyUintLenSeed{};
+    struct CharKeyUintLenSeeds{};
     struct UcharKeyUintLenSeed{};
+
 
     namespace args {
         constinit StrView str_view;
@@ -59,6 +62,7 @@ namespace tests {
         constinit UcharKeyUintLen uchar_key_uint_len;
         constinit CharKeyIntLenSeed char_key_int_len_seed;
         constinit CharKeyUintLenSeed char_key_uint_len_seed;
+        constinit CharKeyUintLenSeeds char_key_uint_len_seeds;
         constinit UcharKeyUintLenSeed uchar_key_uint_len_seed;
     }
 
@@ -104,7 +108,7 @@ namespace tests {
                       ReportsRoot& reports_root, boost::json::object& obj) {
             auto lambda = [func] (std::string_view str) {
                 const auto len = static_cast<int>(str.size());
-                return func(str.data(), len, 0);
+                return func(str.data(), len, SEED_64_1);
             };
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
@@ -113,7 +117,16 @@ namespace tests {
         void HashTest(Function func, CharKeyUintLenSeed, const std::string& hash_name, const std::vector<std::string>& words,
                       ReportsRoot& reports_root, boost::json::object& obj) {
             auto lambda = [func] (std::string_view str) {
-                return func(str.data(), str.size(), 0);
+                return func(str.data(), str.size(), SEED_64_1);
+            };
+            HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
+        }
+
+        template <typename Function>
+        void HashTest(Function func, CharKeyUintLenSeeds, const std::string& hash_name, const std::vector<std::string>& words,
+                      ReportsRoot& reports_root, boost::json::object& obj) {
+            auto lambda = [func] (std::string_view str) {
+                return func(str.data(), str.size(), SEED_64_1, SEED_64_2);
             };
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
@@ -153,7 +166,7 @@ namespace tests {
             auto lambda = [func, bits](std::string_view str) {
                 static const uint32_t mask = (((uint32_t)1 << bits)-1); /* i.e., (u_int32_t)0xffff */
                 const auto len = static_cast<int>(str.size());
-                uint32_t hash = func(str.data(), len, 0);
+                uint32_t hash = func(str.data(), len, SEED_64_1);
                 hash = (hash >> bits) ^ (hash & mask);
                 return hash;
             };
@@ -172,36 +185,12 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
 
-        template<>
-        void BuzHashTest<hfl::uint24_t>(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
-            std::string hash_name = "BuzHash";
-
-            CyclicHash<uint32_t> hasher{4096, 24};
-            auto lambda = [&hasher](std::string_view str) {
-                return static_cast<hfl::uint24_t>(hasher.hash(str));
-            };
-
-            HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
-        }
-
-        template<>
-        void BuzHashTest<hfl::uint48_t>(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
-            std::string hash_name = "BuzHash";
-
-            CyclicHash<uint64_t> hasher{4096, 48};
-            auto lambda = [&hasher](std::string_view str) {
-                return static_cast<hfl::uint48_t>(hasher.hash(str));
-            };
-
-            HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
-        }
-
         template<typename UintT>
         void SpookyHashTest(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
             std::string hash_name = "SpookyHash";
 
             auto lambda = [](std::string_view str) {
-                uint64_t hash1 = 0, seed = 0;
+                uint64_t hash1 = SEED_64_1, seed = SEED_64_2;
                 spooky_inline::spooky_hash128(str.data(), str.size(), &hash1, &seed);
                 return static_cast<UintT>(hash1);
             };
@@ -213,7 +202,7 @@ namespace tests {
             std::string hash_name = "FastHash";
 
             auto lambda = [](std::string_view str) {
-                uint32_t h = fasthash_inline::fasthash32(str.data(), str.size(), 0);
+                uint32_t h = fasthash_inline::fasthash32(str.data(), str.size(), SEED_32);
                 return static_cast<UintT>(h - (h >> 16));
             };
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
@@ -224,7 +213,7 @@ namespace tests {
             std::string hash_name = "FastHash";
 
             auto lambda = [](std::string_view str) {
-                uint64_t h = fasthash_inline::fasthash64(str.data(), str.size(), 0);
+                uint64_t h = fasthash_inline::fasthash64(str.data(), str.size(), SEED_64_1);
                 return static_cast<UintT>(h - (h >> 32));
             };
 
@@ -236,7 +225,7 @@ namespace tests {
             std::string hash_name = "FastHash";
 
             auto lambda = [](std::string_view str) {
-                return fasthash_inline::fasthash64(str.data(), str.size(), 0);
+                return fasthash_inline::fasthash64(str.data(), str.size(), SEED_64_1);
             };
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
@@ -246,8 +235,8 @@ namespace tests {
 
             auto lambda = [](std::string_view str) {
                 uint64_t hash = 0;
-                std::vector<uint8_t> hash_array(8, 0);
-                MetroHash64::Hash(reinterpret_cast<const uint8_t*>(str.data()), str.size(), hash_array.data(), 0);
+                std::vector<uint8_t> hash_array(0, 0);
+                MetroHash64::Hash(reinterpret_cast<const uint8_t*>(str.data()), str.size(), hash_array.data(), SEED_64_1);
                 std::memcpy(&hash, hash_array.data(), 8);
                 return hash;
             };
@@ -258,7 +247,7 @@ namespace tests {
             std::string hash_name = "wyHash64";
 
             auto lambda = [](std::string_view str) {
-                return wyhash(str.data(), str.size(), 0, _wyp);
+                return wyhash(str.data(), str.size(), SEED_64_1, _wyp);
             };
             HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
@@ -266,7 +255,10 @@ namespace tests {
         template <typename BaseFunc>
         void SipHashTest(BaseFunc func, const std::string& hash_name, const std::vector<std::string>& words,
                          ReportsRoot& reports_root, boost::json::object& obj) {
-            unsigned char key[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            unsigned char key[16] = {SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
+                                     SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,
+                                     SEED_8_9, SEED_8_10, SEED_8_11, SEED_8_12,
+                                     SEED_8_13, SEED_8_14, SEED_8_15, SEED_8_16};
 
             auto lambda = [func, &key](std::string_view str) {
                 return func(key, (const unsigned char *)str.data(), str.size());
@@ -277,7 +269,7 @@ namespace tests {
         template <typename BaseFunc>
         void GoogleSipHashTest(BaseFunc func, const std::string& hash_name, const std::vector<std::string>& words,
                          ReportsRoot& reports_root, boost::json::object& obj) {
-            const highwayhash::HH_U64 key[2] = {1234, 5678};
+            const highwayhash::HH_U64 key[2] = {SEED_64_1, SEED_64_2};
 
             auto lambda = [func, &key](std::string_view str) {
                 return func(key, str.data(), str.size());
@@ -291,7 +283,7 @@ namespace tests {
             auto lambda = [](std::string_view str) {
                 using namespace highwayhash;
 
-                static const HHKey key HH_ALIGNAS(32) = {1, 2, 3, 4};
+                static const HHKey key HH_ALIGNAS(32) = {SEED_64_1, SEED_64_2, SEED_64_3, SEED_64_4};
                 HHStateT<HH_TARGET> state(key);
                 HHResult64 result;
                 HighwayHashT(&state, str.data(), str.size(), &result);
@@ -308,7 +300,6 @@ namespace tests {
             HashTest(DJB2Hash<UintT>, args::char_key_uint_len, "DJB2 Hash"s, words, reports_root, obj);
             HashTest(SDBMHash<UintT>, args::char_key_uint_len, "SDBM Hash"s, words, reports_root, obj);
             HashTest(PJWHash<UintT>, args::char_key_uint_len, "PJW Hash"s, words, reports_root, obj);
-            BuzHashTest<UintT>(words, reports_root, obj);
             HashTest(one_at_a_time_hash<UintT>, args::uchar_key_uint_len, "One at a time"s, words, reports_root, obj);
             SpookyHashTest<UintT>(words, reports_root, obj);
         }
@@ -320,6 +311,8 @@ namespace tests {
         PearsonClassTest(hfl::PearsonHash16{}, words, reports_root, obj);
         FNV1aHashTest(FNV32a, 16, words, reports_root, obj);
         SpeedTestT<uint16_t>(words, reports_root, obj);
+        BuzHashTest<uint16_t>(words, reports_root, obj);
+
         FastHash1To31Test<uint16_t>(words, reports_root, obj);
 
         return obj;
@@ -344,6 +337,7 @@ namespace tests {
         PearsonFuncTest(pearson_inline::pearson_hash_32, words, reports_root, obj);
         HashTest(FNV32a, args::char_key_int_len_seed, "FNV-1a Hash"s, words, reports_root, obj);
         SpeedTestT<uint32_t>(words, reports_root, obj);
+        BuzHashTest<uint32_t>(words, reports_root, obj);
         FastHash32To63Test<uint32_t>(words, reports_root, obj);
 
         HashTest(SuperFastHash, args::char_key_int_len, "SuperFastHash"s, words, reports_root, obj);
@@ -353,6 +347,7 @@ namespace tests {
         HashTest(murmur_inline::MurmurHash3_x86_32, args::char_key_int_len_seed, "MurmurHash3"s, words, reports_root, obj);
         HashTest(city::s_inline::CityHash32, args::char_key_uint_len, "CityHash32"s, words, reports_root, obj);
         HashTest(util::s_inline::Hash32, args::char_key_uint_len, "FarmHash32"s, words, reports_root, obj);
+        HashTest(util::s_inline::Hash32WithSeed, args::char_key_uint_len_seed, "FarmHash32WithSeed"s, words, reports_root, obj);
 
         // no inline
         HashTest(t1ha0_32le, args::char_key_uint_len_seed, "T1HA0 32le hash"s, words, reports_root, obj);
@@ -385,11 +380,16 @@ namespace tests {
         PearsonFuncTest(pearson_inline::pearson_hash_64, words, reports_root, obj);
         HashTest(FNV64a, args::char_key_int_len_seed, "FNV-1a Hash", words, reports_root, obj);
         SpeedTestT<uint64_t>(words, reports_root, obj);
+        BuzHashTest<uint64_t>(words, reports_root, obj);
         FastHash64Test(words, reports_root, obj);
 
         HashTest(murmur_inline::MurmurHash64A, args::char_key_int_len_seed, "MurmurHash2 64 bits"s, words, reports_root, obj);
         HashTest(city::s_inline::CityHash64, args::char_key_uint_len, "CityHash64"s, words, reports_root, obj);
+        HashTest(city::s_inline::CityHash64WithSeed, args::char_key_uint_len_seed, "CityHash64WithSeed"s, words, reports_root, obj);
+        HashTest(city::s_inline::CityHash64WithSeeds, args::char_key_uint_len_seeds, "CityHash64WithSeeds"s, words, reports_root, obj);
         HashTest(util::s_inline::Hash64, args::char_key_uint_len, "FarmHash64"s, words, reports_root, obj);
+        HashTest(util::s_inline::Hash64WithSeed, args::char_key_uint_len_seed, "FarmHash64WithSeed"s, words, reports_root, obj);
+        HashTest(util::s_inline::Hash64WithSeeds, args::char_key_uint_len_seeds, "FarmHash64WithSeeds"s, words, reports_root, obj);
         MetroHashTest(words, reports_root, obj);
 
         // no inline
@@ -399,6 +399,7 @@ namespace tests {
 
         HashTest(XXH64, args::char_key_uint_len_seed, "xxHash64"s, words, reports_root, obj);
         HashTest(XXH3_64bits, args::char_key_uint_len, "XXH3_64bits"s, words, reports_root, obj);
+        HashTest(XXH3_64bits_withSeed, args::char_key_uint_len_seed, "XXH3_64bits_withSeed"s, words, reports_root, obj);
 
         WyHash64Test(words, reports_root, obj);
         HashTest(pengyhash, args::char_key_uint_len_seed, "PengyHash"s, words, reports_root, obj);

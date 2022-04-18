@@ -1,29 +1,27 @@
-#include "generator.h"
+#include "generators.h"
 
 #include <random>
+
+
 
 
 std::vector<pcg64> GetGenerators(uint16_t num_generators, uint64_t num_generate_numbers) {
     assert(num_generators != 0);
 
-    pcg64 rng;
-    std::vector<pcg64> generators {rng};
-    generators.reserve(num_generators);
     const uint64_t step = num_generate_numbers / num_generators;
+    num_generate_numbers += NUM_64_BITS_SEEDS;
 
-    pcg_extras::seed_seq_from<std::mt19937_64> seed_source;
+    pcg64 rng;
+    rng.advance(NUM_64_BITS_SEEDS);
+    std::vector<pcg64> generators;
+    generators.reserve(num_generators);
+
     for (uint16_t i = 0; i < num_generators - 1; ++i) {
-        rng.advance(step);
         generators.emplace_back(rng);
+        rng.advance(step);
     }
-    return generators;
-}
 
-std::string UintToString(uint64_t src, uint64_t size) {
-    std::string dest;
-    dest.resize(size);
-    std::memcpy(dest.data(), &src, size);
-    return dest;
+    return generators;
 }
 
 std::string GenerateRandomDataBlock(pcg64& rng, uint32_t length) {

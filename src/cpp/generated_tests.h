@@ -16,7 +16,7 @@
 #include <pcg_random.hpp>
 
 #include "concurrency.h"
-#include "generator.h"
+#include "generators.h"
 #include "test_parameters.h"
 #include "log_duration.h"
 

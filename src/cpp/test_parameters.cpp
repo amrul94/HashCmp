@@ -20,8 +20,10 @@ namespace tests {
                 return "Bins";
             case TestFlag::MASK:
                 return "Mask";
-            default:
+            default: {
                 assert(false);
+                return "";
+            }
         }
     }
 
@@ -140,8 +142,10 @@ namespace tests {
                 const auto &cp = dynamic_cast<const DistTestParameters &>(tp);
                 return hash / cp.divisor;
             }
-            default:
+            default: {
                 assert(false);
+                return -1;
+            }
         }
     }
 }

@@ -14,7 +14,7 @@
 #include <pcg_random.hpp>
 
 #include "concurrency.h"
-#include "generator.h"
+#include "generators.h"
 #include "hashes.h"
 #include "my_assert.h"
 #include "test_parameters.h"

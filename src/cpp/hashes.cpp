@@ -88,7 +88,11 @@ namespace hfl {
 
         hashes.emplace_back("MurmurHash2 64 bits"s, murmur_hash2_64, bits);
         hashes.emplace_back("CityHash64"s, city_hash_64, bits);
+        hashes.emplace_back("CityHash64WithSeed"s, city_hash_64_with_seed, bits);
+        hashes.emplace_back("CityHash64WithSeeds"s, city_hash_64_with_seeds, bits);
         hashes.emplace_back("FarmHash64"s, farm_hash_64, bits);
+        hashes.emplace_back("FarmHash64WithSeed"s, farm_hash_64_with_seed, bits);
+        hashes.emplace_back("FarmHash64WithSeeds"s, farm_hash_64_with_seeds, bits);
         hashes.emplace_back("MetroHash64"s, metro_hash_64, bits);
         hashes.emplace_back("T1HA0 AVX2 hash", t1ha0_avx2_hash, bits);
         hashes.emplace_back("T1HA1 le hash", t1ha1_le_hash, bits);
@@ -96,6 +100,7 @@ namespace hfl {
         hashes.emplace_back("T1HA2 atonce hash", t1ha2_atonce_hash, bits);
         hashes.emplace_back("xxHash64", xx_hash_64, bits);
         hashes.emplace_back("XXH3_64bits", xxh3_64bits, bits);
+        hashes.emplace_back("XXH3_64bits_withSeed", xxh3_64bits_with_seed, bits);
 
         hashes.emplace_back("wyhash", wy_hash_64, bits);
         hashes.emplace_back("PengyHash", pengy_hash_64, bits);
