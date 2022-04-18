@@ -9,15 +9,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lboost_json -ljpeg -ltbb")
 
 set(LIBS libs)
 add_subdirectory(${LIBS}/HashLib HashLibBuildDir)
-set(LIBJPEG_DIR ${LIBS}/libjpeg)
 
 set(SRC "src/cpp")
 set(UTILITIES ${SRC}/log_duration.h ${SRC}/log_duration.cpp ${SRC}/generator.h ${SRC}/generator.cpp)
 set(WRAPPERS ${SRC}/hash_wrappers.h ${SRC}/hash_wrappers.cpp ${SRC}/hashes.h ${SRC}/hashes.cpp)
 set(HELP_STRUCTS ${SRC}/test_parameters.h ${SRC}/test_parameters.cpp)
-set(IMG_FILES ${SRC}/img.h ${SRC}/img.cpp ${SRC}/jpeg_image.h ${SRC}/jpeg_image.cpp)
 set(CONCURRENCY ${SRC}/concurrency.h)
-set(GENERAL_FILES ${UTILITIES} ${WRAPPERS} ${HELP_STRUCTS} ${IMG_FILES} ${CONCURRENCY})
+set(GENERAL_FILES ${UTILITIES} ${WRAPPERS} ${HELP_STRUCTS} ${CONCURRENCY})
 
 set(DIST_TESTS ${SRC}/distribution_tests.h ${SRC}/distribution_tests.cpp)
 set(GEN_TESTS ${SRC}/generated_tests.h ${SRC}/generated_tests.cpp)

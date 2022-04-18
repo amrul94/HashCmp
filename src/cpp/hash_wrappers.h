@@ -17,8 +17,6 @@
 #include <highwayhash/sip_hash.h>
 #include <rolling_hash/cyclichash.h>
 
-#include "img.h"
-
 // HFL = Hash function library
 namespace hfl {
 
@@ -42,13 +40,6 @@ namespace hfl {
                 std::string binary_file = ReadFile(file);
                 assert(!binary_file.empty());
                 return operator()(binary_file);
-            }
-
-            UintT operator()(const img::Image& image) const {
-                const char* bytes = reinterpret_cast<const char*>(image.GetLine(0));
-                const size_t size = image.GetHeight() * image.GetWidth() * sizeof(img::Color);
-                const std::string_view str(bytes, size);
-                return operator()(str);
             }
 
             template<std::integral Number>

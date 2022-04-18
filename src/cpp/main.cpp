@@ -10,8 +10,6 @@
 #include <algorithm>
 
 #include "hashes.h"
-#include "img.h"
-#include "jpeg_image.h"
 #include "my_assert.h"
 
 void TempTests(tests::ReportsRoot& report_root) {
@@ -158,7 +156,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{7, 5, 6};
+    const std::vector test_numbers{0};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

@@ -7,7 +7,6 @@
 #include <boost/format.hpp>
 
 #include "concurrency.h"
-#include "jpeg_image.h"
 #include "log_duration.h"
 #include "test_parameters.h"
 #include "english_tests.h"
