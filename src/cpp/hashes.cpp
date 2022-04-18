@@ -10,7 +10,6 @@ namespace hfl {
         hashes.emplace_back("DJB2 Hash"s, djb2_hash_##BITS, BITS);                      \
         hashes.emplace_back("SDBM Hash"s, sdbm_hash_##BITS, BITS);                      \
         hashes.emplace_back("PJW Hash"s, pjw_hash_##BITS, BITS);                        \
-        hashes.emplace_back("BuzHash"s, buz_hash_##BITS, BITS);                         \
         hashes.emplace_back("One at a time hash"s, one_at_a_time_hash_##BITS, BITS);    \
         hashes.emplace_back("SpookyHash"s, spooky_hash_##BITS, BITS);                   \
         hashes.emplace_back("Fast-Hash"s, fast_hash_##BITS, BITS)
@@ -20,6 +19,7 @@ namespace hfl {
         std::vector<Hash16Struct> hashes;
 
         hashes.emplace_back("PearsonHash"s, pearson_hash_16, 16);
+        hashes.emplace_back("BuzHash"s, buz_hash_16, 16);                         \
         ADD_UNIVERSAL_HASHES(16);
 
         return hashes;
@@ -43,6 +43,7 @@ namespace hfl {
 
         if (bf == BuildFlag::ALL) {
             hashes.emplace_back("PearsonHash"s, pearson_hash_32, bits);
+            hashes.emplace_back("BuzHash"s, buz_hash_32, bits);                         \
             ADD_UNIVERSAL_HASHES(32);
         }
 
@@ -81,6 +82,7 @@ namespace hfl {
         uint16_t bits = 64;
         if (bf == BuildFlag::ALL) {
             hashes.emplace_back("PearsonHash"s, pearson_hash_64, bits);
+            hashes.emplace_back("BuzHash"s, buz_hash_64, bits);                         \
             ADD_UNIVERSAL_HASHES(64);
         }
 

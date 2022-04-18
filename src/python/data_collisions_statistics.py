@@ -16,15 +16,12 @@ class DataCollisionsStatistics(CollisionsStatistics):
         make_dir(self.tests_dir_path)
         make_dir(self.hist_path)
 
-    def __auto_label(self, ax, rects):
+    @staticmethod
+    def __auto_label(ax, rects):
         for rect in rects:
             height = rect.get_height()
-            if self.bits == 16:
-                ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
-                        height, ha='center', va='bottom', rotation=15)
-            else:
-                ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
-                        height, ha='center', va='bottom')
+            ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
+                    height, ha='center', va='bottom')
 
     def __bar(self, ax):
         x = self.collisions.keys()
@@ -44,6 +41,8 @@ class DataCollisionsStatistics(CollisionsStatistics):
         ax.set_title(f'{self.bits} bits hashes')
         plt.xlabel('Hash name')
         plt.ylabel('Collisions')
+        fig.set_figwidth(10)
+        fig.set_figheight(6)
 
         self.__bar(ax)
 

@@ -10,8 +10,8 @@ import speed_statistics as ss
 
 
 def main():
-    reports_dir_name = "Last Report 3.0"
-    test_numbers = [4]
+    reports_dir_name = "Last Report 3.0 (2)"
+    test_numbers = [4, 5, 6]
     for test_number in test_numbers:
         if test_number == 1:
             ds.process_distribution_statistics(reports_dir_name)

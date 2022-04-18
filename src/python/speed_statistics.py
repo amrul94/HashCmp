@@ -46,6 +46,8 @@ class SpeedStatistics:
         ax.set_title(f'{self.bits} bits hashes')
         plt.xlabel('Hash name')
         plt.ylabel('Speed')
+        fig.set_figwidth(10)
+        fig.set_figheight(6)
 
         self.__bar(ax)
 
