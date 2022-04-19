@@ -48,10 +48,10 @@ namespace tests {
 
     // ===============================================================================
 
-    template<typename HashStruct>
-    auto HashTestWithGenBlocks(pcg64& generator, const HashStruct& hs, const GenBlocksParameters& gbp,
+    template<typename Hasher>
+    auto HashTestWithGenBlocks(pcg64& generator, const Hasher& hasher, const GenBlocksParameters& gbp,
                                ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM(hs.name, reports_root.logger);
+        LOG_DURATION_STREAM(hasher.name, reports_root.logger);
 
         // Выделить coll_flags, collisions, num_collisions и мьютекс (в будущем) в отдельный класс (например, Counters).
         // При этом подсчет коллизий вынести в метод класса AddHash
@@ -64,7 +64,7 @@ namespace tests {
         for (uint64_t i = 0; num_words <= gbp.num_keys; num_words *= 2) {
             for (; i < num_words; ++i) {
                 std::string str = GenerateRandomDataBlock(generator, gbp.words_length);
-                const auto hash = static_cast<uint64_t>(hs.hasher(str));
+                const auto hash = static_cast<uint64_t>(hasher.hash(str));
                 const uint64_t modified = ModifyHash(gbp, hash);
                 bool& coll_flag = coll_flags[modified];
                 const uint64_t tmp = coll_flag ? 1 : 0;
@@ -76,7 +76,7 @@ namespace tests {
             collisions[index] = num_collisions;
         }
 
-        auto hash_name = static_cast<boost::json::string>(hs.name);
+        auto hash_name = static_cast<boost::json::string>(hasher.name);
         if (gbp.mode == TestFlag::MASK) {
             hash_name += " (mask " + std::to_string(gbp.test_bits) + " bits)";
         }

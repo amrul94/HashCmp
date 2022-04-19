@@ -14,8 +14,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include <hash_functions.h>
-#include <highwayhash/sip_hash.h>
-#include <highwayhash/highwayhash.h>
 #include <rolling_hash/cyclichash.h>
 
 // HFL = Hash function library

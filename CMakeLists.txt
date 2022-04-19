@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.17)
 project(ThesisWork)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(OPTIMIZE_FLAGS "-march=native -O3 -pipe")
-set(INLINE_FLAGS "-Winline --param inline-unit-growth=10000 --param max-inline-insns-single=10000")
 set(CMAKE_C_FLAGS "${OPTIMIZE_FLAGS} -pthread -Werror -maes")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lboost_json -ljpeg -ltbb")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lboost_json")
 
 set(LIBS libs)
 add_subdirectory(${LIBS}/HashLib HashLibBuildDir)

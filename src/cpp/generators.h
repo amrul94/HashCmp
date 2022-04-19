@@ -33,7 +33,7 @@ static inline std::array<uint64_t, num_seeds>  Generate64BitsSeeds() {
     return GenerateSeedsImpl<uint64_t, num_seeds>(rng);
 }
 
-inline const uint64_t NUM_64_BITS_SEEDS{4};
+inline constexpr uint64_t NUM_64_BITS_SEEDS = 4;
 
 const auto [SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
             SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,

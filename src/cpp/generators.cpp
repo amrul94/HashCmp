@@ -2,9 +2,6 @@
 
 #include <random>
 
-
-
-
 std::vector<pcg64> GetGenerators(uint16_t num_generators, uint64_t num_generate_numbers) {
     assert(num_generators != 0);
 

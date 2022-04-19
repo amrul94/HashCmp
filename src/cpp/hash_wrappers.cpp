@@ -4,6 +4,8 @@
 #include <cityhash/city.h>
 #include <farmhash/farmhash.h>
 #include <fasthash/fasthash.h>
+#include <highwayhash/sip_hash.h>
+#include <highwayhash/highwayhash.h>
 #include <murmur_hash/MurmurHash1.h>
 #include <murmur_hash/MurmurHash2.h>
 #include <murmur_hash/MurmurHash3.h>

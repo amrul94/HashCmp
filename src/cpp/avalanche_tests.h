@@ -91,12 +91,12 @@ namespace tests {
     }
 
     template<typename HashStruct>
-    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const HashStruct& hs, const TestParameters& tp,
+    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const HashStruct& hasher, const TestParameters& tp,
                                   uint64_t original_number, uint64_t iteration_step);
 
 
     template<typename HashStruct>
-    AvalancheInfo HashAvalancheTest(const HashStruct& hs, const TestParameters& tp, ReportsRoot& reports_root);
+    AvalancheInfo HashAvalancheTest(const HashStruct& hasher, const TestParameters& tp, ReportsRoot& reports_root);
 
     template<typename TestFunc, typename HashStructs>
     void AvalancheTest(TestFunc func, const HashStructs& funcs, const TestParameters& tp, ReportsRoot& reports_root);
@@ -106,16 +106,16 @@ namespace tests {
 
 // ==================================================
 
-    template<typename HashStruct>
-    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const HashStruct& hs, const TestParameters& tp,
-                                           uint64_t original_number, uint64_t iteration_step) {
+    template<typename Hasher>
+    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const Hasher& hasher, const TestParameters& tp,
+                                  uint64_t original_number, uint64_t iteration_step) {
         constexpr uint8_t bit_size = 64;
-        const NumberAndHash original {original_number, hs.hasher(original_number)};
+        const NumberAndHash original {original_number, hasher.hash(original_number)};
         for (uint8_t bit_index = 0; bit_index < bit_size; ++bit_index) {
             std::bitset<bit_size> modified_number_bits = original_number;
             modified_number_bits.flip(bit_index);
             const uint64_t modified_number = modified_number_bits.to_ullong();
-            const NumberAndHash modified {modified_number, hs.hasher(modified_number)};
+            const NumberAndHash modified {modified_number, hasher.hash(modified_number)};
             std::bitset<bit_size> xor_hashes = original.hash ^ modified.hash;
             DistanceAndFrequency hamming_distance = xor_hashes.count();
 
@@ -126,19 +126,19 @@ namespace tests {
         }
     }
 
-    template<typename HashStruct>
-    AvalancheInfo HashAvalancheTest(const HashStruct& hs, const TestParameters& tp, ReportsRoot& reports_root) {
+    template<typename Hasher>
+    AvalancheInfo HashAvalancheTest(const Hasher& hasher, const TestParameters& tp, ReportsRoot& reports_root) {
         LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\n\t%1%: \n") % hs.name;
+        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.name;
 
         auto generators = GetGenerators(tp.num_threads, tp.num_keys);
         std::atomic_uint16_t gen_index = 0;
-        auto thread_task = [&hs, &tp, &generators, &gen_index] (uint64_t first, uint64_t last) {
+        auto thread_task = [&hasher, &tp, &generators, &gen_index] (uint64_t first, uint64_t last) {
             pcg64 rng = generators[gen_index++];
             AvalancheInfo avalanche_info;
             while (first < last) {
                 uint64_t number = rng();
-                CalculateHammingDistance(avalanche_info, hs, tp, number, ++first);
+                CalculateHammingDistance(avalanche_info, hasher, tp, number, ++first);
             }
             return avalanche_info;
         };
@@ -155,25 +155,25 @@ namespace tests {
         ThreadTasks<AvalancheInfo> tasks(thread_task, merge_results, tp.num_threads, tp.num_keys);
         const auto result = tasks.GetResult();
 
-        ASSERT_EQUAL_HINT(result.original_pair.hash, static_cast<uint64_t>(hs.hasher(result.original_pair.number)),
-                          hs.name + " is not correct");
-        ASSERT_EQUAL_HINT(result.modified_pair.hash, static_cast<uint64_t>(hs.hasher(result.modified_pair.number)),
-                          hs.name + " is not correct");
+        ASSERT_EQUAL_HINT(result.original_pair.hash, static_cast<uint64_t>(hasher.hash(result.original_pair.number)),
+                          hasher.name + " is not correct");
+        ASSERT_EQUAL_HINT(result.modified_pair.hash, static_cast<uint64_t>(hasher.hash(result.modified_pair.number)),
+                          hasher.name + " is not correct");
 
         reports_root.logger << result << std::endl;
         return result;
     }
 
 
-    template<typename HashStructs>
-    void AvalancheTest(const HashStructs& hashes, const TestParameters& tp, ReportsRoot& reports_root) {
+    template<typename Hashes>
+    void AvalancheTest(const Hashes& hashes, const TestParameters& tp, ReportsRoot& reports_root) {
         reports_root.logger << "--- START " << tp.hash_bits << " BITS TEST ---" << std::endl;
 
         auto out_json = out::GetAvalancheTestJson(tp, reports_root);
         boost::json::object avalanche_statistics;
-        for (const auto& hs : hashes) {
-            AvalancheInfo avalanche_info = HashAvalancheTest(hs, tp, reports_root);
-            avalanche_statistics[hs.name] = out::AvalancheInfoToJson(avalanche_info);
+        for (const auto& hasher : hashes) {
+            AvalancheInfo avalanche_info = HashAvalancheTest(hasher, tp, reports_root);
+            avalanche_statistics[hasher.name] = out::AvalancheInfoToJson(avalanche_info);
         }
 
         out_json.obj["Avalanche effect"] = avalanche_statistics;

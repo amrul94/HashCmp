@@ -33,7 +33,7 @@ namespace tests {
     #define RUN_COLL_TEST_NORMAL_IMPL(BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)                        \
         const auto word_counts##BITS = static_cast<uint64_t>(pow(2, POW_COUNTS));   /*2 << POW_COUNT*/          \
         const GenBlocksParameters wp##BITS {BITS, word_counts##BITS, LENGTH, NUM_THREADS, MODE};                \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes(hfl::BuildFlag::ALL);                            \
+        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                            \
         std::vector<pcg64> generators##BITS = GetGenerators(NUM_THREADS, ((LENGTH) * word_counts##BITS) / 8);   \
         TestWithGeneratedBlocks(generators##BITS, hashes##BITS, wp##BITS, ROOT)
 
@@ -46,7 +46,7 @@ namespace tests {
     #define RUN_COLL_TEST_WITH_MASK_IMPL(GEN, BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)       \
         const auto word_counts##BITS = static_cast<uint64_t>(pow(2, POW_COUNTS));                       \
         const GenBlocksParameters wp##BITS {BITS, 32, word_counts##BITS, LENGTH, NUM_THREADS, MODE};    \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes(hfl::BuildFlag::ALL);                    \
+        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                    \
         TestWithGeneratedBlocks(GEN, hashes##BITS, wp##BITS, ROOT)
 
     void RunCollTestWithMask(pcg64& generator, uint16_t words_length, size_t num_threads, ReportsRoot& reports_root) {

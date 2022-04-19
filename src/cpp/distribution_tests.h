@@ -24,7 +24,7 @@ namespace tests {
                       ReportsRoot& reports_root);
 
     template<typename HashStruct>
-    void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root);
+    void HashDistTest(const HashStruct& hasher, const DistTestParameters& dtp, ReportsRoot& reports_root);
 
     template<typename HashStructs>
     void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, ReportsRoot& reports_root);
@@ -37,18 +37,18 @@ namespace tests {
 
 // ==================================================
 
-    template<typename HashStruct>
-    void HashDistTest(const HashStruct& hs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM('\t' + hs.name, reports_root.logger);
+    template<typename Hasher>
+    void HashDistTest(const Hasher& hasher, const DistTestParameters& dtp, ReportsRoot& reports_root) {
+        LOG_DURATION_STREAM('\t' + hasher.name, reports_root.logger);
 
         // Выделить buckets, max_bucket и мьютекс в отдельный класс (например, Distributor).
         // При этом добавление нового элемента вынести в метод класса AddHash
         std::vector<std::atomic<Bucket>> buckets(dtp.num_buckets);
         const auto max_bucket = std::numeric_limits<Bucket>::max();
 
-        auto lambda = [&hs, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
+        auto lambda = [&hasher, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
             for (uint64_t number = start; number < end; ++number) {
-                const uint64_t hash = hs.hasher(number);
+                const uint64_t hash = hasher.hash(number);
                 const uint64_t modified = ModifyHash(dtp, hash);
                 std::atomic<Bucket>& current_bucket = buckets[modified];
                 Bucket old_bucket, new_bucket;
@@ -61,14 +61,14 @@ namespace tests {
         };
 
         ThreadTasks<void> thread_tasks(lambda, dtp.num_threads, dtp.num_keys);
-        PrintReports(buckets, dtp, hs.name, reports_root);
+        PrintReports(buckets, dtp, hasher.name, reports_root);
     }
 
-    template<typename HashStructs>
-    void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, ReportsRoot& reports_root) {
+    template<typename Hashes>
+    void DistributionTest(const Hashes& hashes, const DistTestParameters& dtp, ReportsRoot& reports_root) {
         reports_root.logger << "--- START " << dtp.hash_bits << " BITS TEST ---\n";
-        for (const auto& current_hash : funcs) {
-            HashDistTest(current_hash, dtp, reports_root);
+        for (const auto& hasher : hashes) {
+            HashDistTest(hasher, dtp, reports_root);
         }
         reports_root.logger << "--- END " << dtp.hash_bits << " BITS TEST ---\n\n";
     }

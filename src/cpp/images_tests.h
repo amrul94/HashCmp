@@ -16,18 +16,18 @@ namespace tests {
         OutputJson GetImagesTestJson(const TestParameters& tp, ReportsRoot& reports_root);
     }
 
-    template <typename HashStruct>
-    uint64_t HashTestWithImages(const HashStruct& hs, const TestParameters& tp, ReportsRoot& reports_root) {
+    template <typename Hasher>
+    uint64_t HashTestWithImages(const Hasher& hasher, const TestParameters& tp, ReportsRoot& reports_root) {
         namespace fs = std::filesystem;
         using HashMap = std::map<uint64_t, uint64_t>;
 
         LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\n\t%1%: \n") % hs.name;
+        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.name;
 
         fs::path general_images_dir = std::filesystem::current_path() / "data/images";
         std::atomic_uint8_t dir_number;
 
-        auto thread_task = [&hs, &tp, &dir_number, general_images_dir](uint64_t, uint64_t) {
+        auto thread_task = [&hasher, &tp, &dir_number, general_images_dir](uint64_t, uint64_t) {
             fs::path current_images_dir = general_images_dir / std::to_string(dir_number++);
             HashMap hashes;
 
@@ -36,7 +36,7 @@ namespace tests {
                 const auto status = fs::status(path);
                 if (!fs::is_directory(status)) {
                     std::ifstream image_file = std::ifstream(path, std::ios_base::binary);
-                    const auto hash = static_cast<uint64_t>(hs.hasher(image_file));
+                    const auto hash = static_cast<uint64_t>(hasher.hash(image_file));
                     const uint64_t modify = ModifyHash(tp, hash);
                     ++hashes[modify];
                 }

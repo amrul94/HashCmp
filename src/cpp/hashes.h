@@ -118,53 +118,36 @@ namespace hfl {
 
     namespace detail {
         template<typename UintT>
-        struct HashStruct {
+        struct Hasher {
             using HashType = UintT;
             using HashFunction = const BaseHashWrapper<UintT>&;
 
-            HashStruct(std::string name, HashFunction function, uint16_t bits)
-                    : name(std::move(name))
-                    , hasher(function)
-                    , bits(bits) {
+            Hasher(std::string name, HashFunction function)
+                : name(std::move(name))
+                , hash(function) {
             }
 
             std::string name{};
-            HashFunction hasher{};
-            uint16_t bits{};
+            HashFunction hash{};
+            uint16_t bits {std::numeric_limits<UintT>::digits};
         };
-
-        template<typename SourceUintT, typename DestUintT>
-        DestUintT ConvertUint(SourceUintT source) {
-            return static_cast<DestUintT>(source);
-        }
     }
 
-    using Hash16Struct = detail::HashStruct<uint16_t>;
-    using Hash24Struct = detail::HashStruct<uint24_t>;
-    using Hash32Struct = detail::HashStruct<uint32_t>;
-    using Hash48Struct = detail::HashStruct<uint48_t>;
-    using Hash64Struct = detail::HashStruct<uint64_t>;
-
-    inline const auto Uint64ToUint32 = [](uint64_t source) { return detail::ConvertUint<uint64_t, uint32_t>(source); };
-    inline const auto Uint64ToUint24 = [](uint64_t source) { return detail::ConvertUint<uint64_t, hfl::uint24_t>(source); };
-    inline const auto Uint64ToUint16 = [](uint64_t source) { return detail::ConvertUint<uint64_t, uint16_t>(source); };
-    inline const auto Uint32ToUint24 = [](uint32_t source) { return detail::ConvertUint<uint32_t, hfl::uint24_t>(source); };
-    inline const auto Uint32ToUint16 = [](uint32_t source) { return detail::ConvertUint<uint32_t, uint16_t>(source); };
-
-    enum class BuildFlag {
-        ALL,
-        MASK
-    };
+    using Hasher16 = detail::Hasher<uint16_t>;
+    using Hasher24 = detail::Hasher<uint24_t>;
+    using Hasher32 = detail::Hasher<uint32_t>;
+    using Hasher48 = detail::Hasher<uint48_t>;
+    using Hasher64 = detail::Hasher<uint64_t>;
 
     //----------- BuildHashes ----------
 
-    std::vector<Hash16Struct> Build16bitsHashes(BuildFlag bf = BuildFlag::ALL);
-    std::vector<Hash24Struct> Build24bitsHashes(BuildFlag bf = BuildFlag::ALL);
-    std::vector<Hash32Struct> Build32bitsHashes(BuildFlag bf = BuildFlag::ALL);
-    std::vector<Hash48Struct> Build48bitsHashes(BuildFlag bf = BuildFlag::ALL);
-    std::vector<Hash64Struct> Build64bitsHashes(BuildFlag bf = BuildFlag::ALL);
+    std::vector<Hasher16> Build16bitsHashes();
+    std::vector<Hasher24> Build24bitsHashes();
+    std::vector<Hasher32> Build32bitsHashes();
+    std::vector<Hasher48> Build48bitsHashes();
+    std::vector<Hasher64> Build64bitsHashes();
 
-    uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
+    //uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
 }
 
 #endif //THESIS_WORK_HASHES_H

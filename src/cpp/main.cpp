@@ -50,11 +50,11 @@ void TempTests(tests::ReportsRoot& report_root) {
 }
 
 void HashIsCorrectTest() {
-    auto lambda = [](const auto& hs, const std::vector<uint64_t>& numbers) {
+    auto lambda = [](const auto& hasher, const std::vector<uint64_t>& numbers) {
         for (uint64_t number : numbers) {
-            ASSERT_EQUAL_HINT(hs.hasher(number), hs.hasher(number), hs.name + " is not correct");
+            ASSERT_EQUAL_HINT(hasher.hash(number), hasher.hash(number), hasher.name + " is not correct");
         }
-        std::cout << boost::format("\t%1% is correct\n") % hs.name;
+        std::cout << boost::format("\t\t%1% is correct\n") % hasher.name;
     };
 
     uint64_t count = 100000;
@@ -66,29 +66,39 @@ void HashIsCorrectTest() {
     }
 
     const auto hashes16 = hfl::Build16bitsHashes();
-    for (const auto& hs : hashes16) {
-        lambda(hs, numbers);
+    std::cout << boost::format("\t16 bits hashes (count = %1%):\n") % hashes16.size();
+    for (const auto& hasher : hashes16) {
+        lambda(hasher, numbers);
     }
+    std::cout << std::endl;
 
     const auto hashes24 = hfl::Build24bitsHashes();
-    for (const auto& hs : hashes24) {
-        lambda(hs, numbers);
+    std::cout << boost::format("\t24 bits hashes (count = %1%):\n") % hashes24.size();
+    for (const auto& hasher : hashes24) {
+        lambda(hasher, numbers);
     }
+    std::cout << std::endl;
 
     const auto hashes32 = hfl::Build32bitsHashes();
-    for (const auto& hs : hashes32) {
-        lambda(hs, numbers);
+    std::cout << boost::format("\t32 bits hashes (count = %1%):\n") % hashes32.size();
+    for (const auto& hasher : hashes32) {
+        lambda(hasher, numbers);
     }
+    std::cout << std::endl;
 
     const auto hashes48 = hfl::Build48bitsHashes();
-    for (const auto& hs : hashes48) {
-        lambda(hs, numbers);
+    std::cout << boost::format("\t48 bits hashes (count = %1%):\n") % hashes48.size();
+    for (const auto& hasher : hashes48) {
+        lambda(hasher, numbers);
     }
+    std::cout << std::endl;
 
     const auto hashes64 = hfl::Build64bitsHashes();
-    for (const auto& hs : hashes64) {
-        lambda(hs, numbers);
+    std::cout << boost::format("\t64 bits hashes (count = %1%):\n") % hashes64.size();
+    for (const auto& hasher : hashes64) {
+        lambda(hasher, numbers);
     }
+    std::cout << std::endl;
 }
 
 

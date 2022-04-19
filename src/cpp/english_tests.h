@@ -20,7 +20,7 @@ namespace tests {
     std::vector<std::string> ParseWords(const std::filesystem::path& file_name);
 
     template <typename HashStruct>
-    uint64_t HashTestWithEngWords(const HashStruct& hs, const std::vector<std::string>& words,
+    uint64_t HashTestWithEngWords(const HashStruct& hasher, const std::vector<std::string>& words,
                                   const TestParameters& tp, ReportsRoot& reports_root);
 
     template <typename HashStruct>
@@ -32,21 +32,21 @@ namespace tests {
 
 // =====================================================
 
-    template <typename HashStruct>
-    uint64_t HashTestWithEngWords(const HashStruct& hs, const std::vector<std::string>& words,
+    template <typename Hasher>
+    uint64_t HashTestWithEngWords(const Hasher& hasher, const std::vector<std::string>& words,
                                   const TestParameters& tp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM(hs.name, reports_root.logger);
+        LOG_DURATION_STREAM(hasher.name, reports_root.logger);
         std::map<uint64_t, uint64_t> hashes;
         for (const std::string& word : words) {
-            const uint64_t hash = hs.hasher(word);
+            const uint64_t hash = hasher.hash(word);
             const uint64_t modify = ModifyHash(tp, hash);
             ++hashes[modify];
         }
         return CountCollisions(hashes);
     }
 
-    template <typename HashStruct>
-    void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vector<std::string>& words,
+    template <typename Hasher>
+    void TestWithEnglishWords(const std::vector<Hasher>& hashes, const std::vector<std::string>& words,
                               const TestParameters& tp, ReportsRoot& reports_root) {
         reports_root.logger << boost::format("--- START TEST WITH %1% BITS HASHES ---\n") % tp.hash_bits;
 
