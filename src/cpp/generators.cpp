@@ -2,7 +2,7 @@
 
 #include <random>
 
-std::vector<pcg64> GetGenerators(uint16_t num_generators, uint64_t num_generate_numbers) {
+std::vector<pcg64> GetGenerators(size_t num_generators, size_t num_generate_numbers) {
     assert(num_generators != 0);
 
     const uint64_t step = num_generate_numbers / num_generators;

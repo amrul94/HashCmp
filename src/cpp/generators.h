@@ -43,7 +43,7 @@ const auto [SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
 const auto [SEED_32] = Generate32BitsSeeds<1>();
 const auto [SEED_64_1, SEED_64_2, SEED_64_3, SEED_64_4] = Generate64BitsSeeds<NUM_64_BITS_SEEDS>();
 
-std::vector<pcg64> GetGenerators(uint16_t num_generators, uint64_t num_generate_numbers);
+std::vector<pcg64> GetGenerators(size_t num_generators, size_t num_generate_numbers);
 
 std::string GenerateRandomDataBlock(pcg64& rng, uint32_t length);
 std::vector<std::string> GenerateRandomDataBlocks(pcg64& rng, uint64_t num_blocks, uint32_t block_length);

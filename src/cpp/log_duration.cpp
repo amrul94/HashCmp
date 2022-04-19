@@ -17,7 +17,6 @@ double Timer::GetTotalTime() const {
 }
 
 double Timer::GetTime() {
-    //return times(&tms_time_);
     return get_cpu_time();
 }
 
@@ -47,7 +46,9 @@ LogDuration::~LogDuration() {
         out_ << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
     } else if (duration_cast<seconds>(dur).count() < 60) {
         out_ << id_ << ": "s << duration_cast<seconds>(dur).count() << " sec"s << std::endl;
-    } else {
+    } else if (duration_cast<minutes>(dur).count() < 60) {
         out_ << id_ << ": "s << duration_cast<minutes>(dur).count() << " min"s << std::endl;
+    } else {
+        out_ << id_ << ": "s << duration_cast<hours>(dur).count() << " min"s << std::endl;
     }
 }
