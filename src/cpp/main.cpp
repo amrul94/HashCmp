@@ -13,39 +13,14 @@
 #include "my_assert.h"
 
 void TempTests(tests::ReportsRoot& report_root) {
-    namespace fs = std::filesystem;
-    fs::path images_dir = std::filesystem::current_path() / "data/images (new)/Original/Checked (Part 2)";
+    uint64_t counter = 0;
 
-    /*
-    const tests::TestParameters tp(32, 1);
-    libcuckoo::cuckoohash_map<uint64_t, std::atomic_uint64_t> hashes;
-    for (const auto& dir_entry: fs::recursive_directory_iterator(images_dir)) {
-        const auto& path = dir_entry.path();
-        const auto status = fs::status(path);
-        if (!fs::is_directory(status)) {
-            img::Image image = img::LoadJPEG(path);
-            const auto hash = hfl::murmur_hash1(image);
-            const uint64_t modify = ModifyHash(tp, hash);
-            hashes.;
-        }
+    for (int i = 0; i < 10; ++i) {
+        counter += true;
+        std::cout << counter << std::endl;
+        counter += false;
+        std::cout << counter << std::endl;
     }
-
-    std::cout << "Collisions " << tests::CountCollisions(hashes) << std::endl;
-    */
-
-    int steps = 10001;
-
-    long double avg = 0;
-    for (int i = 1; i < steps; ++i) {
-        avg = tests::CalculateArithmeticMean(avg, i*100, i);
-    }
-    std::cout << avg << std::endl;
-
-    long double sum = 0;
-    for (int i = 1; i < steps; ++i) {
-        sum += i*100;
-    }
-    std::cout << sum / (long double)steps << std::endl;
 
 }
 
@@ -150,8 +125,8 @@ void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_
                 break;
             default:
                 TempTests(reports_root);
-                std::filesystem::remove_all(reports_root.root_path);
-                std::cout << reports_root.root_path << " removed\n";
+                //std::filesystem::remove_all(reports_root.root_path);
+                //std::cout << reports_root.root_path << " removed\n";
                 break;
         }
     }
@@ -166,7 +141,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{3};
+    const std::vector test_numbers{2};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

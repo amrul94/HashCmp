@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(ThesisWork)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(OPTIMIZE_FLAGS "-march=native -O3 -pipe")
 set(CMAKE_C_FLAGS "${OPTIMIZE_FLAGS} -pthread -Werror -maes")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lboost_json")

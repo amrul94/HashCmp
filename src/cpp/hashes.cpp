@@ -57,9 +57,9 @@ namespace hfl {
         hashes.emplace_back("xxHash32"s, xx_hash_32);
 
         hashes.emplace_back("wyhash32"s, wyhash32);
-        hashes.emplace_back("nmhash32"s, nmhash32);
-        hashes.emplace_back("nmhash32x"s, nmhash32x);
-        hashes.emplace_back("halfsiphash"s, halfsiphash);
+        hashes.emplace_back("NMHASH32"s, nmhash32);
+        hashes.emplace_back("NMHASH32x"s, nmhash32x);
+        hashes.emplace_back("HalfSipHash"s, halfsiphash);
 
         return hashes;
     }
@@ -97,12 +97,12 @@ namespace hfl {
         hashes.emplace_back("T1HA1 be hash", t1ha1_be_hash);
         hashes.emplace_back("T1HA2 atonce hash", t1ha2_atonce_hash);
         hashes.emplace_back("xxHash64", xx_hash_64);
-        hashes.emplace_back("XXH3_64bits", xxh3_64bits);
-        hashes.emplace_back("XXH3_64bits_withSeed", xxh3_64bits_with_seed);
+        hashes.emplace_back("XXH3 64 bits", xxh3_64bits);
+        hashes.emplace_back("XXH3 64 bits with seed", xxh3_64bits_with_seed);
 
-        hashes.emplace_back("wyhash", wy_hash_64);
+        hashes.emplace_back("wyhash64", wy_hash_64);
         hashes.emplace_back("PengyHash", pengy_hash_64);
-        hashes.emplace_back("mx3", mx3);
+        hashes.emplace_back("MX3 hash", mx3);
         hashes.emplace_back("SipHash", siphash);
         hashes.emplace_back("SipHash13", siphash13);
         hashes.emplace_back("SipHash (Google Impl)", siphash_avx2);

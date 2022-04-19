@@ -107,7 +107,7 @@ namespace tests {
         DistributionTest(hashes##BITS, cp##BITS, ROOT)
 
     void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
-        //RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
+        RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
         RUN_DIST_TEST_NORMAL_IMPL(32, num_threads, reports_root);
     }
 
@@ -118,7 +118,7 @@ namespace tests {
 
 
     void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
-        //RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
+        RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
     }
 
     void RunDistributionTests(ReportsRoot& reports_root) {

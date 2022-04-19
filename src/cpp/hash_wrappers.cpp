@@ -336,28 +336,28 @@ namespace hfl {
 //-------------- T1HA --------------
 
     uint32_t T1HA0_32leWrapper::Hash(const char *message, size_t length) const {
-        return t1ha0_32le(message, length, 0);
+        return t1ha0_32le(message, length, SEED_64_1);
     }
 
     uint32_t T1HA0_32beWrapper::Hash(const char *message, size_t length) const {
-        return t1ha0_32be(message, length, 0);
+        return t1ha0_32be(message, length, SEED_64_1);
     }
 
     uint64_t T1HA0_AVX2_Wrapper::Hash(const char *message, size_t length) const {
-        return t1ha0_ia32aes_avx2(message, length, 0);
+        return t1ha0_ia32aes_avx2(message, length, SEED_64_1);
     }
 
 
     uint64_t T1HA1LeWrapper::Hash(const char *message, size_t length) const {
-        return t1ha1_le(message, length, 0);
+        return t1ha1_le(message, length, SEED_64_1);
     }
 
     uint64_t T1HA1BeWrapper::Hash(const char *message, size_t length) const {
-        return t1ha1_be(message, length, 0);
+        return t1ha1_be(message, length, SEED_64_1);
     }
 
     uint64_t T1HA2AtonceWrapper::Hash(const char *message, size_t length) const {
-        return t1ha2_atonce(message, length, 0);
+        return t1ha2_atonce(message, length, SEED_64_1);
     }
 
 //------------ wyHashes -----------

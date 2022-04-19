@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 project(HashLib)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 set(OPTIMIZE_FLAGS "-march=native -O3 -pipe")
 set(INLINE_FLAGS "-Winline --param inline-unit-growth=10000 --param max-inline-insns-single=10000")

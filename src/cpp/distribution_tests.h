@@ -54,8 +54,9 @@ namespace tests {
                 Bucket old_bucket, new_bucket;
                 do {
                     old_bucket = current_bucket.load();
-                    const Bucket tmp = (old_bucket != max_bucket) ? 1 : 0;
-                    new_bucket = old_bucket + tmp;
+                    Bucket increment = (old_bucket != max_bucket);
+                    //const Bucket increment = (old_bucket != max_bucket) ? 1 : 0;
+                    new_bucket = old_bucket + increment;
                 } while (!current_bucket.compare_exchange_weak(old_bucket, new_bucket));
             }
         };

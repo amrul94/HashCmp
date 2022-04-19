@@ -244,7 +244,7 @@ namespace tests {
         }
 
         void WyHash64Test(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
-            std::string hash_name = "wyHash64";
+            std::string hash_name = "wyhash64";
 
             auto lambda = [](std::string_view str) {
                 return wyhash(str.data(), str.size(), SEED_64_1, _wyp);
@@ -308,12 +308,11 @@ namespace tests {
     [[maybe_unused]] boost::json::object SpeedTests16(const std::vector<std::string>& words, ReportsRoot& reports_root) {
         boost::json::object obj;
 
-        PearsonClassTest(hfl::PearsonHash16{}, words, reports_root, obj);
         FNV1aHashTest(FNV32a, 16, words, reports_root, obj);
         SpeedTestT<uint16_t>(words, reports_root, obj);
-        BuzHashTest<uint16_t>(words, reports_root, obj);
-
         FastHash1To31Test<uint16_t>(words, reports_root, obj);
+        PearsonClassTest(hfl::PearsonHash16{}, words, reports_root, obj);
+        BuzHashTest<uint16_t>(words, reports_root, obj);
 
         return obj;
     }
@@ -321,10 +320,10 @@ namespace tests {
     [[maybe_unused]] boost::json::object SpeedTests24(const std::vector<std::string>& words, ReportsRoot& reports_root) {
         boost::json::object obj;
 
-        PearsonClassTest(hfl::PearsonHash24{}, words, reports_root, obj);
         FNV1aHashTest(FNV32a, 24, words, reports_root, obj);
         SpeedTestT<hfl::uint24_t>(words, reports_root, obj);
         FastHash1To31Test<hfl::uint24_t>(words, reports_root, obj);
+        PearsonClassTest(hfl::PearsonHash24{}, words, reports_root, obj);
 
         return obj;
     }
@@ -334,11 +333,12 @@ namespace tests {
 
         using namespace std::literals;
 
-        PearsonFuncTest(pearson_inline::pearson_hash_32, words, reports_root, obj);
+
         HashTest(FNV32a, args::char_key_int_len_seed, "FNV-1a Hash"s, words, reports_root, obj);
         SpeedTestT<uint32_t>(words, reports_root, obj);
-        BuzHashTest<uint32_t>(words, reports_root, obj);
         FastHash32To63Test<uint32_t>(words, reports_root, obj);
+        PearsonFuncTest(pearson_inline::pearson_hash_32, words, reports_root, obj);
+        BuzHashTest<uint32_t>(words, reports_root, obj);
 
         HashTest(SuperFastHash, args::char_key_int_len, "SuperFastHash"s, words, reports_root, obj);
         HashTest(murmur_inline::MurmurHash1, args::char_key_int_len_seed, "MurmurHash1"s, words, reports_root, obj);
@@ -347,7 +347,7 @@ namespace tests {
         HashTest(murmur_inline::MurmurHash3_x86_32, args::char_key_int_len_seed, "MurmurHash3"s, words, reports_root, obj);
         HashTest(city::s_inline::CityHash32, args::char_key_uint_len, "CityHash32"s, words, reports_root, obj);
         HashTest(util::s_inline::Hash32, args::char_key_uint_len, "FarmHash32"s, words, reports_root, obj);
-        HashTest(util::s_inline::Hash32WithSeed, args::char_key_uint_len_seed, "FarmHash32WithSeed"s, words, reports_root, obj);
+        HashTest(util::s_inline::Hash32WithSeed, args::char_key_uint_len_seed, "FarmHash32 with seed"s, words, reports_root, obj);
 
         // no inline
         HashTest(t1ha0_32le, args::char_key_uint_len_seed, "T1HA0 32le hash"s, words, reports_root, obj);
@@ -377,29 +377,30 @@ namespace tests {
 
         using namespace std::literals;
 
-        PearsonFuncTest(pearson_inline::pearson_hash_64, words, reports_root, obj);
         HashTest(FNV64a, args::char_key_int_len_seed, "FNV-1a Hash", words, reports_root, obj);
         SpeedTestT<uint64_t>(words, reports_root, obj);
-        BuzHashTest<uint64_t>(words, reports_root, obj);
         FastHash64Test(words, reports_root, obj);
+        PearsonFuncTest(pearson_inline::pearson_hash_64, words, reports_root, obj);
+        BuzHashTest<uint64_t>(words, reports_root, obj);
 
-        HashTest(murmur_inline::MurmurHash64A, args::char_key_int_len_seed, "MurmurHash2 64 bits"s, words, reports_root, obj);
+        HashTest(murmur_inline::MurmurHash64A, args::char_key_int_len_seed, "MurmurHash64A"s, words, reports_root, obj);
         HashTest(city::s_inline::CityHash64, args::char_key_uint_len, "CityHash64"s, words, reports_root, obj);
-        HashTest(city::s_inline::CityHash64WithSeed, args::char_key_uint_len_seed, "CityHash64WithSeed"s, words, reports_root, obj);
-        HashTest(city::s_inline::CityHash64WithSeeds, args::char_key_uint_len_seeds, "CityHash64WithSeeds"s, words, reports_root, obj);
+        HashTest(city::s_inline::CityHash64WithSeed, args::char_key_uint_len_seed, "CityHash64 with seed"s, words, reports_root, obj);
+        HashTest(city::s_inline::CityHash64WithSeeds, args::char_key_uint_len_seeds, "CityHash64 with seeds"s, words, reports_root, obj);
         HashTest(util::s_inline::Hash64, args::char_key_uint_len, "FarmHash64"s, words, reports_root, obj);
-        HashTest(util::s_inline::Hash64WithSeed, args::char_key_uint_len_seed, "FarmHash64WithSeed"s, words, reports_root, obj);
-        HashTest(util::s_inline::Hash64WithSeeds, args::char_key_uint_len_seeds, "FarmHash64WithSeeds"s, words, reports_root, obj);
+        HashTest(util::s_inline::Hash64WithSeed, args::char_key_uint_len_seed, "FarmHash64 with seed"s, words, reports_root, obj);
+        HashTest(util::s_inline::Hash64WithSeeds, args::char_key_uint_len_seeds, "FarmHash64 with seeds"s, words, reports_root, obj);
         MetroHashTest(words, reports_root, obj);
 
         // no inline
         HashTest(t1ha0_ia32aes_avx2, args::char_key_uint_len_seed, "T1HA0 AVX2 hash"s, words, reports_root, obj);
         HashTest(t1ha1_le, args::char_key_uint_len_seed, "T1HA1 le hash"s, words, reports_root, obj);
         HashTest(t1ha1_be, args::char_key_uint_len_seed, "T1HA1 be hash"s, words, reports_root, obj);
+        HashTest(t1ha2_atonce, args::char_key_uint_len_seed, "T1HA2 atonce hash"s, words, reports_root, obj);
 
         HashTest(XXH64, args::char_key_uint_len_seed, "xxHash64"s, words, reports_root, obj);
-        HashTest(XXH3_64bits, args::char_key_uint_len, "XXH3_64bits"s, words, reports_root, obj);
-        HashTest(XXH3_64bits_withSeed, args::char_key_uint_len_seed, "XXH3_64bits_withSeed"s, words, reports_root, obj);
+        HashTest(XXH3_64bits, args::char_key_uint_len, "XXH3 64 bits"s, words, reports_root, obj);
+        HashTest(XXH3_64bits_withSeed, args::char_key_uint_len_seed, "XXH3 64 bits with seed"s, words, reports_root, obj);
 
         WyHash64Test(words, reports_root, obj);
         HashTest(pengyhash, args::char_key_uint_len_seed, "PengyHash"s, words, reports_root, obj);

@@ -38,7 +38,7 @@ namespace tests {
 
     void RunCollTestNormal(uint16_t words_length, size_t num_threads, ReportsRoot& reports_root) {
         RUN_COLL_TEST_NORMAL_IMPL(16, 16, words_length, num_threads, TestFlag::NORMAL, reports_root);
-        //RUN_COLL_TEST_NORMAL_IMPL(24, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
+        RUN_COLL_TEST_NORMAL_IMPL(24, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
         RUN_COLL_TEST_NORMAL_IMPL(32, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
     }
 
@@ -49,7 +49,7 @@ namespace tests {
         TestWithGeneratedBlocks(hashes##BITS, wp##BITS, ROOT)
 
     void RunCollTestWithMask(uint16_t words_length, size_t num_threads, ReportsRoot& reports_root) {
-        //RUN_COLL_TEST_WITH_MASK_IMPL(48, 24, words_length, num_threads, TestFlag::MASK, reports_root);
+        RUN_COLL_TEST_WITH_MASK_IMPL(48, 24, words_length, num_threads, TestFlag::MASK, reports_root);
         RUN_COLL_TEST_WITH_MASK_IMPL(64, 24, words_length, num_threads, TestFlag::MASK, reports_root);
     }
 
