@@ -217,8 +217,7 @@ namespace tests {
                 return static_cast<UintT>(h - (h >> 32));
             };
 
-            HashSpeed hs = HashSpeedTest(lambda, hash_name, words, reports_root);
-            obj[hash_name] = std::to_string(hs.sec_time) + " sec";
+            HashTest(lambda, args::str_view, hash_name, words, reports_root, obj);
         }
 
         void FastHash64Test(const std::vector<std::string>& words, ReportsRoot& reports_root, boost::json::object& obj) {
@@ -235,7 +234,7 @@ namespace tests {
 
             auto lambda = [](std::string_view str) {
                 uint64_t hash = 0;
-                std::vector<uint8_t> hash_array(0, 0);
+                std::vector<uint8_t> hash_array(8, 0);
                 MetroHash64::Hash(reinterpret_cast<const uint8_t*>(str.data()), str.size(), hash_array.data(), SEED_64_1);
                 std::memcpy(&hash, hash_array.data(), 8);
                 return hash;

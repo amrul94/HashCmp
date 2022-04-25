@@ -9,27 +9,21 @@
 #include <pcg_random.hpp>
 #include <algorithm>
 
+#include "hash_wrappers.h"
 #include "hashes.h"
 #include "my_assert.h"
 
 void TempTests(tests::ReportsRoot& report_root) {
     uint64_t counter = 0;
 
-    for (int i = 0; i < 10; ++i) {
-        counter += true;
-        std::cout << counter << std::endl;
-        counter += false;
-        std::cout << counter << std::endl;
-    }
-
 }
 
 void HashIsCorrectTest() {
     auto lambda = [](const auto& hasher, const std::vector<uint64_t>& numbers) {
         for (uint64_t number : numbers) {
-            ASSERT_EQUAL_HINT(hasher.hash(number), hasher.hash(number), hasher.name + " is not correct");
+            ASSERT_EQUAL_HINT(hasher(number), hasher(number), hasher.GetName() + " is not correct");
         }
-        std::cout << boost::format("\t\t%1% is correct\n") % hasher.name;
+        std::cout << boost::format("\t\t%1% is correct\n") % hasher.GetName();
     };
 
     uint64_t count = 100000;
@@ -141,7 +135,7 @@ tests::ReportsRoot CreateReportsRoot() {
 }
 
 int main() {
-    const std::vector test_numbers{2};
+    const std::vector test_numbers{0};
     tests::ReportsRoot reports_root = CreateReportsRoot();
     RunTests(test_numbers, reports_root);
 }

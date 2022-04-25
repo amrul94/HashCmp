@@ -27,10 +27,10 @@ namespace tests {
     void HashDistTest(const HashStruct& hasher, const DistTestParameters& dtp, ReportsRoot& reports_root);
 
     template<typename HashStructs>
-    void DistributionTest(const HashStructs& funcs, const DistTestParameters& dtp, ReportsRoot& reports_root);
+    void DistributionTest(const HashStructs& hashes, const DistTestParameters& dtp, ReportsRoot& reports_root);
 
-    void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root);
-    void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root);
+    void RunDistTestNormal(uint16_t num_threads, ReportsRoot& reports_root);
+    void RunDistTestWithBins(uint16_t num_threads, ReportsRoot& reports_root);
 
     void RunDistributionTests(ReportsRoot& reports_root);
 
@@ -39,19 +39,19 @@ namespace tests {
 
     template<typename Hasher>
     void HashDistTest(const Hasher& hasher, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM('\t' + hasher.name, reports_root.logger);
+        LOG_DURATION_STREAM('\t' + hasher.GetName(), reports_root.logger);
 
         // Выделить buckets, max_bucket и мьютекс в отдельный класс (например, Distributor).
         // При этом добавление нового элемента вынести в метод класса AddHash
         std::vector<std::atomic<Bucket>> buckets(dtp.num_buckets);
-        const auto max_bucket = std::numeric_limits<Bucket>::max();
+        const Bucket max_bucket = std::numeric_limits<Bucket>::max();
 
-        auto lambda = [&hasher, &dtp, &buckets, max_bucket](uint64_t start, uint64_t end) {
+        auto lambda = [&hasher, &dtp, &buckets](uint64_t start, uint64_t end) {
             for (uint64_t number = start; number < end; ++number) {
-                const uint64_t hash = hasher.hash(number);
+                const uint64_t hash = hasher(number);
                 const uint64_t modified = ModifyHash(dtp, hash);
                 std::atomic<Bucket>& current_bucket = buckets[modified];
-                Bucket old_bucket, new_bucket;
+                Bucket old_bucket = 0, new_bucket = 0;
                 do {
                     old_bucket = current_bucket.load();
                     Bucket increment = (old_bucket != max_bucket);
@@ -62,7 +62,7 @@ namespace tests {
         };
 
         ThreadTasks<void> thread_tasks(lambda, dtp.num_threads, dtp.num_keys);
-        PrintReports(buckets, dtp, hasher.name, reports_root);
+        PrintReports(buckets, dtp, hasher.GetName(), reports_root);
     }
 
     template<typename Hashes>

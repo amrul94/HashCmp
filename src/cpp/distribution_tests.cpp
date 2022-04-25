@@ -103,26 +103,28 @@ namespace tests {
 
     #define RUN_DIST_TEST_NORMAL_IMPL(BITS, NUM_THREADS, ROOT)                  \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();               \
-        const DistTestParameters cp##BITS{BITS, NUM_THREADS, TestFlag::NORMAL}; \
+        const uint64_t num_keys_and_buckets##BITS = 1ull << (BITS);             \
+        const DistTestParameters cp##BITS{BITS, NUM_THREADS, num_keys_and_buckets##BITS, num_keys_and_buckets##BITS, TestFlag::NORMAL}; \
         DistributionTest(hashes##BITS, cp##BITS, ROOT)
 
-    void RunDistTestNormal(size_t num_threads, ReportsRoot& reports_root) {
+    void RunDistTestNormal(uint16_t num_threads, ReportsRoot& reports_root) {
         RUN_DIST_TEST_NORMAL_IMPL(16, num_threads, reports_root);
         RUN_DIST_TEST_NORMAL_IMPL(32, num_threads, reports_root);
     }
 
-    #define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS, ROOT)                     \
+    #define RUN_DIST_TEST_WITH_BINS_IMPL(BITS, NUM_THREADS, ROOT)               \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();               \
-        const DistTestParameters cp##BITS{BITS, NUM_THREADS, TestFlag::BINS};   \
+        const uint64_t num_keys_and_buckets##BITS = 1ull << ((BITS) - 32);      \
+        const DistTestParameters cp##BITS{BITS, NUM_THREADS, num_keys_and_buckets##BITS, num_keys_and_buckets##BITS, TestFlag::BINS};   \
         DistributionTest(hashes##BITS, cp##BITS, ROOT)
 
 
-    void RunDistTestWithBins(size_t num_threads, ReportsRoot& reports_root) {
+    void RunDistTestWithBins(uint16_t num_threads, ReportsRoot& reports_root) {
         RUN_DIST_TEST_WITH_BINS_IMPL(64, num_threads, reports_root);
     }
 
     void RunDistributionTests(ReportsRoot& reports_root) {
-        const size_t num_threads = GetNumThreads();
+        const uint16_t num_threads = GetNumThreads();
         reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
         RunDistTestNormal(num_threads, reports_root);

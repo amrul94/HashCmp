@@ -5,8 +5,8 @@
 #include <vector>
 #include <thread>
 
-static inline size_t GetNumThreads() {
-    static const size_t hardware_threads = std::thread::hardware_concurrency();
+static inline uint16_t GetNumThreads() {
+    static const uint16_t hardware_threads = std::thread::hardware_concurrency();
     return hardware_threads != 0 ? hardware_threads : 1;
 }
 

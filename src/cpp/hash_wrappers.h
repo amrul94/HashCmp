@@ -31,7 +31,7 @@ namespace hfl {
         template<typename UintT>
         class BaseHashWrapper {
         public:
-            UintT operator()(std::string_view str) const {
+            UintT operator()(const std::string& str) const {
                 return Hash(str.data(), str.size());
             }
 

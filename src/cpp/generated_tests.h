@@ -39,9 +39,9 @@ namespace tests {
                                  const GenBlocksParameters& gbp, ReportsRoot& reports_root);
 
 
-    void RunCollTestNormal(uint16_t words_length, size_t num_threads, ReportsRoot& reports_root);
+    void RunCollTestNormal(uint16_t words_length, uint16_t num_threads, ReportsRoot& reports_root);
 
-    void RunCollTestWithMask(uint16_t words_length, size_t num_threads, ReportsRoot& reports_root);
+    void RunCollTestWithMask(uint16_t words_length, uint16_t num_threads, ReportsRoot& reports_root);
 
     void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root);
 
@@ -53,18 +53,18 @@ namespace tests {
     template<typename Hasher>
     auto HashTestWithGenBlocks(const Hasher& hasher, const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
         LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.name;
+        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.GetName();
 
         std::vector<pcg64> generators = GetGenerators(gbp.num_threads, (gbp.num_keys * gbp.words_length) / 8);   \
         // Выделить coll_flags, collisions, num_collisions и мьютекс (в будущем) в отдельный класс (например, Counters).
         // При этом подсчет коллизий вынести в метод класса AddHash
-        const auto num_hashes = static_cast<uint64_t>(std::pow(2, gbp.test_bits));
+        const auto num_hashes = static_cast<uint64_t>(std::pow(2, gbp.mask_bits));
         std::deque<std::atomic_bool> coll_flags(num_hashes);
         boost::json::object collisions;
         std::atomic_uint64_t num_collisions = 0;
 
-        size_t num_words = (1 << (gbp.test_bits >> 1));
-        size_t step = (gbp.test_bits != 24) ? 1 : 2;
+        size_t num_words = (1 << (gbp.mask_bits >> 1));
+        size_t step = (gbp.mask_bits != 24) ? 1 : 2;
 
         bool loop_conditional = (num_words <= gbp.num_keys);
         auto completion_lambda =
@@ -86,7 +86,7 @@ namespace tests {
                 size_t thread_num_words = num_words / gbp.num_threads;
                 for (; i < thread_num_words; ++i) {
                     std::string str = GenerateRandomDataBlock(rng, gbp.words_length);
-                    const auto hash = static_cast<uint64_t>(hasher.hash(str));
+                    const auto hash = static_cast<uint64_t>(hasher(str));
                     const uint64_t modified = ModifyHash(gbp, hash);
                     num_collisions += coll_flags[modified].exchange(true);
                 }
@@ -103,9 +103,9 @@ namespace tests {
             t.join();
         }
 
-        auto hash_name = static_cast<boost::json::string>(hasher.name);
+        auto hash_name = static_cast<boost::json::string>(hasher.GetName());
         if (gbp.mode == TestFlag::MASK) {
-            hash_name += " (mask " + std::to_string(gbp.test_bits) + " bits)";
+            hash_name += " (mask " + std::to_string(gbp.mask_bits) + " bits)";
         }
         boost::json::object result;
         result[hash_name] = collisions;

@@ -1,6 +1,7 @@
 import json
 import os.path
 
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
@@ -20,7 +21,7 @@ class DataCollisionsStatistics(CollisionsStatistics):
     def __auto_label(ax, rects):
         for rect in rects:
             height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
+            ax.text(rect.get_x() + rect.get_width() / 2., 1.01 * height,
                     height, ha='center', va='bottom')
 
     def __bar(self, ax):
@@ -30,19 +31,20 @@ class DataCollisionsStatistics(CollisionsStatistics):
         plt.xticks(rotation='vertical')
         self.__auto_label(ax, rects)
 
-        max_height = max([rect.get_height() for rect in rects])
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(max_height / 5))
-        ax.yaxis.set_minor_locator(ticker.MultipleLocator(max_height / 25))
+        max_height = max([np.around(rect.get_height()) for rect in rects])
+        max_ticket = int(np.around(max_height, -1))
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(max_ticket * 0.2))
+        ax.yaxis.set_minor_locator(ticker.MultipleLocator(max_ticket * 0.04))
         plt.grid(ls=':')
-        plt.ylim(top=max_height*1.2)
+        plt.ylim(top=max_height * 1.125)
 
-    def create_histogram(self, file_name):
+    def create_histogram(self):
         fig, ax = plt.subplots()
         ax.set_title(f'{self.bits} bits hashes')
         plt.xlabel('Hash name')
         plt.ylabel('Collisions')
-        fig.set_figwidth(10)
-        fig.set_figheight(6)
+        fig.set_figwidth(15)
+        fig.set_figheight(9)
 
         self.__bar(ax)
 
@@ -55,7 +57,7 @@ def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
         ews = DataCollisionsStatistics(js, tests_dir_name)
-        ews.create_histogram(file_name)
+        ews.create_histogram()
 
 
 def process_collision_statistics(tests_dir_name, test_name):

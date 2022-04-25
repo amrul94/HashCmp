@@ -22,7 +22,7 @@ namespace tests {
         using HashMap = std::map<uint64_t, uint64_t>;
 
         LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.name;
+        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.GetName();
 
         fs::path general_images_dir = std::filesystem::current_path() / "data/images";
         std::atomic_uint8_t dir_number;
@@ -36,9 +36,8 @@ namespace tests {
                 const auto status = fs::status(path);
                 if (!fs::is_directory(status)) {
                     std::ifstream image_file = std::ifstream(path, std::ios_base::binary);
-                    const auto hash = static_cast<uint64_t>(hasher.hash(image_file));
-                    const uint64_t modify = ModifyHash(tp, hash);
-                    ++hashes[modify];
+                    const uint64_t hash = hasher(image_file);
+                    ++hashes[hash];
                 }
             }
 
@@ -66,7 +65,7 @@ namespace tests {
         auto out_json = out::GetImagesTestJson(tp, reports_root);
         boost::json::object collisions;
         for (const auto& hs : hashes) {
-            collisions[hs.name] = HashTestWithImages(hs, tp,reports_root);
+            collisions[hs.GetName()] = HashTestWithImages(hs, tp,reports_root);
         }
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;

@@ -4,7 +4,7 @@
 
 namespace tests {
     namespace out {
-        OutputJson GetAvalancheTestJson(const TestParameters& tp, ReportsRoot& reports_root) {
+        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& tp, ReportsRoot& reports_root) {
             const std::string test_name = "Avalanche effect tests";
             const std::filesystem::path report_test_dir = test_name;
             const auto report_test_path = reports_root.root_path / report_test_dir;
@@ -93,14 +93,14 @@ namespace tests {
 
     #define RUN_AVALANCHE_TEST_IMPL(NUM_KEYS, BITS, NUM_THREADS, ROOT)                  \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                       \
-        const TestParameters tp##BITS{BITS, NUM_KEYS, NUM_THREADS, TestFlag::NORMAL};   \
+        const AvalancheTestParameters tp##BITS{BITS, NUM_THREADS, NUM_KEYS};   \
         AvalancheTest(hashes##BITS, tp##BITS, ROOT)
 
     void RunAvalancheTests(ReportsRoot& reports_root) {
-        const size_t num_threads = GetNumThreads();
+        const uint16_t num_threads = GetNumThreads();
         reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
-        const uint64_t num_keys = std::numeric_limits<uint32_t>::max() + 1ull;
+        const uint64_t num_keys = 1ull << 32;
         RUN_AVALANCHE_TEST_IMPL(num_keys, 16, num_threads, reports_root);
         RUN_AVALANCHE_TEST_IMPL(num_keys, 32, num_threads, reports_root);
         RUN_AVALANCHE_TEST_IMPL(num_keys, 64, num_threads, reports_root);

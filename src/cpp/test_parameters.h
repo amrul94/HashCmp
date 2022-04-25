@@ -22,9 +22,6 @@ namespace tests {
     }
 
     struct ReportsRoot {
-        typedef boost::iostreams::tee_device<std::ostream, std::ofstream> TeeDevice;
-        typedef boost::iostreams::stream<TeeDevice> TeeStream;
-
         explicit ReportsRoot(const std::filesystem::path& root_path);
 
         const std::filesystem::path root_path;
@@ -43,36 +40,50 @@ namespace tests {
     uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
 
     struct TestParameters {
-        // думаю стоит заменить uint16_t на uint8_t
-        const uint16_t hash_bits{}; // Количество битов, которые выдает хеш-функция
-        const uint16_t test_bits{}; // Количество битов для тестов (иногда задается маской)
-        uint64_t num_keys{};        // Количество входных данных для хешей
-        const size_t num_threads{}; // Количество потоков выполнения
-        const TestFlag mode;        // Тип подсчета
+        uint16_t hash_bits;     // Количество битов, которые выдает хеш-функция
+        uint16_t num_threads;   // Количество потоков выполнения
 
 
-        TestParameters(uint16_t hash_bits, size_t num_threads, TestFlag mode = TestFlag::NORMAL);
-        TestParameters(uint16_t hash_bits, uint16_t test_bits, size_t num_threads, TestFlag mode);
-        TestParameters(uint16_t hash_bits, uint64_t key_counts, size_t num_threads, TestFlag mode);
-        TestParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t key_counts, size_t num_threads, TestFlag mode);
+        TestParameters() = delete;
+        TestParameters(const TestParameters& parameters) = default;
+        TestParameters(TestParameters&& parameters) = default;
+
+        TestParameters& operator=(const TestParameters& parameters) = default;
+        TestParameters& operator=(TestParameters&& parameters) = default;
+
+        explicit TestParameters(uint16_t hash_bits, uint16_t num_threads = 1);
+
         [[nodiscard]] static uint64_t GiveDivisor(uint16_t degree);
         virtual ~TestParameters() = default;
     };
 
-    struct DistTestParameters : TestParameters{
-        uint64_t num_buckets{};   // Количество счетчиков
+    struct AvalancheTestParameters : public TestParameters {
+        uint64_t num_keys{};        // Количество входных данных для хешей
+
+        AvalancheTestParameters(uint16_t hash_bits, uint16_t num_threads, uint64_t num_keys);
+    };
+
+    struct AdvancedTestParameters : public AvalancheTestParameters {
+        const TestFlag mode{};      // Тип подсчета
+
+        AdvancedTestParameters(uint16_t hash_bits, uint16_t num_threads, uint64_t num_keys,
+                               TestFlag mode = TestFlag::NORMAL);
+    };
+
+
+
+    struct DistTestParameters : AdvancedTestParameters {
+        uint64_t num_buckets;       // Количество счетчиков
         uint64_t divisor = 1;       // Делитель. Нужен, когда в одном счетчике много хешей
 
-        DistTestParameters(uint16_t hash_bits, size_t num_threads, TestFlag mode);
-        DistTestParameters(uint16_t hash_bits, uint16_t test_bits, size_t num_threads, TestFlag mode);
+        DistTestParameters(uint16_t hash_bits, uint16_t num_threads, uint64_t num_keys, uint64_t num_buckets,
+                           TestFlag mode);
 
     private:
-        static constexpr uint16_t DIVIDER_FOR_32 = 0; // было ранее 5;
-        //static constexpr uint16_t DIVIDER_FOR_32 = 5; // было ранее 5;
-        static constexpr uint16_t DIVIDER_FOR_48 = DIVIDER_FOR_32 + 16;
-        static constexpr uint16_t DIVIDER_FOR_64 = DIVIDER_FOR_32 + 32;
-        static constexpr uint64_t MAX_BINS_COUNT = static_cast<uint64_t>(UINT32_MAX) + 1;
-        //static constexpr uint64_t MAX_BINS_COUNT = 134'217'728; // 2^27
+        static constexpr uint16_t divider_for_32 = 0;
+        static constexpr uint16_t divider_for_48 = divider_for_32 + 16;
+        static constexpr uint16_t divider_for_64 = divider_for_32 + 32;
+        static constexpr uint64_t MAX_BINS_COUNT = 1ull << 32; // static_cast<uint64_t>(UINT32_MAX) + 1;
 
     private:
         void SetParameters();
@@ -81,15 +92,15 @@ namespace tests {
         void SetMaskMode();
     };
 
-    struct GenBlocksParameters : TestParameters {
-        uint32_t words_length{};
+    struct GenBlocksParameters : AdvancedTestParameters {
+        const uint16_t mask_bits{};
+        uint16_t words_length{};
 
-        GenBlocksParameters(uint16_t hash_bits, uint64_t num_words, TestFlag mode = TestFlag::NORMAL);
-        GenBlocksParameters(uint16_t hash_bits, uint64_t num_words, uint32_t length, size_t num_threads, TestFlag mode);
-        GenBlocksParameters(uint16_t hash_bits, uint16_t test_bits, uint64_t num_words, uint32_t length, size_t num_threads, TestFlag mode);
+        GenBlocksParameters(uint16_t hash_bits, uint16_t test_bits, uint16_t num_threads, uint64_t num_words,
+                            uint16_t words_length, TestFlag mode);
     };
 
-    uint64_t ModifyHash(const TestParameters& tp, uint64_t hash);
+    uint64_t ModifyHash(const AdvancedTestParameters& tp, uint64_t hash);
 }
 
 #endif //THESIS_WORK_HELPER_STRUCTS_H

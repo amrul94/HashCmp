@@ -23,19 +23,18 @@ class SpeedStatistics:
     @staticmethod
     def __auto_label(ax, rects):
         for rect in rects:
-            height = int(np.around(rect.get_height(), 0))
-            ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
-                    height, ha='center', va='bottom')
+            height = np.around(rect.get_height(), 1)
+            ax.text(rect.get_x() + rect.get_width() / 2., height + 0.3, height, ha='center', va='bottom')
 
     def __bar(self, ax):
         x = self.speeds.keys()
         height = self.speeds.values()
         rects = plt.bar(x, height, color='c', edgecolor='b', linewidth=1)
-        # rects = plt.bar(x, height)
         plt.xticks(rotation='vertical')
         self.__auto_label(ax, rects)
 
-        max_height = max([rect.get_height() for rect in rects])
+        max_height = max([int(np.around(rect.get_height(), -1)) for rect in rects])
+        print(max_height)
         ax.yaxis.set_major_locator(ticker.MultipleLocator(max_height / 5))
         ax.yaxis.set_minor_locator(ticker.MultipleLocator(max_height / 25))
         plt.grid(ls=':')
@@ -45,9 +44,9 @@ class SpeedStatistics:
         fig, ax = plt.subplots()
         ax.set_title(f'{self.bits} bits hashes')
         plt.xlabel('Hash name')
-        plt.ylabel('Speed')
-        fig.set_figwidth(10)
-        fig.set_figheight(6)
+        plt.ylabel('Speed (seconds)')
+        fig.set_figwidth(15)
+        fig.set_figheight(9)
 
         self.__bar(ax)
 
@@ -63,7 +62,7 @@ def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes)
         ews.create_histogram(file_name)
 
 
-def process_collision_statistics(tests_dir_name):
+def process_speed_statistics(tests_dir_name):
     path_to_test_dir = get_cpp_report_path(tests_dir_name)
     path_to_eg_dir = os.path.join(path_to_test_dir, "Speed tests")
     list_of_files = os.listdir(path_to_eg_dir)

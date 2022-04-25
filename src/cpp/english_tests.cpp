@@ -44,10 +44,10 @@ namespace tests {
         return words;
     }
 
-    #define RUN_TEST_WITH_ENG_WORDS_IMPL(WORDS, BITS, ROOT)                         \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                   \
-        const TestParameters tp##BITS{BITS, static_cast<uint64_t>((WORDS).size())}; \
-        TestWithEnglishWords(hashes##BITS, WORDS, tp##BITS, ROOT)                   \
+    #define RUN_TEST_WITH_ENG_WORDS_IMPL(WORDS, BITS, ROOT)             \
+        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();       \
+        const TestParameters tp##BITS{BITS};                            \
+        TestWithEnglishWords(hashes##BITS, WORDS, tp##BITS, ROOT)       \
 
 
     void RunTestWithEnglishWords(ReportsRoot& reports_root) {

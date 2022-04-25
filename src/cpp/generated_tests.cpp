@@ -15,7 +15,7 @@ namespace tests {
             std::filesystem::create_directories(block_size_path);
 
             const std::filesystem::path report_name = std::to_string(gbp.hash_bits) + " bits (" + TestFlagToString(gbp.mode)
-                                                      + " "s + std::to_string(gbp.test_bits) + " bits).json"s;
+                                                      + " "s + std::to_string(gbp.mask_bits) + " bits).json"s;
             const std::filesystem::path report_path = block_size_path / report_name;
 
             std::ofstream out(report_path);
@@ -24,7 +24,7 @@ namespace tests {
             obj["Test name"] = "Test With Random Words";
             obj["Mode"] = TestFlagToString(gbp.mode);
             obj["Bits"] = gbp.hash_bits;
-            obj["Mask"] = gbp.test_bits;
+            obj["Mask"] = gbp.mask_bits;
             obj["Number of keys"] = gbp.num_keys;
             return OutputJson{std::move(obj), std::move(out)};
         }
@@ -32,11 +32,11 @@ namespace tests {
 
     #define RUN_COLL_TEST_NORMAL_IMPL(BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)                        \
         const auto word_counts##BITS = (1 << (POW_COUNTS)); /*static_cast<uint64_t>(pow(2, POW_COUNTS));   */ \
-        const GenBlocksParameters wp##BITS {BITS, word_counts##BITS, LENGTH, NUM_THREADS, MODE};                \
+        const GenBlocksParameters wp##BITS {BITS, BITS, NUM_THREADS, word_counts##BITS, LENGTH, MODE};     \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                            \
         TestWithGeneratedBlocks(hashes##BITS, wp##BITS, ROOT)
 
-    void RunCollTestNormal(uint16_t words_length, size_t num_threads, ReportsRoot& reports_root) {
+    void RunCollTestNormal(uint16_t words_length, uint16_t num_threads, ReportsRoot& reports_root) {
         RUN_COLL_TEST_NORMAL_IMPL(16, 16, words_length, num_threads, TestFlag::NORMAL, reports_root);
         RUN_COLL_TEST_NORMAL_IMPL(24, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
         RUN_COLL_TEST_NORMAL_IMPL(32, 24, words_length, num_threads, TestFlag::NORMAL, reports_root);
@@ -44,17 +44,17 @@ namespace tests {
 
     #define RUN_COLL_TEST_WITH_MASK_IMPL(BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)       \
         const auto word_counts##BITS = (1 << (POW_COUNTS)); /*static_cast<uint64_t>(pow(2, POW_COUNTS));*/\
-        const GenBlocksParameters wp##BITS {BITS, 32, word_counts##BITS, LENGTH, NUM_THREADS, MODE};    \
+        const GenBlocksParameters wp##BITS {BITS, 32, NUM_THREADS, word_counts##BITS, LENGTH, MODE};    \
         const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                    \
         TestWithGeneratedBlocks(hashes##BITS, wp##BITS, ROOT)
 
-    void RunCollTestWithMask(uint16_t words_length, size_t num_threads, ReportsRoot& reports_root) {
+    void RunCollTestWithMask(uint16_t words_length, uint16_t num_threads, ReportsRoot& reports_root) {
         RUN_COLL_TEST_WITH_MASK_IMPL(48, 24, words_length, num_threads, TestFlag::MASK, reports_root);
         RUN_COLL_TEST_WITH_MASK_IMPL(64, 24, words_length, num_threads, TestFlag::MASK, reports_root);
     }
 
     void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root) {
-        const size_t num_threads = GetNumThreads();
+        const uint16_t num_threads = GetNumThreads();
         RunCollTestNormal(words_length, num_threads, reports_root);
         RunCollTestWithMask(words_length, num_threads, reports_root);
     }

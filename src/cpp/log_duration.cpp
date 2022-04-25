@@ -49,6 +49,6 @@ LogDuration::~LogDuration() {
     } else if (duration_cast<minutes>(dur).count() < 60) {
         out_ << id_ << ": "s << duration_cast<minutes>(dur).count() << " min"s << std::endl;
     } else {
-        out_ << id_ << ": "s << duration_cast<hours>(dur).count() << " min"s << std::endl;
+        out_ << id_ << ": "s << duration_cast<hours>(dur).count() << " hours"s << std::endl;
     }
 }

@@ -35,12 +35,11 @@ namespace tests {
     template <typename Hasher>
     uint64_t HashTestWithEngWords(const Hasher& hasher, const std::vector<std::string>& words,
                                   const TestParameters& tp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM(hasher.name, reports_root.logger);
+        LOG_DURATION_STREAM(hasher.GetName(), reports_root.logger);
         std::map<uint64_t, uint64_t> hashes;
         for (const std::string& word : words) {
-            const uint64_t hash = hasher.hash(word);
-            const uint64_t modify = ModifyHash(tp, hash);
-            ++hashes[modify];
+            const uint64_t hash = hasher(word);
+            ++hashes[hash];
         }
         return CountCollisions(hashes);
     }
@@ -53,7 +52,7 @@ namespace tests {
         auto out_json = out::GetEnglishTestJson(tp, words.size(), reports_root);
         boost::json::object collisions;
         for (const auto& hs : hashes) {
-            collisions[hs.name] = HashTestWithEngWords(hs, words, tp, reports_root);
+            collisions[hs.GetName()] = HashTestWithEngWords(hs, words, tp, reports_root);
         }
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;

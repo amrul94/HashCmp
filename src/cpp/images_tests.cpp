@@ -27,7 +27,7 @@ namespace tests {
         TestWithImages(hashes##BITS, tp##BITS, ROOT)
 
     void RunImagesTests(ReportsRoot& reports_root) {
-        const size_t num_threads = GetNumThreads();
+        const uint16_t num_threads = GetNumThreads();
         RUN_IMAGES_TEST_IMPL(16, num_threads, reports_root);
         RUN_IMAGES_TEST_IMPL(24, num_threads, reports_root);
         RUN_IMAGES_TEST_IMPL(32, num_threads, reports_root);

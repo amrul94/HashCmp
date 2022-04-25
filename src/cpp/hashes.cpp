@@ -1,115 +1,118 @@
+#include <gsl/gsl>
+
 #include "hashes.h"
 
 // HFL = Hash function library
 namespace hfl {
     //----------- BuildHashes ----------
 
-    #define ADD_UNIVERSAL_HASHES(BITS)                                            \
-        hashes.emplace_back("FNV-1a Hash"s, fnv_1a_hash_##BITS);                  \
-        hashes.emplace_back("DJB2 Hash"s, djb2_hash_##BITS);                      \
-        hashes.emplace_back("SDBM Hash"s, sdbm_hash_##BITS);                      \
-        hashes.emplace_back("PJW Hash"s, pjw_hash_##BITS);                        \
-        hashes.emplace_back("One at a time hash"s, one_at_a_time_hash_##BITS);    \
-        hashes.emplace_back("SpookyHash"s, spooky_hash_##BITS);                   \
-        hashes.emplace_back("Fast-Hash"s, fast_hash_##BITS)
+    #define ADD_UNIVERSAL_HASHES(BITS)                                              \
+        hashes.emplace_back("FNV-1a Hash"s, std::make_unique<FNV1aHash##BITS##Wrapper>());          \
+        hashes.emplace_back("DJB2 Hash"s, std::make_unique<DJB2HashWrapper<uint##BITS##_t>>());         \
+        hashes.emplace_back("SDBM Hash"s, std::make_unique<SDBMHashWrapper<uint##BITS##_t>>());                      \
+        hashes.emplace_back("PJW Hash"s, std::make_unique<PJWHashWrapper<uint##BITS##_t>>());                        \
+        hashes.emplace_back("One at a time hash"s, std::make_unique<OneTimeHashWrapper<uint##BITS##_t>>());    \
+        hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash##BITS##Wrapper>());                   \
+        hashes.emplace_back("Fast-Hash"s, std::make_unique<FastHash##BITS##Wrapper>())
 
-    std::vector<Hasher16> Build16bitsHashes() {
+    std::vector<Hash16> Build16bitsHashes() {
         using namespace std::literals;
-        std::vector<Hasher16> hashes;
+        std::vector<Hash16> hashes;
         hashes.reserve(9);
 
         ADD_UNIVERSAL_HASHES(16);
-        hashes.emplace_back("PearsonHash"s, pearson_hash_16);
-        hashes.emplace_back("BuzHash"s, buz_hash_16);
+        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash16Wrapper>());
+        hashes.emplace_back("BuzHash"s, std::make_unique<BuzHashWrapper<uint16_t>>());
 
         return hashes;
     }
 
-    std::vector<Hasher24> Build24bitsHashes() {
+    std::vector<Hash24> Build24bitsHashes() {
         using namespace std::literals;
-        std::vector<Hasher24> hashes;
+        std::vector<Hash24> hashes;
         hashes.reserve(8);
 
         ADD_UNIVERSAL_HASHES(24);
-        hashes.emplace_back("PearsonHash"s, pearson_hash_24);
+        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash24Wrapper>());
 
         return hashes;
     }
 
-    std::vector<Hasher32> Build32bitsHashes() {
+    std::vector<Hash32> Build32bitsHashes() {
         using namespace std::literals;
-        std::vector<Hasher32> hashes;
+        std::vector<Hash32> hashes;
         hashes.reserve(23);
 
         ADD_UNIVERSAL_HASHES(32);
-        hashes.emplace_back("PearsonHash"s, pearson_hash_32);
-        hashes.emplace_back("BuzHash"s, buz_hash_32);
+        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash32Wrapper>());
+        hashes.emplace_back("BuzHash"s, std::make_unique<BuzHashWrapper<uint32_t>>());
 
-        hashes.emplace_back("SuperFastHash"s, super_fast_hash);
-        hashes.emplace_back("MurmurHash1"s, murmur_hash1);
-        hashes.emplace_back("MurmurHash2"s, murmur_hash2_32);
-        hashes.emplace_back("MurmurHash2A"s, murmur_hash2a_32);
-        hashes.emplace_back("MurmurHash3"s, murmur_hash3);
-        hashes.emplace_back("CityHash32"s, city_hash_32);
-        hashes.emplace_back("FarmHash32"s, farm_hash_32);
-        hashes.emplace_back("T1HA0 32le hash"s, t1ha0_32le_hash);
-        hashes.emplace_back("T1HA0 32be hash"s, t1ha0_32be_hash);
-        hashes.emplace_back("xxHash32"s, xx_hash_32);
+        hashes.emplace_back("SuperFastHash"s, std::make_unique<SuperFastHashWrapper>());
+        hashes.emplace_back("MurmurHash1"s, std::make_unique<MurmurHash1Wrapper>());
+        hashes.emplace_back("MurmurHash2"s, std::make_unique<MurmurHash2Wrapper>());
+        hashes.emplace_back("MurmurHash2A"s, std::make_unique<MurmurHash2AWrapper>());
+        hashes.emplace_back("MurmurHash3"s, std::make_unique<MurmurHash3Wrapper>());
+        hashes.emplace_back("CityHash32"s, std::make_unique<CityHash32Wrapper>());
+        hashes.emplace_back("FarmHash32"s, std::make_unique<FarmHash32Wrapper>());
+        hashes.emplace_back("FarmHash32 with seed"s, std::make_unique<FarmHash32WithSeedWrapper>());
+        hashes.emplace_back("T1HA0 32le hash"s, std::make_unique<T1HA0_32leWrapper>());
+        hashes.emplace_back("T1HA0 32be hash"s, std::make_unique<T1HA0_32beWrapper>());
+        hashes.emplace_back("xxHash32"s, std::make_unique<xxHash32Wrapper>());
 
-        hashes.emplace_back("wyhash32"s, wyhash32);
-        hashes.emplace_back("NMHASH32"s, nmhash32);
-        hashes.emplace_back("NMHASH32x"s, nmhash32x);
-        hashes.emplace_back("HalfSipHash"s, halfsiphash);
+        hashes.emplace_back("wyhash32"s, std::make_unique<wyHash32Wrapper>());
+        hashes.emplace_back("NMHASH32"s, std::make_unique<nmHash32Wrapper>());
+        hashes.emplace_back("NMHASH32x"s, std::make_unique<nmHash32XWrapper>());
+        hashes.emplace_back("HalfSipHash"s, std::make_unique<HalfSipHashWrapper>());
 
         return hashes;
     }
 
-    std::vector<Hasher48> Build48bitsHashes() {
+    std::vector<Hash48> Build48bitsHashes() {
         using namespace std::literals;
 
-        std::vector<Hasher48> hashes;
+        std::vector<Hash48> hashes;
         hashes.reserve(7);
 
         ADD_UNIVERSAL_HASHES(48);
         return hashes;
     }
 
-    std::vector<Hasher64> Build64bitsHashes() {
+    std::vector<Hash64> Build64bitsHashes() {
         using namespace std::literals;
-        std::vector<Hasher64> hashes;
+        std::vector<Hash64> hashes;
         hashes.reserve(34);
 
         ADD_UNIVERSAL_HASHES(64);
-        hashes.emplace_back("PearsonHash"s, pearson_hash_64);
-        hashes.emplace_back("BuzHash"s, buz_hash_64);
+        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash64Wrapper>());
+        hashes.emplace_back("BuzHash"s, std::make_unique<BuzHashWrapper<uint64_t>>());
 
 
-        hashes.emplace_back("MurmurHash2 64 bits"s, murmur_hash2_64);
-        hashes.emplace_back("CityHash64"s, city_hash_64);
-        hashes.emplace_back("CityHash64WithSeed"s, city_hash_64_with_seed);
-        hashes.emplace_back("CityHash64WithSeeds"s, city_hash_64_with_seeds);
-        hashes.emplace_back("FarmHash64"s, farm_hash_64);
-        hashes.emplace_back("FarmHash64WithSeed"s, farm_hash_64_with_seed);
-        hashes.emplace_back("FarmHash64WithSeeds"s, farm_hash_64_with_seeds);
-        hashes.emplace_back("MetroHash64"s, metro_hash_64);
-        hashes.emplace_back("T1HA0 AVX2 hash", t1ha0_avx2_hash);
-        hashes.emplace_back("T1HA1 le hash", t1ha1_le_hash);
-        hashes.emplace_back("T1HA1 be hash", t1ha1_be_hash);
-        hashes.emplace_back("T1HA2 atonce hash", t1ha2_atonce_hash);
-        hashes.emplace_back("xxHash64", xx_hash_64);
-        hashes.emplace_back("XXH3 64 bits", xxh3_64bits);
-        hashes.emplace_back("XXH3 64 bits with seed", xxh3_64bits_with_seed);
+        hashes.emplace_back("MurmurHash2 64 bits"s, std::make_unique<MurmurHash64AWrapper>());
+        hashes.emplace_back("CityHash64"s, std::make_unique<CityHash64Wrapper>());
+        hashes.emplace_back("CityHash64WithSeed"s, std::make_unique<CityHash64WithSeedWrapper>());
+        hashes.emplace_back("CityHash64WithSeeds"s, std::make_unique<CityHash64WithSeedsWrapper>());
+        hashes.emplace_back("FarmHash64"s, std::make_unique<FarmHash64Wrapper>());
+        hashes.emplace_back("FarmHash64WithSeed"s, std::make_unique<FarmHash64WithSeedWrapper>());
+        hashes.emplace_back("FarmHash64WithSeeds"s, std::make_unique<FarmHash64WithSeedsWrapper>());
+        hashes.emplace_back("MetroHash64"s, std::make_unique<MetroHash64_Wrapper>());
+        hashes.emplace_back("T1HA0 AVX2 hash", std::make_unique<T1HA0_AVX2_Wrapper>());
+        hashes.emplace_back("T1HA1 le hash", std::make_unique<T1HA1LeWrapper>());
+        hashes.emplace_back("T1HA1 be hash", std::make_unique<T1HA1BeWrapper>());
+        hashes.emplace_back("T1HA2 atonce hash", std::make_unique<T1HA2AtonceWrapper>());
+        hashes.emplace_back("xxHash64", std::make_unique<xxHash64Wrapper>());
+        hashes.emplace_back("XXH3 64 bits", std::make_unique<XXH3_64BitsWrapper>());
+        hashes.emplace_back("XXH3 64 bits with seed", std::make_unique<XXH3_64bits_withSeedWrapper>());
 
-        hashes.emplace_back("wyhash64", wy_hash_64);
-        hashes.emplace_back("PengyHash", pengy_hash_64);
-        hashes.emplace_back("MX3 hash", mx3);
-        hashes.emplace_back("SipHash", siphash);
-        hashes.emplace_back("SipHash13", siphash13);
-        hashes.emplace_back("SipHash (Google Impl)", siphash_avx2);
-        hashes.emplace_back("SipHash13 (Google Impl)", siphash13_avx2);
-        hashes.emplace_back("HighwayHash", highway_hash);
-        hashes.emplace_back("MUM hash", mum_hash);
-        hashes.emplace_back("mir hash", mir_hash);
+        hashes.emplace_back("wyhash64", std::make_unique<wyHash64Wrapper>());
+        hashes.emplace_back("PengyHash", std::make_unique<PengyHash64Wrapper>());
+        hashes.emplace_back("MX3 hash", std::make_unique<MX3HashWrapper>());
+        hashes.emplace_back("SipHash", std::make_unique<SipHashWrapper>());
+        hashes.emplace_back("SipHash13", std::make_unique<SipHash13Wrapper>());
+        hashes.emplace_back("SipHash (Google Impl)", std::make_unique<SipHashAVX2Wrapper>());
+        hashes.emplace_back("SipHash13 (Google Impl)", std::make_unique<SipHash13AVX2Wrapper>());
+        hashes.emplace_back("HighwayHash", std::make_unique<HighwayHashWrapper>());
+        hashes.emplace_back("MUM hash", std::make_unique<MumHashWrapper>());
+        hashes.emplace_back("mir hash", std::make_unique<MirHashWrapper>());
         return hashes;
     }
 }

@@ -10,8 +10,8 @@ import speed_statistics as ss
 
 
 def main():
-    reports_dir_name = "Last Report 3.0 (2)"
-    test_numbers = [4, 5, 6]
+    reports_dir_name = "Report 21.04.2022"
+    test_numbers = [6]
     for test_number in test_numbers:
         if test_number == 1:
             ds.process_distribution_statistics(reports_dir_name)
@@ -20,7 +20,7 @@ def main():
         elif test_number == 3:
             dcs.process_collision_statistics(reports_dir_name, "English words tests")
         elif test_number == 4:
-            ss.process_collision_statistics(reports_dir_name)
+            ss.process_speed_statistics(reports_dir_name)
         elif test_number == 5:
             ae.process_avalanche_effect_statistics(reports_dir_name)
         elif test_number == 6:

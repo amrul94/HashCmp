@@ -1,17 +1,10 @@
 import json
 
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from helper import *
 
 import typing
-
-L_DISTANCE: typing.Final = 'Distance'
-L_FREQUENCY: typing.Final = 'Frequency'
-L_NUMBER: typing.Final = 'Number'
-L_HASH: typing.Final = 'Hash'
-L_ERR: typing.Final = 'Err'
 
 
 class AvalancheEffectStatistics:
@@ -71,25 +64,22 @@ class AvalancheEffectStatistics:
         ax.yaxis.set_major_locator(ticker.MultipleLocator(max_height / 4))
         ax.yaxis.set_minor_locator(ticker.MultipleLocator(max_height / 16))
         plt.grid(ls=':')
-
-        plt.ylim(top=self.bits * 1.125)
-
+        plt.ylim(top=self.bits * 1.125, bottom=-1)
 
     def create_histogram(self, file_name: str):
         fig, ax = plt.subplots()
-        func_name = file_name.split()[0]
+        file_name = file_name.split('.')[0]
         ax.set_title(self.test_name)
         plt.xlabel(f'Hashes')
         plt.ylabel('Hamming distance')
-        fig.set_figwidth(10)
-        fig.set_figheight(6)
+        fig.set_figwidth(15)
+        fig.set_figheight(9)
 
         self.__bar(ax, fig)
 
-        file_path = os.path.join(self.hist_path, func_name + '.png')
+        file_path = os.path.join(self.hist_path, file_name + '.png')
         print('file_path: ', file_path)
         fig.savefig(file_path, bbox_inches='tight')
-        #plt.show()
         plt.cla()
         plt.clf()
         plt.close()
