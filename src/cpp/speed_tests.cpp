@@ -307,8 +307,8 @@ namespace tests {
     [[maybe_unused]] boost::json::object SpeedTests16(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
-        FNV1aHashTest(FNV32a, 16, words, logger, obj);
         SpeedTestT<uint16_t>(words, logger, obj);
+        FNV1aHashTest(FNV32a, 16, words, logger, obj);
         FastHash1To31Test<uint16_t>(words, logger, obj);
         PearsonClassTest(hfl::wrappers::PearsonHash16{}, words, logger, obj);
         BuzHashTest<uint16_t>(words, logger, obj);
@@ -319,8 +319,9 @@ namespace tests {
     [[maybe_unused]] boost::json::object SpeedTests24(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
-        FNV1aHashTest(FNV32a, 24, words, logger, obj);
+
         SpeedTestT<hfl::uint24_t>(words, logger, obj);
+        FNV1aHashTest(FNV32a, 24, words, logger, obj);
         FastHash1To31Test<hfl::uint24_t>(words, logger, obj);
         PearsonClassTest(hfl::wrappers::PearsonHash24{}, words, logger, obj);
 
@@ -332,9 +333,8 @@ namespace tests {
 
         using namespace std::literals;
 
-
-        HashTest(FNV32a, args::char_key_int_len_seed, "FNV-1a Hash"s, words, logger, obj);
         SpeedTestT<uint32_t>(words, logger, obj);
+        HashTest(FNV32a, args::char_key_int_len_seed, "FNV-1a Hash"s, words, logger, obj);
         FastHash32To63Test<uint32_t>(words, logger, obj);
         PearsonFuncTest(pearson_inline::pearson_hash_32, words, logger, obj);
         BuzHashTest<uint32_t>(words, logger, obj);
@@ -364,9 +364,10 @@ namespace tests {
     [[maybe_unused]] boost::json::object SpeedTests48(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
-        FNV1aHashTest(FNV64a, 48, words, logger, obj);
         SpeedTestT<hfl::uint48_t>(words, logger, obj);
+        FNV1aHashTest(FNV64a, 48, words, logger, obj);
         FastHash32To63Test<hfl::uint48_t>(words, logger, obj);
+        PearsonClassTest(hfl::wrappers::PearsonHash48{}, words, logger, obj);
 
         return obj;
     }
@@ -376,8 +377,8 @@ namespace tests {
 
         using namespace std::literals;
 
-        HashTest(FNV64a, args::char_key_int_len_seed, "FNV-1a Hash", words, logger, obj);
         SpeedTestT<uint64_t>(words, logger, obj);
+        HashTest(FNV64a, args::char_key_int_len_seed, "FNV-1a Hash", words, logger, obj);
         FastHash64Test(words, logger, obj);
         PearsonFuncTest(pearson_inline::pearson_hash_64, words, logger, obj);
         BuzHashTest<uint64_t>(words, logger, obj);

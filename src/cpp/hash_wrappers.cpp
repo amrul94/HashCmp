@@ -264,17 +264,22 @@ namespace hfl::wrappers {
     }
 
     void PearsonHash24::Init() const {
-        t24_.resize(table_size_);
-        iota(t24_.begin(), t24_.end(), uint32_t(0));
-        shuffle(t24_.begin(), t24_.end(), pcg32{});
+        t12_.resize(table_size_);
+        iota(t12_.begin(), t12_.end(), uint16_t(0));
+        shuffle(t12_.begin(), t12_.end(), pcg32{});
     }
 
     uint24_t PearsonHash24::operator()(const char *message, size_t length) const {
         uint24_t hash = 0;
         std::string_view str(message, length);
         for (size_t i = 0; i < length; ++i) {
-            uint24_t index = hash ^ (mask_ & str[i]);
-            hash = t24_[static_cast<size_t>(index)];
+            uint24_t c = bits_mask_ & str[i];
+            c |= c <<  shift6_;
+            c |= c << shift12_;
+            hash ^= c ^ hash_mask_;
+            uint32_t upper_index = static_cast<uint32_t>(hash >> shift12_);
+            uint32_t lower_index = static_cast<uint32_t>(bits_mask_ & hash);
+            hash = (t12_[upper_index] << shift12_) + t12_[lower_index];
         }
         return hash;
     }
@@ -291,6 +296,65 @@ namespace hfl::wrappers {
     uint32_t PearsonHash32Wrapper::HashImpl(const char *message, size_t length) const {
         std::call_once(init_flag_, pearson_hash_init);
         return pearson_hash_32(reinterpret_cast<const uint8_t*>(message), length, SEED_32);
+    }
+
+    void PearsonHash48::Init() const {
+        t12_.resize(table_size_);
+        iota(t12_.begin(), t12_.end(), uint16_t(0));
+        shuffle(t12_.begin(), t12_.end(), pcg32{});
+    }
+
+    uint48_t PearsonHash48::ROR48(const uint48_t& h) const {
+        constexpr uint16_t inv_shift12 = 48;
+        return (h >> shift12_) | (h << (inv_shift12 - shift12_));
+    }
+
+    uint48_t PearsonHash48::operator()(const char *message, size_t length) const {
+        uint48_t hash = 0;
+        std::string_view str(message, length);
+        for (size_t i = 0; i < length; ++i) {
+            uint48_t c = bits_mask_ & str[i];
+            c |= c <<  shift6_;
+            c |= c << shift12_;
+            c |= c << shift24_;
+            hash ^= c ^ hash_mask_;
+            uint48_t h{};
+            uint12_t x{};
+
+            x = static_cast<uint12_t>(hash);
+            x = t12_[static_cast<uint16_t>(x)];
+            hash >>= shift12_;
+            h = x;
+            h = ROR48(h);
+
+            x = static_cast<uint12_t>(hash);
+            x = t12_[static_cast<uint16_t>(x)];
+            hash >>= shift12_;
+            h |= x;
+            h = ROR48(h);
+
+            x = static_cast<uint12_t>(hash);
+            x = t12_[static_cast<uint16_t>(x)];
+            hash >>= shift12_;
+            h |= x;
+            h = ROR48(h);
+
+            x = static_cast<uint12_t>(hash);
+            x = t12_[static_cast<uint16_t>(x)];
+            h |= x;
+            h = ROR48(h);
+            hash = h;
+        }
+        return hash;
+    }
+
+    uint48_t PearsonHash48::operator()(const std::string& message) const {
+        return operator()(message.data(), message.size());
+    }
+
+    uint48_t PearsonHash48Wrapper::HashImpl(const char *message, size_t length) const {
+        std::call_once(init_flag_, &PearsonHash48::Init, &hash_);
+        return hash_(message, length);
     }
 
     uint64_t PearsonHash64Wrapper::HashImpl(const char *message, size_t length) const {

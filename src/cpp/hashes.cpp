@@ -11,7 +11,6 @@ namespace hfl {
     static void AddTemplateHashes(std::vector<Hash<UintT>>& hashes) {
         using namespace std::literals;
         using namespace hfl::wrappers;
-        
         hashes.emplace_back("DJB2 Hash"s, std::make_unique<DJB2HashWrapper<UintT>>());         \
         hashes.emplace_back("SDBM Hash"s, std::make_unique<SDBMHashWrapper<UintT>>());                      \
         hashes.emplace_back("PJW Hash"s, std::make_unique<PJWHashWrapper<UintT>>());                        \
@@ -26,12 +25,12 @@ namespace hfl {
         std::vector<Hash<uint16_t>> hashes;
         hashes.reserve(num_hashes);
 
-        /*AddTemplateHashes(hashes);
+        AddTemplateHashes(hashes);
         hashes.emplace_back("FNV-1a Hash"s, std::make_unique<FNV1aHash16Wrapper>());
-        hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash16Wrapper>());*/
+        hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash16Wrapper>());
         hashes.emplace_back("Fast-Hash"s, std::make_unique<FastHash16Wrapper>());
-        /*hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash16Wrapper>());
-        hashes.emplace_back("BuzHash"s, std::make_unique<BuzHashWrapper<uint16_t>>());*/
+        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash16Wrapper>());
+        hashes.emplace_back("BuzHash"s, std::make_unique<BuzHashWrapper<uint16_t>>());
 
         return hashes;
     }
@@ -61,7 +60,7 @@ namespace hfl {
         std::vector<Hash<uint32_t>> hashes;
         hashes.reserve(num_hashes);
 
-        /*AddTemplateHashes(hashes);
+        AddTemplateHashes(hashes);
         hashes.emplace_back("FNV-1a Hash"s, std::make_unique<FNV1aHash32Wrapper>());
         hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash32Wrapper>());
         hashes.emplace_back("Fast-Hash"s, std::make_unique<FastHash32Wrapper>());
@@ -72,9 +71,9 @@ namespace hfl {
         hashes.emplace_back("MurmurHash1"s, std::make_unique<MurmurHash1Wrapper>());
         hashes.emplace_back("MurmurHash2"s, std::make_unique<MurmurHash2Wrapper>());
         hashes.emplace_back("MurmurHash2A"s, std::make_unique<MurmurHash2AWrapper>());
-        hashes.emplace_back("MurmurHash3"s, std::make_unique<MurmurHash3Wrapper>());*/
+        hashes.emplace_back("MurmurHash3"s, std::make_unique<MurmurHash3Wrapper>());
         hashes.emplace_back("CityHash32"s, std::make_unique<CityHash32Wrapper>());
-        /*hashes.emplace_back("FarmHash32"s, std::make_unique<FarmHash32Wrapper>());
+        hashes.emplace_back("FarmHash32"s, std::make_unique<FarmHash32Wrapper>());
         hashes.emplace_back("FarmHash32 with seed"s, std::make_unique<FarmHash32WithSeedWrapper>());
         hashes.emplace_back("T1HA0 32le hash"s, std::make_unique<T1HA0_32leWrapper>());
         hashes.emplace_back("T1HA0 32be hash"s, std::make_unique<T1HA0_32beWrapper>());
@@ -83,7 +82,7 @@ namespace hfl {
         hashes.emplace_back("wyhash32"s, std::make_unique<wyHash32Wrapper>());
         hashes.emplace_back("NMHASH32"s, std::make_unique<nmHash32Wrapper>());
         hashes.emplace_back("NMHASH32x"s, std::make_unique<nmHash32XWrapper>());
-        hashes.emplace_back("HalfSipHash"s, std::make_unique<HalfSipHashWrapper>());*/
+        hashes.emplace_back("HalfSipHash"s, std::make_unique<HalfSipHashWrapper>());
 
         return hashes;
     }
@@ -100,6 +99,7 @@ namespace hfl {
         hashes.emplace_back("FNV-1a Hash"s, std::make_unique<FNV1aHash48Wrapper>());
         hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash48Wrapper>());
         hashes.emplace_back("Fast-Hash"s, std::make_unique<FastHash48Wrapper>());
+        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash48Wrapper>());
 
         return hashes;
     }
@@ -112,16 +112,16 @@ namespace hfl {
         std::vector<Hash<uint64_t>> hashes;
         hashes.reserve(num_hashes);
 
-        /*AddTemplateHashes(hashes);
+        AddTemplateHashes(hashes);
         hashes.emplace_back("FNV-1a Hash"s, std::make_unique<FNV1aHash64Wrapper>());
         hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash64Wrapper>());
         hashes.emplace_back("Fast-Hash"s, std::make_unique<FastHash64Wrapper>());
         hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash64Wrapper>());
         hashes.emplace_back("BuzHash"s, std::make_unique<BuzHashWrapper<uint64_t>>());
 
-        hashes.emplace_back("MurmurHash2 64 bits"s, std::make_unique<MurmurHash64AWrapper>());*/
+        hashes.emplace_back("MurmurHash2 64 bits"s, std::make_unique<MurmurHash64AWrapper>());
         hashes.emplace_back("CityHash64"s, std::make_unique<CityHash64Wrapper>());
-        /*hashes.emplace_back("CityHash64WithSeed"s, std::make_unique<CityHash64WithSeedWrapper>());
+        hashes.emplace_back("CityHash64WithSeed"s, std::make_unique<CityHash64WithSeedWrapper>());
         hashes.emplace_back("CityHash64WithSeeds"s, std::make_unique<CityHash64WithSeedsWrapper>());
         hashes.emplace_back("FarmHash64"s, std::make_unique<FarmHash64Wrapper>());
         hashes.emplace_back("FarmHash64WithSeed"s, std::make_unique<FarmHash64WithSeedWrapper>());
@@ -144,7 +144,7 @@ namespace hfl {
         hashes.emplace_back("SipHash13 (Google Impl)", std::make_unique<SipHash13AVX2Wrapper>());
         hashes.emplace_back("HighwayHash", std::make_unique<HighwayHashWrapper>());
         hashes.emplace_back("MUM hash", std::make_unique<MumHashWrapper>());
-        hashes.emplace_back("mir hash", std::make_unique<MirHashWrapper>());*/
+        hashes.emplace_back("mir hash", std::make_unique<MirHashWrapper>());
 
         return hashes;
     }

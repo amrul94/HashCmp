@@ -18,6 +18,10 @@
 
 // HFL = Hash function library
 namespace hfl {
+    using uint12_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<8, 8,
+            boost::multiprecision::unsigned_magnitude,
+            boost::multiprecision::unchecked, void>>;
+
     using uint24_t = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<24, 24,
             boost::multiprecision::unsigned_magnitude,
             boost::multiprecision::unchecked, void>>;
@@ -371,9 +375,13 @@ namespace hfl::wrappers {
         void Init() const;
 
     private:
-        mutable std::vector<uint32_t> t24_;
-        const uint32_t table_size_ = 16'777'216;
-        const uint32_t mask_ = 16'777'215;
+        mutable std::vector<uint32_t> t12_;
+        const uint16_t shift6_ = 6;
+        const uint16_t shift12_ = 12;
+        const uint32_t table_size_ = 1ull << shift12_;
+        const uint32_t bits_mask_ = table_size_ - 1;
+        const uint24_t hash_mask_ = 0x020100;
+
     };
 
     class [[maybe_unused]] PearsonHash24Wrapper final : public BaseHash24Wrapper {
@@ -390,6 +398,33 @@ namespace hfl::wrappers {
         [[nodiscard]] uint32_t HashImpl(const char *message, size_t length) const override;
 
         mutable std::once_flag init_flag_;
+    };
+
+    class [[maybe_unused]] PearsonHash48 {
+    public:
+        uint48_t operator()(const char *message, size_t length) const;
+        uint48_t operator()(const std::string& message) const;
+        void Init() const;
+
+    private:
+        uint48_t ROR48(const uint48_t& h) const;
+
+        mutable std::vector<uint32_t> t12_;
+        const uint16_t shift6_ = 6;
+        const uint16_t shift12_ = 12;
+        const uint16_t shift24_ = 24;
+        const uint32_t table_size_ = 1ull << shift12_;
+        const uint32_t bits_mask_ = table_size_ - 1;
+        const uint24_t hash_mask_ = 0x050403020100ull;
+
+    };
+
+    class [[maybe_unused]] PearsonHash48Wrapper final : public BaseHash48Wrapper {
+    private:
+        [[nodiscard]] uint48_t HashImpl(const char *message, size_t length) const override;
+
+        mutable std::once_flag init_flag_;
+        PearsonHash48 hash_;
     };
 
     class [[maybe_unused]] PearsonHash64Wrapper final : public BaseHash64Wrapper {
