@@ -3,10 +3,10 @@
 
 namespace tests {
     namespace out {
-        OutputJson GetEnglishTestJson(const TestParameters& tp, size_t num_words, ReportsRoot& reports_root) {
+        OutputJson GetEnglishTestJson(const TestParameters& tp, size_t num_words, out::Logger& logger) {
                 const std::string test_name = "English words tests";
                 const std::filesystem::path report_test_dir = test_name;
-                const auto report_test_path = reports_root.root_path / report_test_dir;
+                const auto report_test_path = logger.GetLogDirPath() / report_test_dir;
                 std::filesystem::create_directories(report_test_path);
 
                 const std::filesystem::path report_name = std::to_string(tp.hash_bits) + " bits.json";
@@ -50,14 +50,15 @@ namespace tests {
         TestWithEnglishWords(hashes##BITS, WORDS, tp##BITS, ROOT)       \
 
 
-    void RunTestWithEnglishWords(ReportsRoot& reports_root) {
+    void RunTestWithEnglishWords(out::Logger& logger) {
+        out::StartAndEndLogTest start_and_end_log(logger, "ENGLISH WORDS");
         const std::filesystem::path& file_name = "data/english_words.txt";
         const std::vector<std::string> words = ParseWords(file_name);
 
-        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 16, reports_root);
-        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 24, reports_root);
-        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 32, reports_root);
-        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 48, reports_root);
-        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 64, reports_root);
+        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 16, logger);
+        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 24, logger);
+        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 32, logger);
+        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 48, logger);
+        RUN_TEST_WITH_ENG_WORDS_IMPL(words, 64, logger);
     }
 }

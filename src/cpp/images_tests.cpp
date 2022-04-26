@@ -3,10 +3,10 @@
 
 namespace tests {
     namespace out {
-        OutputJson GetImagesTestJson(const TestParameters& tp, ReportsRoot& reports_root) {
+        OutputJson GetImagesTestJson(const TestParameters& tp, out::Logger& logger) {
             const std::string test_name = "Images tests";
             const std::filesystem::path report_test_dir = test_name;
-            const auto report_test_path = reports_root.root_path / report_test_dir;
+            const auto report_test_path = logger.GetLogDirPath() / report_test_dir;
             std::filesystem::create_directories(report_test_path);
 
             const std::filesystem::path report_name = std::to_string(tp.hash_bits) + " bits.json";
@@ -26,13 +26,14 @@ namespace tests {
         const TestParameters tp##BITS{BITS, NUM_THREADS};     \
         TestWithImages(hashes##BITS, tp##BITS, ROOT)
 
-    void RunImagesTests(ReportsRoot& reports_root) {
+    void RunImagesTests(out::Logger& logger) {
+        out::StartAndEndLogTest start_and_end_log(logger, "IMAGES");
         const uint16_t num_threads = GetNumThreads();
-        RUN_IMAGES_TEST_IMPL(16, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(24, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(32, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(48, num_threads, reports_root);
-        RUN_IMAGES_TEST_IMPL(64, num_threads, reports_root);
+        RUN_IMAGES_TEST_IMPL(16, num_threads, logger);
+        RUN_IMAGES_TEST_IMPL(24, num_threads, logger);
+        RUN_IMAGES_TEST_IMPL(32, num_threads, logger);
+        RUN_IMAGES_TEST_IMPL(48, num_threads, logger);
+        RUN_IMAGES_TEST_IMPL(64, num_threads, logger);
     }
 
 }

@@ -80,7 +80,7 @@ static inline UintT PJWHash(const char *message, size_t length) {
     const auto MaxUintT = std::numeric_limits<UintT>::max();
     const auto HighBits  = MaxUintT << (BitsInUnsignedInt - OneEighth);
     UintT hash = 0;
-    UintT test{};
+    UintT test = 0;
 
     for (size_t i = 0; i < length; ++i) {
         hash = (hash << OneEighth) + message[i];

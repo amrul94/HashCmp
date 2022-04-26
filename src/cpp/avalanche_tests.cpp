@@ -4,16 +4,16 @@
 
 namespace tests {
     namespace out {
-        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& tp, ReportsRoot& reports_root) {
+        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& tp, out::Logger& logger) {
             const std::string test_name = "Avalanche effect tests";
             const std::filesystem::path report_test_dir = test_name;
-            const auto report_test_path = reports_root.root_path / report_test_dir;
+            const auto report_test_path = logger.GetLogDirPath() / report_test_dir;
             std::filesystem::create_directories(report_test_path);
 
             const std::filesystem::path report_name = std::to_string(tp.hash_bits) + " bits.json";
             const std::filesystem::path out_path = report_test_path / report_name;
             std::ofstream out(out_path);
-            assert(out);
+            BOOST_ASSERT_MSG(out, "Failed to create json file");
 
             boost::json::object obj;
             obj["Test name"] = test_name;
@@ -51,7 +51,7 @@ namespace tests {
     }
 
     std::ostream& operator<<(std::ostream &os, const DistanceAndFrequency& distance_and_frequency) {
-        return os  << "value = " << distance_and_frequency.GetValue()
+        return os  << "value = " << distance_and_frequency.value
                    << ", frequency = " << distance_and_frequency.frequency;
     }
 
@@ -91,18 +91,23 @@ namespace tests {
         }
     }
 
-    #define RUN_AVALANCHE_TEST_IMPL(NUM_KEYS, BITS, NUM_THREADS, ROOT)                  \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                       \
-        const AvalancheTestParameters tp##BITS{BITS, NUM_THREADS, NUM_KEYS};   \
-        AvalancheTest(hashes##BITS, tp##BITS, ROOT)
+    template<hfl::UnsignedIntegral UintT>
+    static void RunAvalancheTestImpl(uint16_t num_threads, out::Logger& logger) {
+        constexpr uint16_t bits = std::numeric_limits<UintT>::digits;
+        constexpr uint64_t num_keys = 1ull << 32;
+        const auto hashes = hfl::BuildHashes<UintT>();
+        const AvalancheTestParameters parameters{bits, num_threads, num_keys};
+        AvalancheTest(hashes, parameters, logger);
+    }
 
-    void RunAvalancheTests(ReportsRoot& reports_root) {
+    void RunAvalancheTests(out::Logger& logger) {
+        out::StartAndEndLogTest start_and_end_log(logger, "AVALANCHE");
+
         const uint16_t num_threads = GetNumThreads();
-        reports_root.logger << boost::format("\tnum_threads = %1%\n\n") % num_threads;
 
-        const uint64_t num_keys = 1ull << 32;
-        RUN_AVALANCHE_TEST_IMPL(num_keys, 16, num_threads, reports_root);
-        RUN_AVALANCHE_TEST_IMPL(num_keys, 32, num_threads, reports_root);
-        RUN_AVALANCHE_TEST_IMPL(num_keys, 64, num_threads, reports_root);
+        RunAvalancheTestImpl<uint16_t>(num_threads, logger);
+        RunAvalancheTestImpl<uint32_t>(num_threads, logger);
+        RunAvalancheTestImpl<uint64_t>(num_threads, logger);
+
     }
 }

@@ -45,11 +45,11 @@ template <typename hashvaluetype = uint32, typename chartype =  unsigned char>
 class CharacterHash {
 public:
     CharacterHash(hashvaluetype maxval) {
-        if(sizeof(hashvaluetype) <=4) {
+        if constexpr (sizeof(hashvaluetype) <=4) {
             mersenneRNG randomgenerator(maxval);
             for(size_t k =0; k<nbrofchars; ++k)
                 hashvalues[k] = static_cast<hashvaluetype>(randomgenerator());
-        } else if (sizeof(hashvaluetype) == 8) {
+        } else if constexpr(sizeof(hashvaluetype) == 8) {
             mersenneRNG randomgenerator(maxval>>32);
             mersenneRNG randomgeneratorbase((maxval>>32) ==0 ? maxval : 0xFFFFFFFFU);
             for(size_t k =0; k<nbrofchars; ++k)

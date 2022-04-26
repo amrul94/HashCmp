@@ -1,6 +1,7 @@
 #ifndef THESIS_WORK_WORDS_TESTS_H
 #define THESIS_WORK_WORDS_TESTS_H
 
+#include <barrier>
 #include <deque>
 #include <execution>
 #include <fstream>
@@ -17,43 +18,43 @@
 
 #include "concurrency.h"
 #include "generators.h"
+#include "timers.h"
+#include "output.h"
 #include "test_parameters.h"
-#include "log_duration.h"
-
-#include <barrier>
+#include "hashes.h"
 
 constexpr int KILOBYTE = 1024;
 constexpr int FOUR_KILOBYTES = KILOBYTE * 4;
 
 namespace tests {
     namespace out {
-        OutputJson GetGenTestJson(const GenBlocksParameters& gbp, ReportsRoot& reports_root);
+        OutputJson GetGenTestJson(const GenBlocksParameters& gbp, out::Logger& logger);
     }
 
-    template<typename HashStruct>
-    auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const HashStruct& hs, const GenBlocksParameters& gbp,
-                               ReportsRoot& reports_root);
+    template<hfl::UnsignedIntegral UintT>
+    auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const hfl::Hash<UintT>& hs, const GenBlocksParameters& gbp,
+                               out::Logger& logger);
 
-    template<typename HashStructs>
-    void TestWithGeneratedBlocks(std::vector<pcg64>& generators, const HashStructs& hash_vec,
-                                 const GenBlocksParameters& gbp, ReportsRoot& reports_root);
+    template<hfl::UnsignedIntegral UintT>
+    void TestWithGeneratedBlocks(std::vector<pcg64>& generators, const std::vector<hfl::Hash<UintT>>& hashes,
+                                 const GenBlocksParameters& gbp, out::Logger& logger);
 
 
-    void RunCollTestNormal(uint16_t words_length, uint16_t num_threads, ReportsRoot& reports_root);
+    void RunCollTestNormal(uint16_t words_length, uint16_t num_threads, out::Logger& logger);
 
-    void RunCollTestWithMask(uint16_t words_length, uint16_t num_threads, ReportsRoot& reports_root);
+    void RunCollTestWithMask(uint16_t words_length, uint16_t num_threads, out::Logger& logger);
 
-    void RunTestWithGeneratedBlocks(uint16_t words_length, ReportsRoot& reports_root);
+    void RunTestWithGeneratedBlocks(uint16_t words_length, out::Logger& logger);
 
 
     // ===============================================================================
 
 
     // Эту функцию думаю в будущем разбить на части
-    template<typename Hasher>
-    auto HashTestWithGenBlocks(const Hasher& hasher, const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.GetName();
+    template<hfl::UnsignedIntegral UintT>
+    auto HashTestWithGenBlocks(const hfl::Hash<UintT>& hasher, const GenBlocksParameters& gbp, out::Logger& logger) {
+        out::LogDuration log_duration("\t\ttime", logger);
+        logger << boost::format("\n\t%1%: \n") % hasher.GetName();
 
         std::vector<pcg64> generators = GetGenerators(gbp.num_threads, (gbp.num_keys * gbp.words_length) / 8);   \
         // Выделить coll_flags, collisions, num_collisions и мьютекс (в будущем) в отдельный класс (например, Counters).
@@ -68,8 +69,8 @@ namespace tests {
 
         bool loop_conditional = (num_words <= gbp.num_keys);
         auto completion_lambda =
-                [&reports_root, &num_words, &num_collisions, &collisions, &loop_conditional, &gbp, step] () {
-            reports_root.logger << boost::format("\t\t%1% words:\t%2% collisions\n") % num_words % num_collisions;
+                [&logger, &num_words, &num_collisions, &collisions, &loop_conditional, &gbp, step] () {
+            logger << boost::format("\t\t%1% words:\t%2% collisions\n") % num_words % num_collisions;
             std::string index = std::to_string(num_words);
             collisions[index] = num_collisions;
             num_words <<= step;
@@ -113,24 +114,24 @@ namespace tests {
     }
 
     // Возможно стоит поделить эту функции на части, так как она очень большая
-    template<typename Hashes>
-    void TestWithGeneratedBlocks(const Hashes& hashes, const GenBlocksParameters& gbp, ReportsRoot& reports_root) {
-        reports_root.logger << "--- START " << gbp.hash_bits << " BITS TEST ---" << std::endl;
+    template<hfl::UnsignedIntegral UintT>
+    void TestWithGeneratedBlocks(const std::vector<hfl::Hash<UintT>>& hashes, const GenBlocksParameters& gbp, out::Logger& logger) {
+        logger << "--- START " << gbp.hash_bits << " BITS TEST ---" << std::endl;
 
-        auto out_json = out::GetGenTestJson(gbp, reports_root);
+        auto out_json = out::GetGenTestJson(gbp, logger);
 
         boost::json::object collisions;
         std::mutex local_mutex;
 
         for (const auto& hasher : hashes) {
-            auto [hash_name, counters] = HashTestWithGenBlocks(hasher, gbp, reports_root);
+            auto [hash_name, counters] = HashTestWithGenBlocks(hasher, gbp, logger);
             collisions[hash_name] = std::move(counters);
         }
 
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;
 
-        reports_root.logger << "\n--- END " << gbp.hash_bits << " BITS TEST ---" << std::endl << std::endl;
+        logger << "\n--- END " << gbp.hash_bits << " BITS TEST ---" << std::endl << std::endl;
     }
 }
 

@@ -1,5 +1,5 @@
-#ifndef THESISWORK_CONCURRENCY_H
-#define THESISWORK_CONCURRENCY_H
+#ifndef THESIS_WORK_CONCURRENCY_H
+#define THESIS_WORK_CONCURRENCY_H
 
 #include <future>
 #include <vector>
@@ -65,6 +65,8 @@ private:
 
 };
 
+
+
 template<>
 class ThreadTasks<void> {
     using TaskFunction = std::function<void(uint64_t, uint64_t)>;
@@ -110,4 +112,4 @@ private:
     std::vector<std::thread> threads_;
 };
 
-#endif //THESISWORK_CONCURRENCY_H
+#endif //THESIS_WORK_CONCURRENCY_H

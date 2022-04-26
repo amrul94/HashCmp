@@ -1,5 +1,5 @@
-#ifndef THESISWORK_ENGLISH_TESTS_H
-#define THESISWORK_ENGLISH_TESTS_H
+#ifndef THESIS_WORK_ENGLISH_TESTS_H
+#define THESIS_WORK_ENGLISH_TESTS_H
 
 #include <map>
 #include <vector>
@@ -7,59 +7,63 @@
 #include <boost/format.hpp>
 #include <boost/json.hpp>
 
-#include "log_duration.h"
+#include "timers.h"
+#include "output.h"
 #include "test_parameters.h"
+#include "hashes.h"
 
 namespace tests {
     namespace out {
-        OutputJson GetEnglishTestJson(const TestParameters& tp, size_t num_words, ReportsRoot& reports_root);
+        OutputJson GetEnglishTestJson(const TestParameters& tp, size_t num_words, out::Logger& logger);
     }
 
     uint64_t CountCollisions(const std::map<uint64_t, uint64_t>& hashes);
 
     std::vector<std::string> ParseWords(const std::filesystem::path& file_name);
 
-    template <typename HashStruct>
-    uint64_t HashTestWithEngWords(const HashStruct& hasher, const std::vector<std::string>& words,
-                                  const TestParameters& tp, ReportsRoot& reports_root);
+    template <hfl::UnsignedIntegral UintT>
+    uint64_t HashTestWithEngWords(const hfl::Hash<UintT>& hasher, const std::vector<std::string>& words,
+                                  const TestParameters& tp, out::Logger& logger);
 
-    template <typename HashStruct>
-    void TestWithEnglishWords(const std::vector<HashStruct>& hashes, const std::vector<std::string>& words,
-                              const TestParameters& tp, ReportsRoot& reports_root);
+    template <hfl::UnsignedIntegral UintT>
+    void TestWithEnglishWords(const std::vector<hfl::Hash<UintT>>& hashes, const std::vector<std::string>& words,
+                              const TestParameters& tp, out::Logger& logger);
 
-    void RunTestWithEnglishWords(ReportsRoot& reports_root);
+    void RunTestWithEnglishWords(out::Logger& logger);
 
 
 // =====================================================
 
-    template <typename Hasher>
-    uint64_t HashTestWithEngWords(const Hasher& hasher, const std::vector<std::string>& words,
-                                  const TestParameters& tp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM(hasher.GetName(), reports_root.logger);
-        std::map<uint64_t, uint64_t> hashes;
+    template <hfl::UnsignedIntegral UintT>
+    uint64_t HashTestWithEngWords(const hfl::Hash<UintT>& hash, const std::vector<std::string>& words,
+                                  const TestParameters& tp, out::Logger& logger) {
+        out::LogDuration log_duration("\t\ttime", logger);
+        logger << '\t' + hash.GetName() + ':' << std::endl;
+
+        std::map<uint64_t, uint64_t> hash_values;
         for (const std::string& word : words) {
-            const uint64_t hash = hasher(word);
-            ++hashes[hash];
+            const uint64_t hash_value = hash(word);
+            ++hash_values[hash_value];
         }
-        return CountCollisions(hashes);
+        const uint32_t num_collisions = CountCollisions(hash_values);
+        std::cout << "\t\tcollisions: " << num_collisions << std::endl;
+        return num_collisions;
     }
 
-    template <typename Hasher>
-    void TestWithEnglishWords(const std::vector<Hasher>& hashes, const std::vector<std::string>& words,
-                              const TestParameters& tp, ReportsRoot& reports_root) {
-        reports_root.logger << boost::format("--- START TEST WITH %1% BITS HASHES ---\n") % tp.hash_bits;
+    template <hfl::UnsignedIntegral UintT>
+    void TestWithEnglishWords(const std::vector<hfl::Hash<UintT>>& hashes, const std::vector<std::string>& words,
+                              const TestParameters& tp, out::Logger& logger) {
+        out::StartAndEndLogBitsTest printer(logger, tp.hash_bits);
 
-        auto out_json = out::GetEnglishTestJson(tp, words.size(), reports_root);
+        auto out_json = out::GetEnglishTestJson(tp, words.size(), logger);
         boost::json::object collisions;
-        for (const auto& hs : hashes) {
-            collisions[hs.GetName()] = HashTestWithEngWords(hs, words, tp, reports_root);
+        for (const auto& hash : hashes) {
+            collisions[hash.GetName()] = HashTestWithEngWords(hash, words, tp, logger);
         }
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;
-
-        reports_root.logger << boost::format("--- END TEST WITH %1% BITS HASHES ---\n\n") % tp.hash_bits;
     }
 
 }
 
-#endif //THESISWORK_ENGLISH_TESTS_H
+#endif //THESIS_WORK_ENGLISH_TESTS_H

@@ -1,5 +1,5 @@
-#ifndef THESISWORK_GENERATORS_H
-#define THESISWORK_GENERATORS_H
+#ifndef THESIS_WORK_GENERATORS_H
+#define THESIS_WORK_GENERATORS_H
 
 #include <string>
 #include <vector>
@@ -48,4 +48,4 @@ std::vector<pcg64> GetGenerators(size_t num_generators, size_t num_generate_numb
 std::string GenerateRandomDataBlock(pcg64& rng, uint32_t length);
 std::vector<std::string> GenerateRandomDataBlocks(pcg64& rng, uint64_t num_blocks, uint32_t block_length);
 
-#endif //THESISWORK_GENERATORS_H
+#endif //THESIS_WORK_GENERATORS_H

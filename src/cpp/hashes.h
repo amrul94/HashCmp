@@ -3,63 +3,74 @@
 
 #include <concepts>
 #include <utility>
+#include <variant>
 
 #include "hash_wrappers.h"
 
 // HFL = Hash function library
 namespace hfl {
-    namespace detail {
-        template<typename UintT>
-        class Hash {
-        public:
-            Hash(std::string name, std::unique_ptr<BaseHashWrapper<UintT>>&& function_pointer)
-                    : name_(std::move(name))
-                    , hasher_impl_(std::move(function_pointer)) {
-            }
+    template<UnsignedIntegral UintT>
+    class Hash {
+        using BaseHashWrapper = wrappers::detail::BaseHashWrapper<UintT>;
+    public:
+        Hash(std::string name, std::unique_ptr<BaseHashWrapper>&& function_pointer)
+                : name_(std::move(name))
+                , hasher_impl_(std::move(function_pointer)) {
+        }
 
-            uint64_t operator()(const std::string& str) const {
-                UintT hash = hasher_impl_->template operator()(str);
-                return NumberToUint64(hash);
-            }
+        uint64_t operator()(const std::string& str) const {
+            UintT hash = hasher_impl_->template Hash(str);
+            return NumberToUint64(hash);
+        }
 
-            uint64_t operator()(std::ifstream& file) const {
-                UintT hash = hasher_impl_->template operator()(file);
-                return NumberToUint64(hash);
-            }
+        uint64_t operator()(std::ifstream& file) const {
+            UintT hash = hasher_impl_->template Hash(file);
+            return NumberToUint64(hash);
+        }
 
-            template<std::integral Number>
-            uint64_t operator()(Number number) const {
-                UintT hash = hasher_impl_->template operator()(number);
-                return NumberToUint64(hash);
-            }
+        template<std::integral Number>
+        uint64_t operator()(Number number) const {
+            UintT hash = hasher_impl_->template Hash(number);
+            return NumberToUint64(hash);
+        }
 
-            [[nodiscard]] std::string GetName() const {
-                return name_;
-            }
+        [[nodiscard]] std::string GetName() const {
+            return name_;
+        }
 
-        private:
-            uint64_t NumberToUint64(UintT number) const {
-                return static_cast<uint64_t>(number);
-            }
+    private:
+        uint64_t NumberToUint64(UintT number) const {
+            return static_cast<uint64_t>(number);
+        }
 
-            std::string name_{};
-            std::unique_ptr<BaseHashWrapper<UintT>> hasher_impl_{};
-        };
-    }
-
-    using Hash16 = detail::Hash<uint16_t>;
-    using Hash24 = detail::Hash<uint24_t>;
-    using Hash32 = detail::Hash<uint32_t>;
-    using Hash48 = detail::Hash<uint48_t>;
-    using Hash64 = detail::Hash<uint64_t>;
+        std::string name_{};
+        std::unique_ptr<BaseHashWrapper> hasher_impl_{};
+    };
 
     //----------- BuildHashes ----------
+    std::vector<Hash<uint16_t>> Build16bitsHashes();
+    std::vector<Hash<uint24_t>> Build24bitsHashes();
+    std::vector<Hash<uint32_t>> Build32bitsHashes();
+    std::vector<Hash<uint48_t>> Build48bitsHashes();
+    std::vector<Hash<uint64_t>> Build64bitsHashes();
 
-    std::vector<Hash16> Build16bitsHashes();
-    std::vector<Hash24> Build24bitsHashes();
-    std::vector<Hash32> Build32bitsHashes();
-    std::vector<Hash48> Build48bitsHashes();
-    std::vector<Hash64> Build64bitsHashes();
+    template<class> inline constexpr bool always_false_v = false;
+
+    template<UnsignedIntegral UintT>
+    std::vector<Hash<UintT>> BuildHashes() {
+        if constexpr (std::is_same_v<UintT, uint16_t>)
+            return Build16bitsHashes();
+        else if constexpr (std::is_same_v<UintT, uint24_t>)
+            return Build24bitsHashes();
+        else if constexpr (std::is_same_v<UintT, uint32_t>)
+            return Build32bitsHashes();
+        else if constexpr (std::is_same_v<UintT, uint48_t>)
+            return Build48bitsHashes();
+        else if constexpr (std::is_same_v<UintT, uint64_t>)
+            return Build64bitsHashes();
+        else
+            static_assert(always_false_v<UintT>, "non-exhaustive visitor!");
+    }
 
     //uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift = 0);
 }

@@ -8,70 +8,74 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <concepts>
 
 #include <boost/format.hpp>
 
 #include "concurrency.h"
 #include "hashes.h"
 #include "test_parameters.h"
-#include "log_duration.h"
+#include "timers.h"
+#include "output.h"
 
 namespace tests {
-
     using Bucket = std::uint16_t;
 
-    void PrintReports(const std::vector<Bucket>& buckets, const DistTestParameters& dtp, const std::string& hash_name,
-                      ReportsRoot& reports_root);
+    namespace out {
+        void SaveReport(const std::vector<std::atomic<Bucket>>& buckets, const DistTestParameters& parameters,
+                        const std::string& hash_name, out::Logger& logger);
+    }
 
-    template<typename HashStruct>
-    void HashDistTest(const HashStruct& hasher, const DistTestParameters& dtp, ReportsRoot& reports_root);
+    class DistributionHashes {
+    public:
+        static constexpr Bucket max_bucket = std::numeric_limits<Bucket>::max();
 
-    template<typename HashStructs>
-    void DistributionTest(const HashStructs& hashes, const DistTestParameters& dtp, ReportsRoot& reports_root);
+        explicit DistributionHashes(size_t num_buckets);
+        void AddHash(uint64_t hash_value);
+        [[nodiscard]] const std::vector<std::atomic<Bucket>>& GetBuckets() const;
 
-    void RunDistTestNormal(uint16_t num_threads, ReportsRoot& reports_root);
-    void RunDistTestWithBins(uint16_t num_threads, ReportsRoot& reports_root);
+    private:
+        std::vector<std::atomic<Bucket>> buckets_;
+    };
 
-    void RunDistributionTests(ReportsRoot& reports_root);
 
+
+    template<hfl::UnsignedIntegral UintT>
+    void HashDistributionTest(const hfl::Hash<UintT>& hash, const DistTestParameters& parameters, out::Logger& logger);
+
+    template<hfl::UnsignedIntegral UintT>
+    void DistributionTest(const std::vector<hfl::Hash<UintT>>& hashes, const DistTestParameters& parameters,
+                          out::Logger& logger);
+
+    void RunDistributionTests(out::Logger& logger);
 
 // ==================================================
 
-    template<typename Hasher>
-    void HashDistTest(const Hasher& hasher, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM('\t' + hasher.GetName(), reports_root.logger);
+    template<hfl::UnsignedIntegral UintT>
+    void HashDistributionTest(const hfl::Hash<UintT>& hash, const DistTestParameters& parameters, out::Logger& logger) {
+        out::LogDuration log_duration("\t\ttime", logger);
+        logger << boost::format("\t%1%: \n") % hash.GetName();
 
-        // Выделить buckets, max_bucket и мьютекс в отдельный класс (например, Distributor).
-        // При этом добавление нового элемента вынести в метод класса AddHash
-        std::vector<std::atomic<Bucket>> buckets(dtp.num_buckets);
-        const Bucket max_bucket = std::numeric_limits<Bucket>::max();
-
-        auto lambda = [&hasher, &dtp, &buckets](uint64_t start, uint64_t end) {
+        DistributionHashes distribution_hashes{parameters.num_buckets};
+        auto lambda = [&hash, &parameters, &distribution_hashes](uint64_t start, uint64_t end) {
             for (uint64_t number = start; number < end; ++number) {
-                const uint64_t hash = hasher(number);
-                const uint64_t modified = ModifyHash(dtp, hash);
-                std::atomic<Bucket>& current_bucket = buckets[modified];
-                Bucket old_bucket = 0, new_bucket = 0;
-                do {
-                    old_bucket = current_bucket.load();
-                    Bucket increment = (old_bucket != max_bucket);
-                    //const Bucket increment = (old_bucket != max_bucket) ? 1 : 0;
-                    new_bucket = old_bucket + increment;
-                } while (!current_bucket.compare_exchange_weak(old_bucket, new_bucket));
+                const uint64_t hash_value = hash(number);
+                const uint64_t modified_value = ModifyHash(parameters, hash_value);
+                distribution_hashes.AddHash(modified_value);
             }
         };
 
-        ThreadTasks<void> thread_tasks(lambda, dtp.num_threads, dtp.num_keys);
-        PrintReports(buckets, dtp, hasher.GetName(), reports_root);
+        ThreadTasks<void> thread_tasks(lambda, parameters.num_threads, parameters.num_keys);
+        out::SaveReport(distribution_hashes.GetBuckets(), parameters, hash.GetName(), logger);
     }
 
-    template<typename Hashes>
-    void DistributionTest(const Hashes& hashes, const DistTestParameters& dtp, ReportsRoot& reports_root) {
-        reports_root.logger << "--- START " << dtp.hash_bits << " BITS TEST ---\n";
-        for (const auto& hasher : hashes) {
-            HashDistTest(hasher, dtp, reports_root);
+    template<hfl::UnsignedIntegral UintT>
+    void DistributionTest(const std::vector<hfl::Hash<UintT>>& hashes, const DistTestParameters& parameters,
+                          out::Logger& logger) {
+        out::StartAndEndLogBitsTest log(logger, parameters.hash_bits);
+        for (const auto& hash : hashes) {
+            HashDistributionTest(hash, parameters, logger);
         }
-        reports_root.logger << "--- END " << dtp.hash_bits << " BITS TEST ---\n\n";
     }
 }
 

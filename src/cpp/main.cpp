@@ -1,7 +1,7 @@
 #include "generated_tests.h"
 #include "distribution_tests.h"
 #include "english_tests.h"
-#include "log_duration.h"
+#include "timers.h"
 #include "speed_tests.h"
 #include "avalanche_tests.h"
 #include "images_tests.h"
@@ -12,13 +12,29 @@
 #include "hash_wrappers.h"
 #include "hashes.h"
 #include "my_assert.h"
+#include "output.h"
 
-void TempTests(tests::ReportsRoot& report_root) {
-    uint64_t counter = 0;
-
+void print(std::integral auto i) {
+    std::cout << "Integral: " << i << '\n';
 }
 
-void HashIsCorrectTest() {
+void print(auto x) {
+    std::cout << "Non-integral: " << x << '\n';
+}
+
+void TempTests(tests::out::Logger& logger) {
+    std::cout << std::boolalpha;
+    print(true ); static_assert( std::integral<bool> );
+    print( 'o' ); static_assert( std::integral<char> );
+    print( 007 ); static_assert( std::integral<int> );
+    print( hfl::uint24_t{365} ); static_assert( !std::integral<hfl::uint24_t> );
+    print(hfl::uint48_t{365}); static_assert( !std::integral<hfl::uint48_t> );
+    std::cout << boost::is_integral<hfl::uint48_t>::value << std::endl;
+}
+
+void HashIsCorrectTest(tests::out::Logger& logger) {
+    tests::out::StartAndEndLogTest start_and_end_log{logger, "CHECK HASHES"};
+
     auto lambda = [](const auto& hasher, const std::vector<uint64_t>& numbers) {
         for (uint64_t number : numbers) {
             ASSERT_EQUAL_HINT(hasher(number), hasher(number), hasher.GetName() + " is not correct");
@@ -26,7 +42,7 @@ void HashIsCorrectTest() {
         std::cout << boost::format("\t\t%1% is correct\n") % hasher.GetName();
     };
 
-    uint64_t count = 100000;
+    const uint64_t count = 100000;
     pcg64 rng;
     std::vector<uint64_t> numbers;
     numbers.reserve(count);
@@ -71,72 +87,49 @@ void HashIsCorrectTest() {
 }
 
 
-void RunTests(const std::vector<int>& test_numbers, tests::ReportsRoot& reports_root) {
-    LOG_DURATION_STREAM("FULL TIME", reports_root.logger);
-
+void RunTests(const std::vector<int>& test_numbers, tests::out::Logger& logger) {
+    tests::out::LogDuration log_duration("FULL TIME", logger);
 
     for (int test_number : test_numbers) {
         switch (test_number) {
             case 0:
-                std::cout << "=== CHECK HASHES ===\n\n";
-                HashIsCorrectTest();
-                std::cout << "=== CHECK HASHES ===\n\n\n";
+                HashIsCorrectTest(logger);
                 break;
             case 1:
-                reports_root.logger << "=== START DISTRIBUTION TEST ===\n\n";
-                tests::RunDistributionTests(reports_root);
-                reports_root.logger << "=== END DISTRIBUTION TEST ===\n\n\n";
+                tests::RunDistributionTests(logger);
                 break;
             case 2:
-                reports_root.logger << "=== START GENERATED BLOCKS TEST (length = 16) ===\n\n";
-                tests::RunTestWithGeneratedBlocks(16, reports_root);
-                reports_root.logger << "=== END GENERATED BLOCKS TEST (length = 16) ===\n\n\n";
+                tests::RunTestWithGeneratedBlocks(16, logger);
                 break;
             case 3:
-                reports_root.logger << "=== START GENERATED BLOCKS TEST (length = 4096) ===\n\n";
-                tests::RunTestWithGeneratedBlocks(FOUR_KILOBYTES, reports_root);
-                reports_root.logger << "=== END GENERATED BLOCKS TEST (length = 4096) ===\n\n\n";
+                tests::RunTestWithGeneratedBlocks(FOUR_KILOBYTES, logger);
                 break;
             case 4:
-                reports_root.logger << "=== START ENGLISH WORDS TEST ===\n\n";
-                tests::RunTestWithEnglishWords(reports_root);
-                reports_root.logger << "=== END ENGLISH WORDS TEST ===\n\n\n";
+                tests::RunTestWithEnglishWords(logger);
                 break;
             case 5:
-                reports_root.logger << "=== START SPEED TEST ===\n\n";
-                tests::RunSpeedTests(2'000'000, FOUR_KILOBYTES, reports_root);
-                reports_root.logger << "=== END SPEED TEST ===\n\n\n";
+                tests::RunSpeedTests(2'000'000, FOUR_KILOBYTES, logger);
                 break;
             case 6:
-                reports_root.logger << "=== START AVALANCHE TEST ===\n\n";
-                tests::RunAvalancheTests(reports_root);
-                reports_root.logger << "=== END AVALANCHE TEST ===\n\n\n";
+                tests::RunAvalancheTests(logger);
                 break;
             case 7:
-                reports_root.logger << "=== START IMAGES TEST ===\n\n";
-                tests::RunImagesTests(reports_root);
-                reports_root.logger << "=== END IMAGES TEST ===\n\n\n";
+                tests::RunImagesTests(logger);
                 break;
             default:
-                TempTests(reports_root);
-                //std::filesystem::remove_all(reports_root.root_path);
-                //std::cout << reports_root.root_path << " removed\n";
+                TempTests(logger);
+                //std::filesystem::remove_all(logger.GetLogDirPath());
+                //std::cout << logger.GetLogDirPath() << " removed\n";
                 break;
         }
     }
 }
 
-tests::ReportsRoot CreateReportsRoot() {
-    const auto current_path = std::filesystem::current_path();
-    const std::filesystem::path reports_dir {"reports"};
-    const auto reports_path = current_path / reports_dir / CurrentTime() / "cpp";
-    std::filesystem::create_directories(reports_path);
-    return tests::ReportsRoot{reports_path};
-}
+
 
 int main() {
-    const std::vector test_numbers{0};
-    tests::ReportsRoot reports_root = CreateReportsRoot();
-    RunTests(test_numbers, reports_root);
+    const std::vector test_numbers{6};
+    auto Logger = tests::out::CreateLogger();
+    RunTests(test_numbers, Logger);
 }
 

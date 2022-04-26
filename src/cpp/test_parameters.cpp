@@ -3,14 +3,9 @@
 #include <cmath>
 #include <limits>
 
-#include "log_duration.h"
+#include "timers.h"
 
 namespace tests {
-
-    ReportsRoot::ReportsRoot(const std::filesystem::path& root_path)
-            : root_path(root_path)
-            , logger(root_path / "Log.txt") {
-    }
 
     std::string TestFlagToString(TestFlag mode) {
         switch (mode) {

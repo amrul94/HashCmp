@@ -1,5 +1,5 @@
-#ifndef THESISWORK_AVALANCHE_TESTS_H
-#define THESISWORK_AVALANCHE_TESTS_H
+#ifndef THESIS_WORK_AVALANCHE_TESTS_H
+#define THESIS_WORK_AVALANCHE_TESTS_H
 
 #include <bitset>
 #include <concepts>
@@ -8,8 +8,8 @@
 #include <vector>
 #include <thread>
 
-#include <boost/format.hpp>
 #include <boost/assert.hpp>
+#include <boost/format.hpp>
 
 #include <pcg_random.hpp>
 
@@ -18,25 +18,26 @@
 #include "hashes.h"
 #include "my_assert.h"
 #include "test_parameters.h"
-#include "log_duration.h"
+#include "timers.h"
+#include "output.h"
 
 namespace tests {
     class AvalancheInfo;
 
     namespace out {
-        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& tp, ReportsRoot& reports_root);
+        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& parameters, out::Logger& loger);
         boost::json::object AvalancheInfoToJson(const AvalancheInfo& avalanche_info);
     }
 
     struct DistanceAndFrequency {
-        uint8_t value = 0;
+        uint16_t value = 0;
         uint64_t frequency = 0;
 
         DistanceAndFrequency() = default;
 
-        DistanceAndFrequency(std::integral auto other_distance)
-                : value(other_distance)
-                , frequency(1) {
+        explicit DistanceAndFrequency(std::integral auto other_distance)
+            : value(other_distance)
+            , frequency(1) {
         }
 
         DistanceAndFrequency operator=(std::integral auto other_distance) {
@@ -44,8 +45,6 @@ namespace tests {
             frequency = 1;
             return *this;
         }
-
-        uint16_t GetValue() const { return static_cast<uint16_t>(value); };
 
         auto operator<=>(const DistanceAndFrequency& other) const { return value <=> other.value; };
         auto operator<=>(std::integral auto other_distance) const { return value <=> other_distance; };
@@ -56,7 +55,7 @@ namespace tests {
 
     struct HammingDistance {
         DistanceAndFrequency min {std::numeric_limits<uint8_t>::max()};     // худший случай
-        DistanceAndFrequency max;                                           // лучший случай
+        DistanceAndFrequency max {0};                                       // лучший случай
         long double avg = 0;                                                // среднее значение
 
     };
@@ -90,34 +89,36 @@ namespace tests {
         return multiplier1 * multiplier2;
     }
 
-    template<typename HashStruct>
-    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const HashStruct& hasher, const AvalancheTestParameters& tp,
-                                  uint64_t original_number, uint64_t iteration_step);
+    template<hfl::UnsignedIntegral UintT>
+    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const hfl::Hash<UintT>& hash,
+                                  const AvalancheTestParameters& tp, uint64_t original_number, uint64_t iteration_step);
 
+    template<hfl::UnsignedIntegral UintT>
+    AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& tp,
+                                    out::Logger& logger);
 
-    template<typename HashStruct>
-    AvalancheInfo HashAvalancheTest(const HashStruct& hasher, const AvalancheTestParameters& tp, ReportsRoot& reports_root);
+    template<hfl::UnsignedIntegral UintT>
+    void AvalancheTest(const std::vector<hfl::Hash<UintT>>& hashes, const AvalancheTestParameters& tp,
+                       out::Logger& logger);
 
-    template<typename TestFunc, typename HashStructs>
-    void AvalancheTest(TestFunc func, const HashStructs& funcs, const AvalancheTestParameters& tp, ReportsRoot& reports_root);
-
-    void RunAvalancheTests(ReportsRoot& reports_root);
+    void RunAvalancheTests(out::Logger& loger);
 
 
 // ==================================================
 
-    template<typename Hasher>
-    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const Hasher& hasher, const AvalancheTestParameters& tp,
-                                  uint64_t original_number, uint64_t iteration_step) {
+    template<hfl::UnsignedIntegral UintT>
+    void CalculateHammingDistance(AvalancheInfo& avalanche_info, const hfl::Hash<UintT>& hash,
+                                  const AvalancheTestParameters& tp, uint64_t original_number,
+                                  uint64_t iteration_step) {
         constexpr uint8_t bit_size = 64;
-        const NumberAndHash original {original_number, hasher(original_number)};
+        const NumberAndHash original {original_number, hash(original_number)};
         for (uint8_t bit_index = 0; bit_index < bit_size; ++bit_index) {
             std::bitset<bit_size> modified_number_bits = original_number;
             modified_number_bits.flip(bit_index);
             const uint64_t modified_number = modified_number_bits.to_ullong();
-            const NumberAndHash modified {modified_number, hasher(modified_number)};
+            const NumberAndHash modified {modified_number, hash(modified_number)};
             std::bitset<bit_size> xor_hashes = original.hash ^ modified.hash;
-            DistanceAndFrequency hamming_distance = xor_hashes.count();
+            DistanceAndFrequency hamming_distance{xor_hashes.count()};
 
             CompareAndChangeMinHammingDistance(avalanche_info, hamming_distance, original, modified);
             CompareAndChangeMaxHammingDistance(avalanche_info, hamming_distance);
@@ -126,19 +127,20 @@ namespace tests {
         }
     }
 
-    template<typename Hasher>
-    AvalancheInfo HashAvalancheTest(const Hasher& hasher, const AvalancheTestParameters& tp, ReportsRoot& reports_root) {
-        LOG_DURATION_STREAM("\t\ttime", reports_root.logger);
-        reports_root.logger << boost::format("\n\t%1%: \n") % hasher.GetName();
+    template<hfl::UnsignedIntegral UintT>
+    AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& tp,
+                                    out::Logger& logger) {
+        out::LogDuration log_duration("\t\ttime", logger);
+        logger << boost::format("\t%1%: \n") % hash.GetName();
 
         auto generators = GetGenerators(tp.num_threads, tp.num_keys);
         std::atomic_uint16_t gen_index = 0;
-        auto thread_task = [&hasher, &tp, &generators, &gen_index] (uint64_t first, uint64_t last) {
+        auto thread_task = [&hash, &tp, &generators, &gen_index] (uint64_t first, uint64_t last) {
             pcg64 rng = generators[gen_index++];
             AvalancheInfo avalanche_info;
             while (first < last) {
                 uint64_t number = rng();
-                CalculateHammingDistance(avalanche_info, hasher, tp, number, ++first);
+                CalculateHammingDistance(avalanche_info, hash, tp, number, ++first);
             }
             return avalanche_info;
         };
@@ -155,33 +157,31 @@ namespace tests {
         ThreadTasks<AvalancheInfo> tasks(thread_task, merge_results, tp.num_threads, tp.num_keys);
         const auto result = tasks.GetResult();
 
-        ASSERT_EQUAL_HINT(result.original_pair.hash, static_cast<uint64_t>(hasher(result.original_pair.number)),
-                          hasher.GetName() + " is not correct");
-        ASSERT_EQUAL_HINT(result.modified_pair.hash, static_cast<uint64_t>(hasher(result.modified_pair.number)),
-                          hasher.GetName() + " is not correct");
+        BOOST_ASSERT_MSG(result.original_pair.hash == hash(result.original_pair.number),
+                         "The hash of the original number is not correct");
+        BOOST_ASSERT_MSG(result.modified_pair.hash == hash(result.modified_pair.number),
+                         "The hash of the original number is not correct");
 
-        reports_root.logger << result << std::endl;
+        logger << result << std::endl;
         return result;
     }
 
 
-    template<typename Hashes>
-    void AvalancheTest(const Hashes& hashes, const AvalancheTestParameters& tp, ReportsRoot& reports_root) {
-        reports_root.logger << "--- START " << tp.hash_bits << " BITS TEST ---" << std::endl;
+    template<hfl::UnsignedIntegral UintT>
+    void AvalancheTest(const std::vector<hfl::Hash<UintT>>& hashes, const AvalancheTestParameters& tp,
+                       out::Logger& logger) {
+        out::StartAndEndLogBitsTest log(logger, tp.hash_bits);
 
-        auto out_json = out::GetAvalancheTestJson(tp, reports_root);
+        auto out_json = out::GetAvalancheTestJson(tp, logger);
         boost::json::object avalanche_statistics;
-        for (const auto& hasher : hashes) {
-            AvalancheInfo avalanche_info = HashAvalancheTest(hasher, tp, reports_root);
-            avalanche_statistics[hasher.GetName()] = out::AvalancheInfoToJson(avalanche_info);
+        for (const auto& hash : hashes) {
+            AvalancheInfo avalanche_info = HashAvalancheTest(hash, tp, logger);
+            avalanche_statistics[hash.GetName()] = out::AvalancheInfoToJson(avalanche_info);
         }
 
         out_json.obj["Avalanche effect"] = avalanche_statistics;
         out_json.out << out_json.obj;
-        reports_root.logger << "\n--- END " << tp.hash_bits << " BITS TEST ---\n" << std::endl;
     }
 }
 
-
-
-#endif //THESISWORK_AVALANCHE_TESTS_H
+#endif //THESIS_WORK_AVALANCHE_TESTS_H

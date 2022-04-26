@@ -5,29 +5,10 @@
 #include <cstdint>
 #include <thread>
 
-#include <boost/json.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/tee.hpp>
-
 #include "hash_wrappers.h"
-#include "log_duration.h"
+#include "timers.h"
 
 namespace tests {
-
-    namespace out {
-        struct OutputJson {
-            boost::json::object obj;
-            std::ofstream out;
-        };
-    }
-
-    struct ReportsRoot {
-        explicit ReportsRoot(const std::filesystem::path& root_path);
-
-        const std::filesystem::path root_path;
-        Logger logger;
-    };
-
     enum class TestFlag {
         NORMAL, // Честный подсчет 16 и 24-битных хешей
         BINS,   // Подсчет по бинам 32 и 64-битных хешей
