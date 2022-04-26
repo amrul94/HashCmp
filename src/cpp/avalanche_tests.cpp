@@ -21,7 +21,20 @@ namespace tests {
             return OutputJson{std::move(obj), std::move(out)};
         }
 
+        static uint8_t Median(const std::vector<uint64_t>& hamming_distances) {
+            const uint64_t num_distances = std::accumulate(hamming_distances.begin(),
+                                                           hamming_distances.end(), 0ull);
+            const uint64_t median_position = num_distances / 2;
+            uint64_t current_position = 0;
+            size_t index = 0;
+            for (; index < hamming_distances.size() && current_position < median_position; ++index) {
+                current_position += hamming_distances[index];
+            }
+            return index - 1;
+        }
+
         boost::json::object AvalancheInfoToJson(const AvalancheInfo& avalanche_info) {
+            constexpr uint8_t bits = 64;
             boost::json::object avalanche_statistics;
 
             boost::json::object worst_case;
@@ -35,15 +48,16 @@ namespace tests {
             avalanche_statistics["Best case"] = best_case;
 
             avalanche_statistics["Average case"] = static_cast<double>(avalanche_info.hamming_distance.avg);
+            avalanche_statistics["Median case"] = Median(avalanche_info.all_distances);
 
             boost::json::object original_pair;
             original_pair["Number"] = avalanche_info.original_pair.number;
-            original_pair["Hash"] = avalanche_info.original_pair.hash;
+            original_pair["Hash"] = std::bitset<bits>(avalanche_info.original_pair.hash).to_string();
             avalanche_statistics["Original pair"] = original_pair;
 
             boost::json::object modified_pair;
             modified_pair["Number"] = avalanche_info.modified_pair.number;
-            modified_pair["Hash"] = avalanche_info.modified_pair.hash;
+            modified_pair["Hash"] = std::bitset<bits>(avalanche_info.modified_pair.hash).to_string();
             avalanche_statistics["Modified pair"] = modified_pair;
 
             return avalanche_statistics;
@@ -62,11 +76,13 @@ namespace tests {
     }
 
     std::ostream& operator<<(std::ostream &os, const NumberAndHash& number_and_hash) {
-        return os  << "number = " << number_and_hash.number << ", hash = " << number_and_hash.hash;
+        constexpr uint8_t bits = 64;
+        return os  << "number = " << number_and_hash.number << ", hash = "
+                   << std::bitset<bits>(number_and_hash.hash);
     }
 
     std::ostream& operator<<(std::ostream &os, const AvalancheInfo& avalanche_info) {
-        return os  << "\t\thamming value:\n" << avalanche_info.hamming_distance
+        return os  << "\t\thamming distance:\n" << avalanche_info.hamming_distance
                    << "\n\t\toriginal: " << avalanche_info.original_pair
                    << "\n\t\tmodified: " << avalanche_info.modified_pair;
     }

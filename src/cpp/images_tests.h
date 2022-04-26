@@ -47,8 +47,8 @@ namespace tests {
         };
 
         auto merge_results = [](HashMap& all_hashes, const HashMap& part_hashes) {
-            for (const auto& [hash, count] : part_hashes) {
-                all_hashes[hash] += count;
+            for (const auto& [hash_value, count] : part_hashes) {
+                all_hashes[hash_value] += count;
             }
         };
 

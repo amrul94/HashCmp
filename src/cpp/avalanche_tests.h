@@ -72,8 +72,9 @@ namespace tests {
 
     struct AvalancheInfo {
         HammingDistance hamming_distance;
-        NumberAndHash original_pair;        // Пара оригинальные число-хэш для худшего случая
-        NumberAndHash modified_pair;        // Пара измененные число-хэш для худшего случая
+        NumberAndHash original_pair;    // Пара оригинальные число-хэш для худшего случая
+        NumberAndHash modified_pair;    // Пара измененные число-хэш для худшего случая
+        std::vector<uint64_t> all_distances = std::vector<uint64_t>(65, 0);
     };
 
     std::ostream& operator<<(std::ostream &os, const AvalancheInfo& avalanche_info);
@@ -110,16 +111,17 @@ namespace tests {
     void CalculateHammingDistance(AvalancheInfo& avalanche_info, const hfl::Hash<UintT>& hash,
                                   const AvalancheTestParameters& tp, uint64_t original_number,
                                   uint64_t iteration_step) {
-        constexpr uint8_t bit_size = 64;
+        constexpr uint8_t number_size = 64;
+        constexpr uint8_t hash_size = std::numeric_limits<UintT>::digits;
         const NumberAndHash original {original_number, hash(original_number)};
-        for (uint8_t bit_index = 0; bit_index < bit_size; ++bit_index) {
-            std::bitset<bit_size> modified_number_bits = original_number;
+        for (uint8_t bit_index = 0; bit_index < number_size; ++bit_index) {
+            std::bitset<number_size> modified_number_bits = original_number;
             modified_number_bits.flip(bit_index);
             const uint64_t modified_number = modified_number_bits.to_ullong();
             const NumberAndHash modified {modified_number, hash(modified_number)};
-            std::bitset<bit_size> xor_hashes = original.hash ^ modified.hash;
+            std::bitset<hash_size> xor_hashes = original.hash ^ modified.hash;
             DistanceAndFrequency hamming_distance{xor_hashes.count()};
-
+            ++avalanche_info.all_distances[hamming_distance.value];
             CompareAndChangeMinHammingDistance(avalanche_info, hamming_distance, original, modified);
             CompareAndChangeMaxHammingDistance(avalanche_info, hamming_distance);
             avalanche_info.hamming_distance.avg = CalculateArithmeticMean(avalanche_info.hamming_distance.avg,
@@ -130,7 +132,6 @@ namespace tests {
     template<hfl::UnsignedIntegral UintT>
     AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& tp,
                                     out::Logger& logger) {
-        out::LogDuration log_duration("\t\ttime", logger);
         logger << boost::format("\t%1%: \n") % hash.GetName();
 
         auto generators = GetGenerators(tp.num_threads, tp.num_keys);
@@ -152,6 +153,9 @@ namespace tests {
             CompareAndChangeMaxHammingDistance(best_result, current_result.hamming_distance.max);
             best_result.hamming_distance.avg = CalculateArithmeticMean(best_result.hamming_distance.avg,
                                                                        current_result.hamming_distance.avg, ++step);
+            for (size_t distance; distance < best_result.all_distances.size(); ++distance) {
+                best_result.all_distances[distance] += current_result.all_distances[distance];
+            }
         };
 
         ThreadTasks<AvalancheInfo> tasks(thread_task, merge_results, tp.num_threads, tp.num_keys);
@@ -175,8 +179,11 @@ namespace tests {
         auto out_json = out::GetAvalancheTestJson(tp, logger);
         boost::json::object avalanche_statistics;
         for (const auto& hash : hashes) {
+            out::LogDuration log_duration("\t\ttime", logger);
             AvalancheInfo avalanche_info = HashAvalancheTest(hash, tp, logger);
-            avalanche_statistics[hash.GetName()] = out::AvalancheInfoToJson(avalanche_info);
+            auto hash_avalanche_statistics = out::AvalancheInfoToJson(avalanche_info);
+            std::cout << "\t\tmedian hamming distance: " << hash_avalanche_statistics["Median case"] << std::endl;
+            avalanche_statistics[hash.GetName()] = std::move(out::AvalancheInfoToJson(avalanche_info));
         }
 
         out_json.obj["Avalanche effect"] = avalanche_statistics;
