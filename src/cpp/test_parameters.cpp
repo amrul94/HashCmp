@@ -1,12 +1,10 @@
 #include "test_parameters.h"
 
-#include <cmath>
-#include <limits>
-
-#include "timers.h"
+#include <boost/assert.hpp>
 
 namespace tests {
 
+    // Конвертор флага в строку
     std::string TestFlagToString(TestFlag mode) {
         switch (mode) {
             case TestFlag::NORMAL:
@@ -16,42 +14,38 @@ namespace tests {
             case TestFlag::MASK:
                 return "Mask";
             default: {
-                assert(false);
+                BOOST_ASSERT_MSG(false, "Unknown flag");
                 return std::string{};
             }
         }
     }
 
-    uint64_t MaskShift(uint64_t src, uint16_t mask_bits, uint16_t shift) {
-        const uint64_t mask = (1ull << mask_bits) - 1;
-        return (src >> shift) & mask;
-    }
-
+    // Функция свертки 64-битного хеша в хеш меньшей длины
     uint64_t XorFoldMask(uint64_t src, uint16_t mask_bits) {
         const uint64_t mask = (1ull << mask_bits) - 1;
         return (src >> mask_bits) ^ (src & mask);
     }
 
+    // Конструктор TestParameters
     TestParameters::TestParameters(uint16_t hash_bits, uint16_t num_threads)
         : hash_bits(hash_bits)
         , num_threads(num_threads) {
     }
 
-    uint64_t TestParameters::GiveDivisor(uint16_t degree) {
-        return 1ull << degree; // static_cast<uint64_t>(std::pow(2, degree));
-    }
-
+// Конструктор AdvancedTestParameters
     AvalancheTestParameters::AvalancheTestParameters(uint16_t hash_bits, uint16_t num_threads, uint64_t num_keys)
         : TestParameters(hash_bits, num_threads)
         , num_keys(num_keys) {
     }
 
+    // Конструктор AdvancedTestParameters
     AdvancedTestParameters::AdvancedTestParameters(uint16_t hash_bits, uint16_t num_threads, uint64_t num_keys,
                                                    TestFlag mode)
        : AvalancheTestParameters(hash_bits, num_threads, num_keys)
        , mode(mode) {
     }
 
+    // Конструктор DistTestParameters
     DistTestParameters::DistTestParameters(uint16_t hash_bits, uint16_t num_threads, uint64_t num_keys,
                                            uint64_t num_buckets, TestFlag mode)
         : AdvancedTestParameters(hash_bits, num_threads, num_keys, mode)
@@ -59,6 +53,8 @@ namespace tests {
         SetParameters();
     }
 
+    // Методы, которые задает параметры тестирования
+    // в зависимости от флага
     void DistTestParameters::SetParameters() {
         switch (mode) {
             case TestFlag::NORMAL:
@@ -71,38 +67,44 @@ namespace tests {
                 SetMaskMode();
                 break;
             default:
+                BOOST_ASSERT_MSG(false, "Unknown flag");
                 break;
         }
     }
 
+    // Задает параметры тестирования с флагом NORMAL
     void DistTestParameters::SetNormalMode() {
         num_keys = 1ull << hash_bits; // static_cast<uint64_t>(std::pow(2, hash_bits));
         num_buckets = num_keys;
     }
 
+    // Задает параметры тестирования с флагом BINS
     void DistTestParameters::SetBinsMode() {
         const uint64_t shift = 32;
         num_keys = 1ull << shift; // static_cast<uint64_t>(std::pow(2, 32));
-        num_buckets = MAX_BINS_COUNT;
+        num_buckets = num_max_bins;
         switch (hash_bits) {
-            case 32:
+            case bits32:
                 divisor = 1ull << divider_for_32;
                 break;
-            case 48:
-                divisor = 1ull << divider_for_48; // GiveDivisor(divider_for_48);
+            case bits48:
+                divisor = 1ull << divider_for_48;
                 break;
-            case 64:
-                divisor = 1ull << divider_for_64; // GiveDivisor(divider_for_64);
+            case bits64:
+                divisor = 1ull << divider_for_64;
                 break;
             default:
-                assert(false);
+                BOOST_ASSERT_MSG(false, "Incorrect hash_bits");
+                break;
         }
     }
 
+    // Задает параметры тестирования с флагом MASK
     void DistTestParameters::SetMaskMode() {
         SetNormalMode();
     }
 
+    // Конструктор GenBlocksParameters
     GenBlocksParameters::GenBlocksParameters(uint16_t hash_bits, uint16_t mask_bits, uint16_t num_threads,
                                              uint64_t num_words, uint16_t words_length, TestFlag mode)
             : AdvancedTestParameters(hash_bits, num_threads, num_words, mode)
@@ -110,20 +112,21 @@ namespace tests {
             , words_length(words_length) {
     }
 
-    uint64_t ModifyHash(const AdvancedTestParameters& tp, uint64_t hash) {
-        switch (tp.mode) {
+    // Изменяет хеш в зависимости от флага тестирования
+    uint64_t ModifyHash(const AdvancedTestParameters& parameters, uint64_t hash) {
+        switch (parameters.mode) {
             case TestFlag::NORMAL:
                 return hash;
             case TestFlag::MASK: {
-                const auto &gbp = dynamic_cast<const GenBlocksParameters &>(tp);
-                return XorFoldMask(hash, gbp.mask_bits);
+                const auto &derived_parameters = dynamic_cast<const GenBlocksParameters &>(parameters);
+                return XorFoldMask(hash, derived_parameters.mask_bits);
             }
             case TestFlag::BINS: {
-                const auto &cp = dynamic_cast<const DistTestParameters &>(tp);
-                return hash / cp.divisor;
+                const auto &derived_parameters = dynamic_cast<const DistTestParameters &>(parameters);
+                return hash / derived_parameters.divisor;
             }
             default: {
-                assert(false);
+                BOOST_ASSERT_MSG(false, "Unknown flag");
                 return -1;
             }
         }

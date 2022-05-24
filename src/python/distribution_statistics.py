@@ -1,10 +1,11 @@
 import json
 
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-from helper import *
+import my_histogram
+from base_statistics import *
+from reports_dir import *
 
 
+# Класс для визуализации статистики распределительных свойств хеш-функций
 class DistributionStatistics:
     def __init__(self, js: dict, tests_dir_path: str):
         self.hash_name = js['Hash name']
@@ -12,7 +13,11 @@ class DistributionStatistics:
         self.mode = js["Mode"]
         self.bin_size = js["Bin size"]
         self.bar_count = js["Bar count"]
+
+        # значения гистограммы по оси X
         self.x_bars = [i + 1 for i in range(self.bar_count)]
+
+        # значения гистограммы по оси Y
         self.y_mean = js["Y mean"]
         self.x_ranges = ["{:,}".format(number) for number in js["X ranges"]]
         self.y_err = [js["Y err min"], js["Y err max"]]
@@ -23,49 +28,26 @@ class DistributionStatistics:
         self.hist_path = os.path.join(tests_dir_path, hist_dir_name)
         make_dir(self.hist_path)
 
-    def __bar(self, ax, fig):
-        plt.bar(self.x_bars, self.y_mean, yerr=self.y_err, ecolor='red', capsize=6, bottom=0, color='b', alpha=0.3,
-                edgecolor='blue')
-        if self.bits < 48:
-            plt.xticks(self.x_bars, self.x_ranges)
-        else:
-            plt.xticks(self.x_bars, self.x_ranges, fontsize=9)
-
-        if self.bin_size == 1:
-            plt.xlabel(f'Hashes')
-        else:
-            tmp = "{:,}".format(self.bin_size)
-            plt.xlabel('Hashes (bin = ' + tmp + ')')
-        plt.ylabel('Count')
-
-        if self.bits < 48:
-            ax.xaxis.set_major_locator(ticker.MultipleLocator(8))
-        else:
-            ax.xaxis.set_major_locator(ticker.MultipleLocator(8))
-        ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
-
-        fig.set_facecolor('floralwhite')
-        ax.set_facecolor('seashell')
-
     def create_histogram(self, file_name: str):
-        fig, ax = plt.subplots()
-        func_name = file_name.split()[0]
-        ax.set_title(self.hash_name)
+        # Названия на гистограмме
+        x_label = 'Хеш-значения' if self.bin_size == 1 else f'Хеш-значения (бин = {self.bin_size})'
+        labels = my_histogram.Labels(self.hash_name, x_label, 'Количество хешей в бине')
 
-        self.__bar(ax, fig)
+        # путь по которому будет построена гистограмма
+        file_path = os.path.join(self.hist_path, file_name + '.png')
+        # построение гистограммы
+        my_histogram.histogram_with_errors(self.x_ranges, self.y_mean, self.y_err, labels, file_path)
 
-        file_path = os.path.join(self.hist_path, func_name + '.png')
-        fig.savefig(file_path)
-        plt.cla()
-        plt.clf()
-        plt.close()
-
+    # возвращает минимальное и максимальное значение счетчика хешей в бинах
     def get_err(self):
         min_counter = min(self.y_min)
         max_counter = max(self.y_max)
         return [self.hash_name, min_counter, max_counter]
 
 
+# Создает списки, в которые будет записана информация
+# распределительных свойствах хеш-функций.
+# На основе этих таблиц составляется таблица в docx
 def create_dict_tables(bits: int):
     table = [['Название функции',
               'Минимальное значение',
@@ -76,16 +58,18 @@ def create_dict_tables(bits: int):
         return {'Normal': table[:]}
 
 
-def create_histogram(sub_dir_path: str, file_name: str, dict_tables, save_path:str):
+# Чтение json-файлов и на их основе построение гистограмм и таблиц
+def create_histogram(sub_dir_path: str, file_name: str, dict_tables, save_path: str):
     path_to_file = os.path.join(sub_dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
         ds = DistributionStatistics(js, save_path)
-        ds.create_histogram(file_name)
+        ds.create_histogram(file_name.split()[0])
         dict_tables[js['Mode']].append(ds.get_err())
 
 
-def open_sub_dir(root_path: str, sub_dir_name, report: Document, save_path: str):
+# Проход по вложенному каталогу результатов теста распределения
+def open_sub_dir(root_path: str, sub_dir_name, report, save_path: str):
     dict_tables = create_dict_tables(int(sub_dir_name))
     sub_dir_path = os.path.join(root_path, sub_dir_name)
     list_of_files = os.listdir(sub_dir_path)
@@ -93,9 +77,10 @@ def open_sub_dir(root_path: str, sub_dir_name, report: Document, save_path: str)
         create_histogram(sub_dir_path, file_name, dict_tables, save_path)
     for mode in dict_tables:
         heading = f'{sub_dir_name} ({mode})'
-        dr.add_table_to_report(heading, dict_tables[mode], report)
+        docx_report.add_table_to_report(heading, dict_tables[mode], report)
 
 
+# Обработки данных тестирования распределения
 def process_distribution_statistics(tests_dir_name):
     report_heading = 'Таблицы распределений'
     path_to_test_dir = get_cpp_report_path(tests_dir_name)

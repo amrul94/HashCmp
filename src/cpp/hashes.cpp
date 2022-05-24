@@ -1,22 +1,21 @@
-#include <gsl/gsl>
-
 #include "hashes.h"
 
 // HFL = Hash function library
 namespace hfl {
     //----------- BuildHashes ----------
 
-
-    template<hfl::UnsignedIntegral UintT>
+    // Функции для конструирования универсальных хеш функций
+    template<UnsignedIntegral UintT>
     static void AddTemplateHashes(std::vector<Hash<UintT>>& hashes) {
         using namespace std::literals;
         using namespace hfl::wrappers;
-        hashes.emplace_back("DJB2 Hash"s, std::make_unique<DJB2HashWrapper<UintT>>());         \
-        hashes.emplace_back("SDBM Hash"s, std::make_unique<SDBMHashWrapper<UintT>>());                      \
-        hashes.emplace_back("PJW Hash"s, std::make_unique<PJWHashWrapper<UintT>>());                        \
-        hashes.emplace_back("One at a time hash"s, std::make_unique<OneTimeHashWrapper<UintT>>());    \
+        hashes.emplace_back("DJB2 Hash"s, std::make_unique<DJB2HashWrapper<UintT>>());
+        hashes.emplace_back("SDBM Hash"s, std::make_unique<SDBMHashWrapper<UintT>>());
+        hashes.emplace_back("PJW Hash"s, std::make_unique<PJWHashWrapper<UintT>>());
+        hashes.emplace_back("One at a time hash"s, std::make_unique<OneTimeHashWrapper<UintT>>());
     }
-        
+
+    // Конструирует 16-битные хеш функции
     std::vector<Hash<uint16_t>> Build16bitsHashes() {
         using namespace std::literals;
         using namespace hfl::wrappers;
@@ -35,6 +34,7 @@ namespace hfl {
         return hashes;
     }
 
+    // Конструирует 24-битные хеш функции
     std::vector<Hash<uint24_t>> Build24bitsHashes() {
         using namespace std::literals;
         using namespace hfl::wrappers;
@@ -52,6 +52,7 @@ namespace hfl {
         return hashes;
     }
 
+    // Конструирует 32-битные хеш функции
     std::vector<Hash<uint32_t>> Build32bitsHashes() {
         using namespace std::literals;
         using namespace hfl::wrappers;
@@ -87,6 +88,7 @@ namespace hfl {
         return hashes;
     }
 
+    // Конструирует 48-битные хеш функции
     std::vector<Hash<uint48_t>> Build48bitsHashes() {
         using namespace std::literals;
         using namespace hfl::wrappers;
@@ -99,11 +101,11 @@ namespace hfl {
         hashes.emplace_back("FNV-1a Hash"s, std::make_unique<FNV1aHash48Wrapper>());
         hashes.emplace_back("SpookyHash"s, std::make_unique<SpookyHash48Wrapper>());
         hashes.emplace_back("Fast-Hash"s, std::make_unique<FastHash48Wrapper>());
-        hashes.emplace_back("PearsonHash"s, std::make_unique<PearsonHash48Wrapper>());
 
         return hashes;
     }
 
+    // Конструирует 64-битные хеш функции
     std::vector<Hash<uint64_t>> Build64bitsHashes() {
         using namespace std::literals;
         using namespace hfl::wrappers;

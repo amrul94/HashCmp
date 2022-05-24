@@ -27,7 +27,10 @@
 #include "generators.h"
 
 namespace tests {
+
     namespace out {
+        // Формирует json-файл, в который будет сохранена информация с теста
+        // скорости хеширования хеш функций
         OutputJson GetSpeedTestJson(uint16_t hash_bits, size_t num_words, out::Logger& logger) {
             const std::filesystem::path report_test_dir = "Speed tests";
             const auto report_test_path = logger.GetLogDirPath() / report_test_dir;
@@ -36,6 +39,7 @@ namespace tests {
             const std::filesystem::path report_name = std::to_string(hash_bits) + " bits.json";
             const std::filesystem::path out_path = report_test_path / report_name;
             std::ofstream out(out_path);
+            BOOST_ASSERT_MSG(out, "Failed to create file");
 
             boost::json::object obj;
             obj["Test name"] = "Speed Tests";
@@ -45,6 +49,8 @@ namespace tests {
         }
     }
 
+    // Структуры, которые служат для перегрузки
+    // функций HashTest
     struct StrView{};
     struct CharKeyIntLen{};
     struct CharKeyUintLen{};
@@ -54,19 +60,23 @@ namespace tests {
     struct CharKeyUintLenSeeds{};
     struct UcharKeyUintLenSeed{};
 
-
+    // Экземпляры структур, которые служат для перегрузки
+    // функций HashTest
     namespace args {
-        constinit StrView str_view{};
-        constinit CharKeyIntLen char_key_int_len{};
-        constinit CharKeyUintLen char_key_uint_len{};
-        constinit UcharKeyUintLen uchar_key_uint_len{};
-        constinit CharKeyIntLenSeed char_key_int_len_seed{};
-        constinit CharKeyUintLenSeed char_key_uint_len_seed{};
-        constinit CharKeyUintLenSeeds char_key_uint_len_seeds{};
-        constinit UcharKeyUintLenSeed uchar_key_uint_len_seed{};
+        constexpr StrView str_view{};
+        constexpr CharKeyIntLen char_key_int_len{};
+        constexpr CharKeyUintLen char_key_uint_len{};
+        constexpr UcharKeyUintLen uchar_key_uint_len{};
+        constexpr CharKeyIntLenSeed char_key_int_len_seed{};
+        constexpr CharKeyUintLenSeed char_key_uint_len_seed{};
+        constexpr CharKeyUintLenSeeds char_key_uint_len_seeds{};
+        constexpr UcharKeyUintLenSeed uchar_key_uint_len_seed{};
     }
 
     namespace {
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const string& message);
+        // - return_type hash(string_view message);
         template <typename Function>
         void HashTest(Function func, StrView, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -74,6 +84,8 @@ namespace tests {
             obj[hash_name] = hs.sec_time;
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const char* message, int length);
         template <typename Function>
         void HashTest(Function func, CharKeyIntLen, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -84,6 +96,8 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const uint8_t* message, int length);
         template <typename Function>
         void HashTest(Function func, CharKeyUintLen, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -93,6 +107,8 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const uint8_t* message, size_t length);
         template <typename Function>
         void HashTest(Function func, UcharKeyUintLen, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -103,6 +119,8 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const char* message, int length, return_type seed);
         template <typename Function>
         void HashTest(Function func, CharKeyIntLenSeed, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -113,6 +131,8 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const char* message, size_t length, return_type seed);
         template <typename Function>
         void HashTest(Function func, CharKeyUintLenSeed, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -122,6 +142,8 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const char* message, size_t length, return_type seed1, return_type seed2);
         template <typename Function>
         void HashTest(Function func, CharKeyUintLenSeeds, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -131,16 +153,19 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций с прототипом вида:
+        // - return_type hash(const uint8_t* message, size_t length, return_type seed);
         template <typename Function>
         void HashTest(Function func, UcharKeyUintLenSeed, const std::string& hash_name, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
             auto lambda = [func] (std::string_view str) {
                 const auto* key = reinterpret_cast<const uint8_t*>(str.data());
-                return func(key, str.size(), 0);
+                return func(key, str.size(), SEED_64_1);
             };
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций PearsonHash
         template <typename PearsonClass>
         void PearsonClassTest(PearsonClass pearson_hash, const std::vector<std::string>& words,
                       out::Logger& logger, boost::json::object& obj) {
@@ -149,6 +174,7 @@ namespace tests {
             HashTest(pearson_hash, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций PearsonHash
         template <typename PearsonFunc>
         void PearsonFuncTest(PearsonFunc pearson_hash, const std::vector<std::string>& words,
                              out::Logger& logger, boost::json::object& obj) {
@@ -157,7 +183,7 @@ namespace tests {
             HashTest(pearson_hash, args::uchar_key_uint_len_seed, hash_name, words, logger, obj);
         }
 
-
+        // Тестирование хеш-функций FNV1a
         template <typename BaseFunc>
         void FNV1aHashTest(BaseFunc func, uint16_t bits, const std::vector<std::string>& words, out::Logger& logger,
                                 boost::json::object& obj) {
@@ -173,11 +199,13 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций BuzHash
         template<hfl::UnsignedIntegral UintT>
         void BuzHashTest(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "BuzHash";
-
-            CyclicHash<UintT> hasher{4096, sizeof(UintT) * 8};
+            constexpr int myn = 4096;
+            constexpr int bits_in_byte = 8;
+            CyclicHash<UintT> hasher{myn, sizeof(UintT) * bits_in_byte};
             auto lambda = [&hasher](std::string_view str) {
                 return hasher.hash(str);
             };
@@ -185,6 +213,7 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций SpookyHash
         template<hfl::UnsignedIntegral UintT>
         void SpookyHashTest(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "SpookyHash";
@@ -197,29 +226,34 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций FastHash, меньше 32-бит
         template<hfl::UnsignedIntegral UintT>
         void FastHash1To31Test(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "FastHash";
 
             auto lambda = [](std::string_view str) {
+                constexpr uint16_t shift = 16;
                 uint32_t h = fasthash_inline::fasthash32(str.data(), str.size(), SEED_32);
-                return static_cast<UintT>(h - (h >> 16));
+                return static_cast<UintT>(h - (h >> shift));
             };
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций FastHash, от 32-бит до 61-бит включительно
         template<hfl::UnsignedIntegral UintT>
         void FastHash32To63Test(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "FastHash";
 
             auto lambda = [](std::string_view str) {
+                constexpr uint16_t shift = 32;
                 uint64_t h = fasthash_inline::fasthash64(str.data(), str.size(), SEED_64_1);
-                return static_cast<UintT>(h - (h >> 32));
+                return static_cast<UintT>(h - (h >> shift));
             };
 
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование 32-битной версии хеш-функций FastHash
         void FastHash64Test(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "FastHash";
 
@@ -229,19 +263,21 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций MetroHash
         void MetroHashTest(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "MetroHash64";
 
             auto lambda = [](std::string_view str) {
                 uint64_t hash = 0;
-                std::vector<uint8_t> hash_array(8, 0);
+                std::vector<uint8_t> hash_array(sizeof(uint64_t), 0);
                 MetroHash64::Hash(reinterpret_cast<const uint8_t*>(str.data()), str.size(), hash_array.data(), SEED_64_1);
-                std::memcpy(&hash, hash_array.data(), 8);
+                std::memcpy(&hash, hash_array.data(), sizeof(uint64_t));
                 return hash;
             };
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций wyhash
         void WyHash64Test(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "wyhash64";
 
@@ -251,20 +287,23 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций SipHash
         template <typename BaseFunc>
         void SipHashTest(BaseFunc func, const std::string& hash_name, const std::vector<std::string>& words,
                          out::Logger& logger, boost::json::object& obj) {
-            unsigned char key[16] = {SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
-                                     SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,
-                                     SEED_8_9, SEED_8_10, SEED_8_11, SEED_8_12,
-                                     SEED_8_13, SEED_8_14, SEED_8_15, SEED_8_16};
+            constexpr size_t num_keys = 16;
+            const uint8_t key[num_keys] = {SEED_8_1, SEED_8_2, SEED_8_3, SEED_8_4,
+                                           SEED_8_5, SEED_8_6, SEED_8_7, SEED_8_8,
+                                           SEED_8_9, SEED_8_10, SEED_8_11, SEED_8_12,
+                                           SEED_8_13, SEED_8_14, SEED_8_15, SEED_8_16};
 
             auto lambda = [func, &key](std::string_view str) {
-                return func(key, (const unsigned char *)str.data(), str.size());
+                return func(key, reinterpret_cast<const uint8_t*>(str.data()), str.size());
             };
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций SipHash (версия от Google)
         template <typename BaseFunc>
         void GoogleSipHashTest(BaseFunc func, const std::string& hash_name, const std::vector<std::string>& words,
                          out::Logger& logger, boost::json::object& obj) {
@@ -276,6 +315,7 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование хеш-функций HighwayHash
         void HighwayHashTest(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             std::string hash_name = "HighwayHash";
 
@@ -284,7 +324,7 @@ namespace tests {
 
                 static const HHKey key HH_ALIGNAS(32) = {SEED_64_1, SEED_64_2, SEED_64_3, SEED_64_4};
                 HHStateT<HH_TARGET> state(key);
-                HHResult64 result;
+                HHResult64 result{};
                 HighwayHashT(&state, str.data(), str.size(), &result);
 
                 return result;
@@ -292,6 +332,7 @@ namespace tests {
             HashTest(lambda, args::str_view, hash_name, words, logger, obj);
         }
 
+        // Тестирование универсальных хеш-функций
         template<hfl::UnsignedIntegral UintT>
         void SpeedTestT(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
             using namespace std::literals;
@@ -304,11 +345,12 @@ namespace tests {
         }
     }
 
+    // Тестирование 16-битных хеш-функций
     [[maybe_unused]] boost::json::object SpeedTests16(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
         SpeedTestT<uint16_t>(words, logger, obj);
-        FNV1aHashTest(FNV32a, 16, words, logger, obj);
+        FNV1aHashTest(FNV32a, bits16, words, logger, obj);
         FastHash1To31Test<uint16_t>(words, logger, obj);
         PearsonClassTest(hfl::wrappers::PearsonHash16{}, words, logger, obj);
         BuzHashTest<uint16_t>(words, logger, obj);
@@ -316,18 +358,19 @@ namespace tests {
         return obj;
     }
 
+    // Тестирование 24-битных хеш-функций
     [[maybe_unused]] boost::json::object SpeedTests24(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
-
         SpeedTestT<hfl::uint24_t>(words, logger, obj);
-        FNV1aHashTest(FNV32a, 24, words, logger, obj);
+        FNV1aHashTest(FNV32a, bits24, words, logger, obj);
         FastHash1To31Test<hfl::uint24_t>(words, logger, obj);
         PearsonClassTest(hfl::wrappers::PearsonHash24{}, words, logger, obj);
 
         return obj;
     }
 
+    // Тестирование 32-битных хеш-функций
     [[maybe_unused]] boost::json::object SpeedTests32(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
@@ -347,8 +390,6 @@ namespace tests {
         HashTest(city::s_inline::CityHash32, args::char_key_uint_len, "CityHash32"s, words, logger, obj);
         HashTest(util::s_inline::Hash32, args::char_key_uint_len, "FarmHash32"s, words, logger, obj);
         HashTest(util::s_inline::Hash32WithSeed, args::char_key_uint_len_seed, "FarmHash32 with seed"s, words, logger, obj);
-
-        // no inline
         HashTest(t1ha0_32le, args::char_key_uint_len_seed, "T1HA0 32le hash"s, words, logger, obj);
         HashTest(t1ha0_32be, args::char_key_uint_len_seed, "T1HA0 32be hash"s, words, logger, obj);
 
@@ -361,24 +402,24 @@ namespace tests {
         return obj;
     }
 
+    // Тестирование 48-битных хеш-функций
     [[maybe_unused]] boost::json::object SpeedTests48(const std::vector<std::string>& words, out::Logger& logger) {
         boost::json::object obj;
 
         SpeedTestT<hfl::uint48_t>(words, logger, obj);
-        FNV1aHashTest(FNV64a, 48, words, logger, obj);
+        FNV1aHashTest(FNV64a, bits48, words, logger, obj);
         FastHash32To63Test<hfl::uint48_t>(words, logger, obj);
-        PearsonClassTest(hfl::wrappers::PearsonHash48{}, words, logger, obj);
 
         return obj;
     }
 
+    // Тестирование 64-битных хеш-функций
     [[maybe_unused]] boost::json::object SpeedTests64(const std::vector<std::string>& words, out::Logger& logger) {
+        using namespace std::literals;
         boost::json::object obj;
 
-        using namespace std::literals;
-
         SpeedTestT<uint64_t>(words, logger, obj);
-        HashTest(FNV64a, args::char_key_int_len_seed, "FNV-1a Hash", words, logger, obj);
+        HashTest(FNV64a, args::char_key_int_len_seed, "FNV-1a Hash"s, words, logger, obj);
         FastHash64Test(words, logger, obj);
         PearsonFuncTest(pearson_inline::pearson_hash_64, words, logger, obj);
         BuzHashTest<uint64_t>(words, logger, obj);
@@ -391,13 +432,10 @@ namespace tests {
         HashTest(util::s_inline::Hash64WithSeed, args::char_key_uint_len_seed, "FarmHash64 with seed"s, words, logger, obj);
         HashTest(util::s_inline::Hash64WithSeeds, args::char_key_uint_len_seeds, "FarmHash64 with seeds"s, words, logger, obj);
         MetroHashTest(words, logger, obj);
-
-        // no inline
         HashTest(t1ha0_ia32aes_avx2, args::char_key_uint_len_seed, "T1HA0 AVX2 hash"s, words, logger, obj);
         HashTest(t1ha1_le, args::char_key_uint_len_seed, "T1HA1 le hash"s, words, logger, obj);
         HashTest(t1ha1_be, args::char_key_uint_len_seed, "T1HA1 be hash"s, words, logger, obj);
         HashTest(t1ha2_atonce, args::char_key_uint_len_seed, "T1HA2 atonce hash"s, words, logger, obj);
-
         HashTest(XXH64, args::char_key_uint_len_seed, "xxHash64"s, words, logger, obj);
         HashTest(XXH3_64bits, args::char_key_uint_len, "XXH3 64 bits"s, words, logger, obj);
         HashTest(XXH3_64bits_withSeed, args::char_key_uint_len_seed, "XXH3 64 bits with seed"s, words, logger, obj);
@@ -416,13 +454,30 @@ namespace tests {
         return obj;
     }
 
-    #define RUN_SPEED_TESTS_IMPL(BITS, WORDS, LOGGER)                                 \
-        (LOGGER) << boost::format("--- START %1% BITS TEST ---") % (BITS);                  \
-        auto out_json##BITS = out::GetSpeedTestJson(BITS, (WORDS).size(), LOGGER); \
-        boost::json::object speed##BITS = SpeedTests##BITS(WORDS, LOGGER);            \
-        out_json##BITS.obj["Speed"] = speed##BITS;                                  \
-        out_json##BITS.out << out_json##BITS.obj;                                   \
-        (LOGGER) << boost::format("--- END %1% BITS TEST ---\n\n") % (BITS)
+    template<hfl::UnsignedIntegral UintT>
+    static inline boost::json::object SpeedTestsVisitor(const std::vector<std::string>& words, out::Logger& logger) {
+        if constexpr (std::is_same_v<UintT, uint16_t>)
+            return SpeedTests16(words, logger);
+        else if constexpr (std::is_same_v<UintT, hfl::uint24_t>)
+            return SpeedTests24(words, logger);
+        else if constexpr (std::is_same_v<UintT, uint32_t>)
+            return SpeedTests32(words, logger);
+        else if constexpr (std::is_same_v<UintT, hfl::uint48_t>)
+            return SpeedTests48(words, logger);
+        else if constexpr (std::is_same_v<UintT, uint64_t>)
+            return SpeedTests64(words, logger);
+        else
+            static_assert(hfl::always_false_v<UintT>, "non-exhaustive visitor!");
+    }
+
+    template<hfl::UnsignedIntegral UintT>
+    void RunSpeedTestImpl(uint16_t bits, const std::vector<std::string>& words, out::Logger& logger) {
+        out::StartAndEndLogBitsTest printer(logger, bits);
+        auto out_json = out::GetSpeedTestJson(bits, words.size(), logger);
+        boost::json::object obj = SpeedTestsVisitor<UintT>(words, logger);
+        out_json.obj["Speed"] = std::move(obj);
+        out_json.out << out_json.obj;
+    }
 
 
     void RunSpeedTests(uint64_t num_blocks, uint32_t block_length, out::Logger& logger) {
@@ -431,11 +486,11 @@ namespace tests {
         pcg64 rng;
         const auto random_blocks = GenerateRandomDataBlocks(rng, num_blocks, block_length);
 
-        RUN_SPEED_TESTS_IMPL(16, random_blocks, logger);
-        RUN_SPEED_TESTS_IMPL(24, random_blocks, logger);
-        RUN_SPEED_TESTS_IMPL(32, random_blocks, logger);
-        RUN_SPEED_TESTS_IMPL(48, random_blocks, logger);
-        RUN_SPEED_TESTS_IMPL(64, random_blocks, logger);
+        RunSpeedTestImpl<uint16_t>(bits16, random_blocks, logger);
+        RunSpeedTestImpl<hfl::uint24_t>(bits24, random_blocks, logger);
+        RunSpeedTestImpl<uint32_t>(bits32, random_blocks, logger);
+        RunSpeedTestImpl<hfl::uint48_t>(bits48, random_blocks, logger);
+        RunSpeedTestImpl<uint64_t>(bits64, random_blocks, logger);
     }
 }
 

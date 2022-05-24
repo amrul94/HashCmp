@@ -3,11 +3,9 @@
 
 #include <barrier>
 #include <deque>
-#include <execution>
 #include <fstream>
 #include <future>
 #include <iostream>
-#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -18,95 +16,98 @@
 
 #include "concurrency.h"
 #include "generators.h"
-#include "timers.h"
-#include "output.h"
-#include "test_parameters.h"
 #include "hashes.h"
+#include "output.h"
+#include "timers.h"
 
-constexpr int KILOBYTE = 1024;
-constexpr int FOUR_KILOBYTES = KILOBYTE * 4;
+#include "test_parameters.h"
 
 namespace tests {
     namespace out {
+        // Формирует json-файл, в который будет сохранена информация с теста хеш функции
+        // на устойчивости к коллизиям
         OutputJson GetGenTestJson(const GenBlocksParameters& gbp, out::Logger& logger);
     }
 
+    // Тестирование устойчивости к коллизиям одной хеш функции. Реализация описана ниже
     template<hfl::UnsignedIntegral UintT>
-    auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const hfl::Hash<UintT>& hs, const GenBlocksParameters& gbp,
-                               out::Logger& logger);
+    auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const hfl::Hash<UintT>& hs,
+                               const GenBlocksParameters& parameters, out::Logger& logger);
 
+    // Тестирование устойчивости к коллизиям хеш функций. Реализация описана ниже
     template<hfl::UnsignedIntegral UintT>
     void TestWithGeneratedBlocks(std::vector<pcg64>& generators, const std::vector<hfl::Hash<UintT>>& hashes,
-                                 const GenBlocksParameters& gbp, out::Logger& logger);
+                                 const GenBlocksParameters& parameters, out::Logger& logger);
 
-
-    void RunCollTestNormal(uint16_t words_length, uint16_t num_threads, out::Logger& logger);
-
-    void RunCollTestWithMask(uint16_t words_length, uint16_t num_threads, out::Logger& logger);
-
+    // Запуск тестирования устойчивости к коллизиям хеш функций
     void RunTestWithGeneratedBlocks(uint16_t words_length, out::Logger& logger);
-
 
     // ===============================================================================
 
-
     // Эту функцию думаю в будущем разбить на части
     template<hfl::UnsignedIntegral UintT>
-    auto HashTestWithGenBlocks(const hfl::Hash<UintT>& hasher, const GenBlocksParameters& gbp, out::Logger& logger) {
+    auto HashTestWithGenBlocks(const hfl::Hash<UintT>& hash, const GenBlocksParameters& parameters,
+                               out::Logger& logger) {
         out::LogDuration log_duration("\t\ttime", logger);
-        logger << boost::format("\n\t%1%: \n") % hasher.GetName();
+        logger << boost::format("\n\t%1%: \n") % hash.GetName();
 
-        std::vector<pcg64> generators = GetGenerators(gbp.num_threads, (gbp.num_keys * gbp.words_length) / 8);   \
-        // Выделить coll_flags, collisions, num_collisions и мьютекс (в будущем) в отдельный класс (например, Counters).
-        // При этом подсчет коллизий вынести в метод класса AddHash
-        const auto num_hashes = static_cast<uint64_t>(std::pow(2, gbp.mask_bits));
-        std::deque<std::atomic_bool> coll_flags(num_hashes);
+        // Выдает генераторы, число которых равно числу запускаемых потоков
+        std::uint64_t num_generated_numbers = (parameters.num_keys * parameters.words_length) / 8;
+        std::vector<pcg64> generators = GetGenerators(parameters.num_threads, num_generated_numbers);   \
+
         boost::json::object collisions;
         std::atomic_uint64_t num_collisions = 0;
 
-        size_t num_words = (1 << (gbp.mask_bits >> 1));
-        size_t step = (gbp.mask_bits != 24) ? 1 : 2;
+        size_t num_words = (1 << (parameters.mask_bits >> 1));
+        size_t step = (parameters.mask_bits != 24) ? 1 : 2;
 
-        bool loop_conditional = (num_words <= gbp.num_keys);
-        auto completion_lambda =
-                [&logger, &num_words, &num_collisions, &collisions, &loop_conditional, &gbp, step] () {
+        // Условие завершения внешнего цикла в thread_task (описан ниже)
+        bool loop_conditional = (num_words <= parameters.num_keys);
+        // Функция, запускаемая барьером sync_point (описан ниже) после выполнения
+        // внутреннего цикла в thread_task
+        auto loop_completion_task =
+                [&logger, &num_words, &num_collisions, &collisions, &loop_conditional, &parameters, step] () {
             logger << boost::format("\t\t%1% words:\t%2% collisions\n") % num_words % num_collisions;
             std::string index = std::to_string(num_words);
             collisions[index] = num_collisions;
             num_words <<= step;
-            loop_conditional = (num_words <= gbp.num_keys);
+            loop_conditional = (num_words <= parameters.num_keys);
         };
 
-        std::atomic_size_t gen_index = 0;
-        std::barrier sync_point(gbp.num_threads, completion_lambda);
+        const uint64_t num_hashes = 1ull << parameters.mask_bits;
+        std::deque<std::atomic_bool> coll_flags(num_hashes);
 
-        auto thread_task = [&loop_conditional, &num_words, &gbp, &generators, &gen_index, &hasher, &coll_flags,
+        std::atomic_size_t gen_index = 0;
+        std::barrier sync_point(parameters.num_threads, loop_completion_task);
+
+        // Функция, запускаемая в отдельном потоке. Подсчитывает число коллизий
+        auto thread_task = [&loop_conditional, &num_words, &parameters, &generators, &gen_index, &hash, &coll_flags,
                             &num_collisions, &sync_point] () {
             pcg64& rng = generators[gen_index++];
             for (size_t i = 0; loop_conditional; ) {
-                size_t thread_num_words = num_words / gbp.num_threads;
+                size_t thread_num_words = num_words / parameters.num_threads;
                 for (; i < thread_num_words; ++i) {
-                    std::string str = GenerateRandomDataBlock(rng, gbp.words_length);
-                    const auto hash = static_cast<uint64_t>(hasher(str));
-                    const uint64_t modified = ModifyHash(gbp, hash);
-                    num_collisions += coll_flags[modified].exchange(true);
+                    std::string str = GenerateRandomDataBlock(rng, parameters.words_length);
+                    const uint64_t hash_value = hash(str);
+                    const uint64_t modified_hash_value = ModifyHash(parameters, hash_value);
+                    num_collisions += coll_flags[modified_hash_value].exchange(true);
                 }
                 sync_point.arrive_and_wait();
             }
         };
 
-        std::vector<std::thread> threads(gbp.num_threads - 1);
-        for (auto& t : threads) {
-            t = std::thread(thread_task);
-        }
-        thread_task();
-        for (auto& t : threads) {
-            t.join();
+        {   // Запуск thread_task в нескольких потоках
+            std::vector<std::jthread> threads(parameters.num_threads - 1);
+            for (auto& t : threads) {
+                t = std::jthread(thread_task);
+            }
+            thread_task();
         }
 
-        auto hash_name = static_cast<boost::json::string>(hasher.GetName());
-        if (gbp.mode == TestFlag::MASK) {
-            hash_name += " (mask " + std::to_string(gbp.mask_bits) + " bits)";
+        // Возвращение результатов теста
+        auto hash_name = static_cast<boost::json::string>(hash.GetName());
+        if (parameters.mode == TestFlag::MASK) {
+            hash_name += " (mask " + std::to_string(parameters.mask_bits) + " bits)";
         }
         boost::json::object result;
         result[hash_name] = collisions;
@@ -115,23 +116,22 @@ namespace tests {
 
     // Возможно стоит поделить эту функции на части, так как она очень большая
     template<hfl::UnsignedIntegral UintT>
-    void TestWithGeneratedBlocks(const std::vector<hfl::Hash<UintT>>& hashes, const GenBlocksParameters& gbp, out::Logger& logger) {
-        logger << "--- START " << gbp.hash_bits << " BITS TEST ---" << std::endl;
+    void TestWithGeneratedBlocks(const std::vector<hfl::Hash<UintT>>& hashes, const GenBlocksParameters& parameters,
+                                 out::Logger& logger) {
+        out::StartAndEndLogBitsTest log(logger, parameters.hash_bits);
 
-        auto out_json = out::GetGenTestJson(gbp, logger);
-
+        auto out_json = out::GetGenTestJson(parameters, logger);
         boost::json::object collisions;
-        std::mutex local_mutex;
 
+        // В цикле запускаются тесты (HashTestWithGenBlocks) для каждой хеш функции
         for (const auto& hasher : hashes) {
-            auto [hash_name, counters] = HashTestWithGenBlocks(hasher, gbp, logger);
+            auto [hash_name, counters] = HashTestWithGenBlocks(hasher, parameters, logger);
             collisions[hash_name] = std::move(counters);
         }
 
+        // Сохранение результатов тестирования
         out_json.obj["Collisions"] = collisions;
         out_json.out << out_json.obj;
-
-        logger << "\n--- END " << gbp.hash_bits << " BITS TEST ---" << std::endl << std::endl;
     }
 }
 

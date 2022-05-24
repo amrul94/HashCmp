@@ -8,19 +8,26 @@
 #include <boost/json.hpp>
 
 namespace tests::out {
+    // Структура, которая хранит json-объект и
+    // объект класса ofstream, для вывода json в файл
     struct OutputJson {
         boost::json::object obj;
         std::ofstream out;
     };
 
+    // Класс для логирования. Осуществляет одновременный вывод лога
+    // в консоль и в файл
     class Logger
     {
     public:
         explicit Logger(const std::filesystem::path& log_dir_path);
 
+        // Операторы вывода
         template<typename T> Logger& operator<<(T t);
         Logger& operator<<(std::ostream& (*fun)(std::ostream& ));
 
+        // Метод, для получения пути, где хранится папка,
+        // в которую будут сохранены результаты тестов и лог
         const std::filesystem::path& GetLogDirPath() const;
 
     private:
@@ -28,20 +35,24 @@ namespace tests::out {
         const std::filesystem::path log_dir_path_;
     };
 
+    // Оператор вывода
     template<typename T> inline Logger& Logger::operator<<(T t) {
         log_file_ << t;
         std::cout << t;
         return *this;
     }
 
+    // Оператор вывода. Необходим для std::endl
     inline Logger& Logger::operator<<(std::ostream& (*fun)(std::ostream&)) {
         log_file_ << std::endl;
         std::cout << std::endl;
         return *this;
     }
 
+    // Конструирует класс Logger
     Logger CreateLogger();
 
+    // Класс для вывода лога о начале и конце тестов из одной группы
     class StartAndEndLogTest {
     public:
         StartAndEndLogTest() = delete;
@@ -59,6 +70,7 @@ namespace tests::out {
         std::string_view test_name_;
     };
 
+    // Класс для вывода лога о начале и конце тестов одной битности
     class StartAndEndLogBitsTest {
     public:
         StartAndEndLogBitsTest() = delete;

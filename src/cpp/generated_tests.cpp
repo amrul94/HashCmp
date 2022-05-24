@@ -1,12 +1,9 @@
-#include <random>
-
-#include <pcg_random.hpp>
-
 #include "generated_tests.h"
-#include "hashes.h"
 
 namespace tests {
     namespace out {
+        // Формирует json-файл, в который будет сохранена информация с теста хеш функции
+        // на устойчивости к коллизиям
         OutputJson GetGenTestJson(const GenBlocksParameters& gbp, out::Logger& logger) {
             using namespace std::literals;
             const std::filesystem::path gen_tests_dir = "Generated blocks tests";
@@ -30,34 +27,34 @@ namespace tests {
         }
     }
 
-    #define RUN_COLL_TEST_NORMAL_IMPL(BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)                        \
-        const auto word_counts##BITS = (1 << (POW_COUNTS)); /*static_cast<uint64_t>(pow(2, POW_COUNTS));   */ \
-        const GenBlocksParameters wp##BITS {BITS, BITS, NUM_THREADS, word_counts##BITS, LENGTH, MODE};     \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                            \
-        TestWithGeneratedBlocks(hashes##BITS, wp##BITS, ROOT)
-
-    void RunCollTestNormal(uint16_t words_length, uint16_t num_threads, out::Logger& logger) {
-        RUN_COLL_TEST_NORMAL_IMPL(16, 16, words_length, num_threads, TestFlag::NORMAL, logger);
-        RUN_COLL_TEST_NORMAL_IMPL(24, 24, words_length, num_threads, TestFlag::NORMAL, logger);
-        RUN_COLL_TEST_NORMAL_IMPL(32, 24, words_length, num_threads, TestFlag::NORMAL, logger);
+    // Запуск тестирования устойчивости к коллизиям хеш функций одной битности
+    template<hfl::UnsignedIntegral UintT>
+    void RunTestWithGeneratedBlocksImpl(uint16_t hash_bits, uint16_t test_bits, uint16_t shift, uint16_t num_threads,
+                                        uint16_t words_length, TestFlag mode, out::Logger& logger) {
+        const uint64_t num_words = (1ull << shift);
+        const GenBlocksParameters parameters {hash_bits, test_bits, num_threads, num_words, words_length, mode};
+        const auto hashes = hfl::BuildHashes<UintT>();
+        TestWithGeneratedBlocks(hashes, parameters, logger);
     }
 
-    #define RUN_COLL_TEST_WITH_MASK_IMPL(BITS, POW_COUNTS, LENGTH, NUM_THREADS, MODE, ROOT)       \
-        const auto word_counts##BITS = (1 << (POW_COUNTS)); /*static_cast<uint64_t>(pow(2, POW_COUNTS));*/\
-        const GenBlocksParameters wp##BITS {BITS, 32, NUM_THREADS, word_counts##BITS, LENGTH, MODE};    \
-        const auto hashes##BITS = hfl::Build##BITS##bitsHashes();                    \
-        TestWithGeneratedBlocks(hashes##BITS, wp##BITS, ROOT)
-
-    void RunCollTestWithMask(uint16_t words_length, uint16_t num_threads, out::Logger& logger) {
-        RUN_COLL_TEST_WITH_MASK_IMPL(48, 24, words_length, num_threads, TestFlag::MASK, logger);
-        RUN_COLL_TEST_WITH_MASK_IMPL(64, 24, words_length, num_threads, TestFlag::MASK, logger);
-    }
-
+    // Запуск тестирования устойчивости к коллизиям всех хеш функций
     void RunTestWithGeneratedBlocks(uint16_t words_length, out::Logger& logger) {
-        out::StartAndEndLogTest start_and_end_log(logger,
-                                                  "GENERATED BLOCKS (length = " + std::to_string(words_length) + ")");
+        using hfl::uint24_t;
+        using hfl::uint48_t;
+
+        const std::string test_name = "GENERATED BLOCKS (length = " + std::to_string(words_length) + ")";
+        out::StartAndEndLogTest start_and_end_log(logger, test_name);
         const uint16_t num_threads = GetNumThreads();
-        RunCollTestNormal(words_length, num_threads, logger);
-        RunCollTestWithMask(words_length, num_threads, logger);
+
+        RunTestWithGeneratedBlocksImpl<uint16_t>(bits16, bits16, bits16, num_threads, words_length,
+                                                 TestFlag::NORMAL, logger);
+        RunTestWithGeneratedBlocksImpl<uint24_t>(bits24, bits24, bits24, num_threads, words_length,
+                                                 TestFlag::NORMAL, logger);
+        RunTestWithGeneratedBlocksImpl<uint32_t>(bits32, bits32, bits24, num_threads, words_length,
+                                                 TestFlag::NORMAL, logger);
+        RunTestWithGeneratedBlocksImpl<uint48_t>(bits48, bits32, bits24, num_threads, words_length,
+                                                 TestFlag::MASK, logger);
+        RunTestWithGeneratedBlocksImpl<uint64_t>(bits64, bits32, bits24, num_threads, words_length,
+                                                 TestFlag::MASK, logger);
     }
 }

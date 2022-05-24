@@ -1,5 +1,5 @@
-#ifndef THESISWORK_MY_ASSERT_H
-#define THESISWORK_MY_ASSERT_H
+#ifndef THESIS_WORK_MY_ASSERT_H
+#define THESIS_WORK_MY_ASSERT_H
 
 #include <execution>
 #include <iostream>
@@ -26,11 +26,4 @@ void AssertEqualImpl(const T& t, const U& u, const std::string& t_str, const std
 
 #define ASSERT_EQUAL_HINT(a, b, hint) AssertEqualImpl((a), (b), #a, #b, __FILE__, __FUNCTION__, __LINE__, (hint))
 
-void AssertImpl(bool value, const std::string& expr_str, const std::string& file, const std::string& func, unsigned line,
-                const std::string& hint);
-
-#define ASSERT(expr) AssertImpl(!!(expr), #expr, __FILE__, __FUNCTION__, __LINE__, "")
-
-#define ASSERT_HINT(expr, hint) AssertImpl(!!(expr), #expr, __FILE__, __FUNCTION__, __LINE__, (hint))
-
-#endif //THESISWORK_MY_ASSERT_H
+#endif //THESIS_WORK_MY_ASSERT_H

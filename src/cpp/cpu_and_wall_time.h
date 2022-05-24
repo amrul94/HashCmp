@@ -3,6 +3,8 @@
 
 #  ifdef _WIN32
 #    include <Windows.h> // Windows
+
+// Возвращает фактическое время в Windows
 double get_wall_time()
 {
 	LARGE_INTEGER time, freq;
@@ -11,6 +13,7 @@ double get_wall_time()
 	return (double)time.QuadPart / freq.QuadPart;
 }
 
+// Возвращает процессорное время в Windows
 double get_cpu_time()
 {
 	FILETIME a, b, c, d;
@@ -22,6 +25,8 @@ double get_cpu_time()
 #  else // Posix/Linux
 #    include <time.h>
 #    include <sys/time.h>
+
+// Возвращает фактическое время в Unix-системах
 double get_wall_time()
 {
 	struct timeval time;
@@ -29,6 +34,7 @@ double get_wall_time()
 	return (double)time.tv_sec + (double)time.tv_usec * 0.000001;
 }
 
+// Возвращает процессорное время в Unix-системах
 double get_cpu_time()
 {
 	return (double)clock() / CLOCKS_PER_SEC;

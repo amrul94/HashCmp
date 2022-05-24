@@ -11,57 +11,44 @@
 
 namespace tests {
     namespace out {
+        // Формирует json-файл, в который будет сохранена информация с теста
+        // скорости хеширования хеш функций
         OutputJson GetSpeedTestJson(uint16_t hash_bits, size_t num_words, out::Logger& logger);
     }
 
+    // Структура, которая хранит имя хеш-функции
+    // и время хеширования
     struct HashSpeed {
         std::string name{};
         double sec_time{};
     };
 
+    // Второй метод подсчета скорости
     template<typename HashFunc>
-    double InnerLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
-                              out::Logger& logger);
+    double CalculateHashingTime(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
+                                out::Logger& logger);
 
-    template<typename HashFunc>
-    double OuterLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
-                              out::Logger& logger);
-
+    // Тестирования скорости хеширования хеш-функций одной битности
     template<typename HashFunc>
     HashSpeed HashSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
                             out::Logger& logger);
 
+    // Функции тестирования скорости хеширования хеш-функций заданной битности
     [[maybe_unused]] boost::json::object SpeedTests16(const std::vector<std::string>& words, out::Logger& logger);
     [[maybe_unused]] boost::json::object SpeedTests24(const std::vector<std::string>& words, out::Logger& logger);
     [[maybe_unused]] boost::json::object SpeedTests32(const std::vector<std::string>& words, out::Logger& logger);
     [[maybe_unused]] boost::json::object SpeedTests48(const std::vector<std::string>& words, out::Logger& logger);
     [[maybe_unused]] boost::json::object SpeedTests64(const std::vector<std::string>& words, out::Logger& logger);
 
+    // Запускает тестирование скорости хеширования хеш-функций
     void RunSpeedTests(uint64_t num_blocks, uint32_t block_length, out::Logger& logger);
 
-// ====================================
+    // ====================================
 
-    template<typename HashFunc>
-    double InnerLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
-                              out::Logger& logger) {
-        Timer timer;
-        auto sum_hashes = static_cast<uint64_t>(func("initial hash"));
-
-        for (const std::string& word : words) {
-            timer.Start();
-            sum_hashes += static_cast<uint64_t>(func(word));
-            timer.End();
-        }
-
-        std::cout << boost::format("\t\tsum hashes: %1%\n") % sum_hashes;
-        logger << boost::format("\t\tfirst timer: %1%\n") % timer;
-
-        return timer.GetTotalTime();
-    }
-
-    template<typename HashFunc>
-    double OuterLoopSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
-                              out::Logger& logger) {
+    // Подсчитывает время хеширования
+    template<typename Hash>
+    double CalculateHashingTime(Hash func, std::string_view hash_name, const std::vector<std::string>& words,
+                                out::Logger& logger) {
         auto sum_hashes = static_cast<uint64_t>(func("initial hash"));
 
         Timer timer1;
@@ -90,18 +77,20 @@ namespace tests {
     }
 
 
+    // Тестирования скорости хеширования хеш-функций одной битности
     template<typename HashFunc>
     HashSpeed HashSpeedTest(HashFunc func, std::string_view hash_name, const std::vector<std::string>& words,
                             out::Logger& logger) {
         out::LogDuration log_duration("\t\tlog duration all time", logger);
         logger << boost::format("\n\t%1%:\n") % hash_name;
 
-        const double total_time_1 = InnerLoopSpeedTest(func, hash_name, words, logger);
-        const double total_time_2 = OuterLoopSpeedTest(func, hash_name, words, logger);
-        const double best_total_time = total_time_1 < total_time_2 ? total_time_1 : total_time_2;
+        // Подсчитывает время хеширования
+        const double hashing_time = CalculateHashingTime(func, hash_name, words, logger);
 
-        logger << boost::format("\t\tbest timer: %1% sec\n") % best_total_time;
-        return HashSpeed{std::string{hash_name}, best_total_time};
+        // Выводит лог
+        logger << boost::format("\t\tbest timer: %1% sec\n") % hashing_time;
+        // Возвращает результаты теста
+        return HashSpeed{std::string{hash_name}, hashing_time};
     }
 }
 
