@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/json.hpp>
 
 #include "count_collisions.h"
 #include "output.h"

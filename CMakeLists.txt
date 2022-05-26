@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(ThesisWork)
+find_package(Boost 1.75 REQUIRED COMPONENTS json)
 
 set(CMAKE_CXX_STANDARD 20)
 set(OPTIMIZE_FLAGS "-march=native -O3 -pipe")
-set(CMAKE_C_FLAGS "${OPTIMIZE_FLAGS} -pthread -Werror -maes")
+set(CMAKE_C_FLAGS "${OPTIMIZE_FLAGS} -Werror -pthread -maes")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lboost_json")
 
 set(LIBS libs)
@@ -30,5 +31,5 @@ set(TESTS ${WORDS_TESTS} ${DIST_TESTS} ${GEN_TESTS} ${ENG_TESTS} ${SPEED_TESTS} 
 
 set(MAIN ${SRC}/main.cpp)
 add_executable(tests ${MAIN} ${GENERAL_FILES} ${TESTS})
-target_include_directories(tests PUBLIC "${LIBS}/HashLib" "${LIBS}/PCG")
-target_link_libraries(tests HashLib)
+target_include_directories(tests PUBLIC "${LIBS}/HashLib" "${LIBS}/PCG" ${Boost_INCLUDE_DIRS})
+target_link_libraries(tests HashLib Boost::json)

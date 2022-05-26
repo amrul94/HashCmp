@@ -1,30 +1,30 @@
+#include "speed_tests.h"
+
 #include <random>
 
-#include "cityhash/inline/city.h"
-#include "farmhash/inline/farmhash.h"
-#include "fasthash/inline/fasthash.h"
+#include <cityhash/inline/city.h>
+#include <farmhash/inline/farmhash.h>
+#include <fasthash/inline/fasthash.h>
+#include <highwayhash/sip_hash.h>
+#include <highwayhash/highwayhash.h>
 #include <metro_hash/metrohash64.h>
-#include "murmur_hash/inline/MurmurHash.h"
+#include <mum-mir/mir-hash.h>
+#include <mum-mir/mum.h>
+#include <murmur_hash/inline/MurmurHash.h>
 #include <nmhash/nmhash.h>
 #include <mx3/mx3.h>
 #include "pearson/inline/pearson.h"
 #include <pengyhash/pengyhash.h>
-#include "spooky_hash/inline/spooky.h"
+#include <siphash/inline/siphash.h>
+#include <spooky_hash/inline/spooky.h>
 #include <super_fast_hash/super_fast_hash.h>
-#include <t1ha/t1ha.h>
+#include <t1ha/inline/t1ha_inline.h>
 #include <wyhash/wyhash.h>
 #include <wyhash/wyhash32.h>
 #include <xx_hash/xxhash.h>
-#include "siphash/inline/siphash.h"
-#include <highwayhash/sip_hash.h>
-#include <highwayhash/highwayhash.h>
 
-#include <mum-mir/mir-hash.h>
-#include <mum-mir/mum.h>
-
-#include "hashes.h"
-#include "speed_tests.h"
 #include "generators.h"
+#include "hashes.h"
 
 namespace tests {
 
@@ -390,8 +390,6 @@ namespace tests {
         HashTest(city::s_inline::CityHash32, args::char_key_uint_len, "CityHash32"s, words, logger, obj);
         HashTest(util::s_inline::Hash32, args::char_key_uint_len, "FarmHash32"s, words, logger, obj);
         HashTest(util::s_inline::Hash32WithSeed, args::char_key_uint_len_seed, "FarmHash32 with seed"s, words, logger, obj);
-        HashTest(t1ha0_32le, args::char_key_uint_len_seed, "T1HA0 32le hash"s, words, logger, obj);
-        HashTest(t1ha0_32be, args::char_key_uint_len_seed, "T1HA0 32be hash"s, words, logger, obj);
 
         HashTest(XXH32, args::char_key_uint_len_seed, "xxHash32"s, words, logger, obj);
         HashTest(wyhash32, args::char_key_uint_len_seed, "wyHash32"s, words, logger, obj);
@@ -432,10 +430,8 @@ namespace tests {
         HashTest(util::s_inline::Hash64WithSeed, args::char_key_uint_len_seed, "FarmHash64 with seed"s, words, logger, obj);
         HashTest(util::s_inline::Hash64WithSeeds, args::char_key_uint_len_seeds, "FarmHash64 with seeds"s, words, logger, obj);
         MetroHashTest(words, logger, obj);
-        HashTest(t1ha0_ia32aes_avx2, args::char_key_uint_len_seed, "T1HA0 AVX2 hash"s, words, logger, obj);
-        HashTest(t1ha1_le, args::char_key_uint_len_seed, "T1HA1 le hash"s, words, logger, obj);
-        HashTest(t1ha1_be, args::char_key_uint_len_seed, "T1HA1 be hash"s, words, logger, obj);
-        HashTest(t1ha2_atonce, args::char_key_uint_len_seed, "T1HA2 atonce hash"s, words, logger, obj);
+        HashTest(t1ha1_inline, args::char_key_uint_len_seed, "T1HA1 hash"s, words, logger, obj);
+        HashTest(t1ha2_atonce_inline, args::char_key_uint_len_seed, "T1HA2 hash"s, words, logger, obj);
         HashTest(XXH64, args::char_key_uint_len_seed, "xxHash64"s, words, logger, obj);
         HashTest(XXH3_64bits, args::char_key_uint_len, "XXH3 64 bits"s, words, logger, obj);
         HashTest(XXH3_64bits_withSeed, args::char_key_uint_len_seed, "XXH3 64 bits with seed"s, words, logger, obj);
@@ -486,10 +482,10 @@ namespace tests {
         pcg64 rng;
         const auto random_blocks = GenerateRandomDataBlocks(rng, num_blocks, block_length);
 
-        RunSpeedTestImpl<uint16_t>(bits16, random_blocks, logger);
-        RunSpeedTestImpl<hfl::uint24_t>(bits24, random_blocks, logger);
-        RunSpeedTestImpl<uint32_t>(bits32, random_blocks, logger);
-        RunSpeedTestImpl<hfl::uint48_t>(bits48, random_blocks, logger);
+        //RunSpeedTestImpl<uint16_t>(bits16, random_blocks, logger);
+        //RunSpeedTestImpl<hfl::uint24_t>(bits24, random_blocks, logger);
+        //RunSpeedTestImpl<uint32_t>(bits32, random_blocks, logger);
+        //RunSpeedTestImpl<hfl::uint48_t>(bits48, random_blocks, logger);
         RunSpeedTestImpl<uint64_t>(bits64, random_blocks, logger);
     }
 }

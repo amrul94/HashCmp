@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 
 project(HashLib)
 set(CMAKE_CXX_STANDARD 20)
 
 set(OPTIMIZE_FLAGS "-march=native -O3 -pipe")
-set(INLINE_FLAGS "-Winline --param inline-unit-growth=10000 --param max-inline-insns-single=10000")
 set(CMAKE_C_FLAGS "${OPTIMIZE_FLAGS} -pthread -maes")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
@@ -34,7 +33,7 @@ set(T1HA_HASH t1ha/t1ha.h t1ha/t1ha0.c t1ha/t1ha0_ia32aes_a.h t1ha/t1ha0_ia32aes
         t1ha/t1ha0_ia32aes_avx2.c t1ha/t1ha0_ia32aes_b.h t1ha/t1ha0_ia32aes_noavx.c
         t1ha/t1ha0_selfcheck.c t1ha/t1ha1.c t1ha/t1ha1_selfcheck.c
         t1ha/t1ha2.c t1ha/t1ha2_selfcheck.c t1ha/t1ha_bits.h t1ha/t1ha_selfcheck.c
-        t1ha/t1ha_selfcheck.h t1ha/t1ha_selfcheck_all.c)
+        t1ha/t1ha_selfcheck.h t1ha/t1ha_selfcheck_all.c t1ha/inline/t1ha_inline.h)
 set(WY_HASH wyhash/wyhash.h wyhash/wyhash32.h)
 set(XX_HASH xx_hash/xxhash.h xx_hash/xxhash.c xx_hash/xxh3.h)
 set(OTHERS_HASH hash_functions.h)

@@ -2,7 +2,6 @@
 #define THESIS_WORK_SPEED_TESTS_H
 
 #include "boost/format.hpp"
-#include "boost/json.hpp"
 
 #include "generators.h"
 #include "timers.h"

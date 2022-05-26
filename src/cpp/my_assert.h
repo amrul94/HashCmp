@@ -8,14 +8,14 @@ template <typename T, typename U>
 void AssertEqualImpl(const T& t, const U& u, const std::string& t_str, const std::string& u_str, const std::string& file,
                      const std::string& func, unsigned line, const std::string& hint) {
     using std::cerr;
-    using std::operator""s;
+    using namespace std::literals;
     if (t != u) {
         cerr << std::boolalpha;
-        cerr << file << "("s << line << "): "s << func << ": "s;
-        cerr << "ASSERT_EQUAL("s << t_str << ", "s << u_str << ") failed: "s;
-        cerr << t << " != "s << u << "."s;
+        cerr << file << "("s << line << "): " << func << ": ";
+        cerr << "ASSERT_EQUAL("s << t_str << ", " << u_str << ") failed: ";
+        cerr << t << " != " << u << ".";
         if (!hint.empty()) {
-            cerr << " Hint: "s << hint;
+            cerr << " Hint: " << hint;
         }
         cerr << std::endl;
         abort();

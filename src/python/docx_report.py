@@ -6,23 +6,27 @@ from docx import Document
 NUM_FOR_ROUND = 5
 
 
+# Создает документ в формате docx
 def create_document(heading: str):
     document = Document()
     document.add_heading(heading, 1)
     return document
 
 
+# Создает документ в формате docx
 def save_document(document: Document, path: str, name: str):
     report_path = os.path.join(path, name)
     document.save(report_path)
 
 
+# Приводит строку к числу
 def num_to_str(num) -> str:
     if isinstance(num, str):
         return num
     return str(np.round(num, NUM_FOR_ROUND))
 
 
+# Заполняет таблицу, которая будет сохранения в DOCX-файле
 def fill_table_for_report(document, data):
     """Создает таблицу в документе и заполняет ее."""
     table = document.add_table(rows=len(data), cols=len(data[0]), style='Table Grid')
@@ -32,6 +36,7 @@ def fill_table_for_report(document, data):
     return table
 
 
+# Добавляет таблицу в DOCX-файл
 def add_table_to_report(heading: str, data: list[list], report: Document):
     report.add_heading(heading, 2)
     fill_table_for_report(report, data)

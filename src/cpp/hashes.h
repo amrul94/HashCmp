@@ -20,20 +20,20 @@ namespace hfl {
 
         // Метод для хеширования строки
         uint64_t operator()(const std::string& str) const {
-            UintT hash = hash_impl_->template Hash(str);
-            return NumberToUint64(hash);
+            UintT hash = hash_impl_->Hash(str);
+            return this->NumberToUint64(hash);
         }
 
         // Метод для хеширования бинарного файла
         uint64_t operator()(std::ifstream& file) const {
-            UintT hash = hash_impl_->template Hash(file);
-            return NumberToUint64(hash);
+            UintT hash = hash_impl_->Hash(file);
+            return this->NumberToUint64(hash);
         }
 
         // Метод для хеширования чисел
         uint64_t operator()(std::integral auto number) const {
-            UintT hash = hash_impl_->template Hash(number);
-            return NumberToUint64(hash);
+            UintT hash = hash_impl_->Hash(number);
+            return this->NumberToUint64(hash);
         }
 
         [[nodiscard]] std::string GetName() const {

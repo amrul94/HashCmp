@@ -76,8 +76,6 @@ namespace hfl {
         hashes.emplace_back("CityHash32"s, std::make_unique<CityHash32Wrapper>());
         hashes.emplace_back("FarmHash32"s, std::make_unique<FarmHash32Wrapper>());
         hashes.emplace_back("FarmHash32 with seed"s, std::make_unique<FarmHash32WithSeedWrapper>());
-        hashes.emplace_back("T1HA0 32le hash"s, std::make_unique<T1HA0_32leWrapper>());
-        hashes.emplace_back("T1HA0 32be hash"s, std::make_unique<T1HA0_32beWrapper>());
         hashes.emplace_back("xxHash32"s, std::make_unique<xxHash32Wrapper>());
 
         hashes.emplace_back("wyhash32"s, std::make_unique<wyHash32Wrapper>());
@@ -129,10 +127,8 @@ namespace hfl {
         hashes.emplace_back("FarmHash64WithSeed"s, std::make_unique<FarmHash64WithSeedWrapper>());
         hashes.emplace_back("FarmHash64WithSeeds"s, std::make_unique<FarmHash64WithSeedsWrapper>());
         hashes.emplace_back("MetroHash64"s, std::make_unique<MetroHash64_Wrapper>());
-        hashes.emplace_back("T1HA0 AVX2 hash", std::make_unique<T1HA0_AVX2_Wrapper>());
-        hashes.emplace_back("T1HA1 le hash", std::make_unique<T1HA1LeWrapper>());
-        hashes.emplace_back("T1HA1 be hash", std::make_unique<T1HA1BeWrapper>());
-        hashes.emplace_back("T1HA2 atonce hash", std::make_unique<T1HA2AtonceWrapper>());
+        hashes.emplace_back("T1HA1 hash", std::make_unique<T1HA1Wrapper>());
+        hashes.emplace_back("T1HA2 hash", std::make_unique<T1HA2Wrapper>());
         hashes.emplace_back("xxHash64", std::make_unique<xxHash64Wrapper>());
         hashes.emplace_back("XXH3 64 bits", std::make_unique<XXH3_64BitsWrapper>());
         hashes.emplace_back("XXH3 64 bits with seed", std::make_unique<XXH3_64bits_withSeedWrapper>());

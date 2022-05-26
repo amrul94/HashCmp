@@ -1,3 +1,5 @@
+#include <endian.h>
+
 #include <cityhash/city.h>
 #include <farmhash/farmhash.h>
 #include <fasthash/fasthash.h>
@@ -345,28 +347,15 @@ namespace hfl::wrappers {
 
     //-------------- T1HA --------------
 
-    uint32_t T1HA0_32leWrapper::HashImpl(const char *message, size_t length) const {
-        return t1ha0_32le(message, length, SEED_64_1);
-    }
-
-    uint32_t T1HA0_32beWrapper::HashImpl(const char *message, size_t length) const {
-        return t1ha0_32be(message, length, SEED_64_1);
-    }
-
-    uint64_t T1HA0_AVX2_Wrapper::HashImpl(const char *message, size_t length) const {
-        return t1ha0_ia32aes_avx2(message, length, SEED_64_1);
-    }
-
-
-    uint64_t T1HA1LeWrapper::HashImpl(const char *message, size_t length) const {
+    uint64_t T1HA1Wrapper::HashImpl(const char *message, size_t length) const {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
         return t1ha1_le(message, length, SEED_64_1);
-    }
-
-    uint64_t T1HA1BeWrapper::HashImpl(const char *message, size_t length) const {
+#else
         return t1ha1_be(message, length, SEED_64_1);
+#endif
     }
 
-    uint64_t T1HA2AtonceWrapper::HashImpl(const char *message, size_t length) const {
+    uint64_t T1HA2Wrapper::HashImpl(const char *message, size_t length) const {
         return t1ha2_atonce(message, length, SEED_64_1);
     }
 

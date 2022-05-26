@@ -497,33 +497,12 @@ namespace hfl::wrappers {
 
     //-------------- T1HA --------------
 
-    class [[maybe_unused]] T1HA0_32leWrapper final : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t HashImpl(const char *message, size_t length) const override;
-    };
-
-    class [[maybe_unused]] T1HA0_32beWrapper final : public BaseHash32Wrapper {
-    private:
-        [[nodiscard]] uint32_t HashImpl(const char *message, size_t length) const override;
-    };
-
-    class [[maybe_unused]] T1HA0_AVX2_Wrapper final : public BaseHash64Wrapper {
+    class [[maybe_unused]] T1HA1Wrapper final : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t HashImpl(const char *message, size_t length) const override;
     };
 
-    class [[maybe_unused]] T1HA1LeWrapper final : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t HashImpl(const char *message, size_t length) const override;
-    };
-
-    class [[maybe_unused]] T1HA1BeWrapper final : public BaseHash64Wrapper {
-    private:
-        [[nodiscard]] uint64_t HashImpl(const char *message, size_t length) const override;
-    };
-
-
-    class [[maybe_unused]] T1HA2AtonceWrapper final : public BaseHash64Wrapper {
+    class [[maybe_unused]] T1HA2Wrapper final : public BaseHash64Wrapper {
     private:
         [[nodiscard]] uint64_t HashImpl(const char *message, size_t length) const override;
     };

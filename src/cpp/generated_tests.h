@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/json.hpp>
 
 #include <pcg_random.hpp>
 
