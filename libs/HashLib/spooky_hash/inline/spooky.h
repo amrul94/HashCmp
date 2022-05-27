@@ -48,7 +48,9 @@
 
 #define restrict __restrict
 
-#define ROTL64(x, k) (((x) << (k)) | ((x) >> (64 - (k))))
+#ifndef ROTL64
+#   define ROTL64(x, k) (((x) << (k)) | ((x) >> (64 - (k))))
+#endif
 
 namespace spooky_inline {
 

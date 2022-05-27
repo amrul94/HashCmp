@@ -81,6 +81,9 @@ void RunTests(const std::vector<int>& test_numbers, tests::out::Logger& logger) 
     for (int test_number : test_numbers) {
         TestType test_type{test_number};
         switch (test_type) {
+            case TestType::AVALANCHE_TESTS:
+                tests::RunAvalancheTests(logger);
+                break;
             case TestType::DISTRIBUTION_TESTS:
                 tests::RunDistributionTests(logger);
                 break;
@@ -93,14 +96,11 @@ void RunTests(const std::vector<int>& test_numbers, tests::out::Logger& logger) 
             case TestType::TESTS_WITH_ENGLISH_WORDS:
                 tests::RunTestWithEnglishWords(logger);
                 break;
-            case TestType::SPEED_TESTS:
-                tests::RunSpeedTests(NUM_SPEED_TEST_WORDS, LENGTH_OF_BIG_BLOCK, logger);
-                break;
-            case TestType::AVALANCHE_TESTS:
-                tests::RunAvalancheTests(logger);
-                break;
             case TestType::TESTS_WITH_IMAGES:
                 tests::RunImagesTests(logger);
+                break;
+            case TestType::SPEED_TESTS:
+                tests::RunSpeedTests(NUM_SPEED_TEST_WORDS, LENGTH_OF_BIG_BLOCK, logger);
                 break;
             default:
                 break;
@@ -109,7 +109,7 @@ void RunTests(const std::vector<int>& test_numbers, tests::out::Logger& logger) 
 }
 
 int main() {
-    const std::vector test_numbers{7};
+    const std::vector test_numbers{3, 5, 7};
     auto logger = tests::out::CreateLogger();
     RunTests(test_numbers, logger);
 }

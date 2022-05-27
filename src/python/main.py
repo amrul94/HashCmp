@@ -1,10 +1,13 @@
+import sys
+import os.path
+
 import matplotlib.pyplot as plt
 
-import avalanche_effect_statistics as avalanche_stat
-import distribution_statistics as distribution_stat
-import data_collisions_statistics as data_stat
-import gen_blocks_statistics as gen_stat
-import speed_statistics as speed_stat
+import avalanche_effect_statistics as ae
+import distribution_statistics as ds
+import gen_blocks_statistics as gbs
+import data_collisions_statistics as dcs
+import speed_statistics as ss
 
 
 def main():
@@ -13,17 +16,17 @@ def main():
     test_numbers = [1, 2, 3, 4, 5, 6]
     for test_number in test_numbers:
         if test_number == 1:
-            avalanche_stat.process_avalanche_effect_statistics(reports_dir_name)
+            ae.process_avalanche_effect_statistics(reports_dir_name)
         elif test_number == 2:
-            distribution_stat.process_distribution_statistics(reports_dir_name)
-        elif test_number == 3:
-            data_stat.process_collision_statistics(reports_dir_name, "English words tests")
-        elif test_number == 4:
-            data_stat.process_collision_statistics(reports_dir_name, "Images tests")
+            ds.process_distribution_statistics(reports_dir_name)
+        elif test_number == 3 or test_number == 4:
+            gbs.process_collision_statistics(reports_dir_name)
         elif test_number == 5:
-            gen_stat.process_collision_statistics(reports_dir_name)
+            dcs.process_collision_statistics(reports_dir_name, "English words tests")
         elif test_number == 6:
-            speed_stat.process_speed_statistics(reports_dir_name)
+            dcs.process_collision_statistics(reports_dir_name, "Images tests")
+        elif test_number == 7:
+            ss.process_speed_statistics(reports_dir_name)
 
 
 if __name__ == '__main__':

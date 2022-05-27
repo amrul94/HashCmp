@@ -65,7 +65,8 @@ namespace tests {
         // Функция, запускаемая барьером sync_point (описан ниже) после выполнения
         // внутреннего цикла в thread_task
         auto loop_completion_task =
-                [&logger, &num_words, &num_collisions, &collisions, &loop_conditional, &parameters, step] () {
+                [&logger, &num_words, &num_collisions, &collisions, &loop_conditional, 
+                 &parameters, step] () noexcept{
             logger << boost::format("\t\t%1% words:\t%2% collisions\n") % num_words % num_collisions;
             std::string index = std::to_string(num_words);
             collisions[index] = num_collisions;
