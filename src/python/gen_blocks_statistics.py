@@ -7,11 +7,14 @@ from base_statistics import *
 from reports_dir import *
 
 
-# Класс для визуализации статистики коллизий при хешировании
-# случайных блоков данных
 class GeneratedBlocksStatistics(CollisionsStatistics):
-    # Конструктор класса
+    """Класс для визуализации статистики коллизий при хешировании случайных блоков данных"""
+
     def __init__(self, js: dict, tests_dir_path: str):
+        """
+        :param js: json-структура с результатами тестов.
+        :param tests_dir_path: путь к папке, в которую сохраняются результаты выполнения программы
+        """
         CollisionsStatistics.__init__(self, js)
         self.mask = js['Mask']
         self.blocks_size = js['Blocks size']
@@ -22,9 +25,14 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
         self.plot_path = os.path.join(blocks_dir_path, str(self.bits))
         make_dir(self.plot_path)
 
-    # Устанавливает параметры построения графика в логарифмическом масштабе
+
     @staticmethod
     def __plot_log_scale(ax):
+        """
+        Устанавливает параметры построения графика в логарифмическом масштабе.
+        :param ax: оси графика
+        :return: None
+        """
         plt.xscale('log', base=2)
         plt.yscale('log', base=2)
         x_major = ticker.LogLocator(base=2.0, numticks=50)
@@ -32,8 +40,12 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
         y_major = ticker.LogLocator(base=2.0, numticks=50)
         ax.yaxis.set_major_locator(y_major)
 
-    # Заполняет списки для построения графика
     def __fill_plot_lines(self, hash_name: str) -> tuple[list, list]:
+        """
+         Заполняет списки для построения графика
+        :param hash_name: название хеш функции
+        :return: tuple[list, list] - списки с числом хешируемых блоков и числом коллизий
+        """
         count_words = []    # Число хэшируемых блоков
         collisions = []     # Число коллизий
         hash_collisions = self.collisions[hash_name]
@@ -43,38 +55,49 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
             collisions.append(hash_collisions[count])
         return count_words, collisions
 
-    # Построение графика коллизий для одной хеш-функции
     def __plot_hash_collisions(self, hash_name: str):
+        """
+        Построение графика коллизий для одной хеш функции.
+        :param hash_name: название хеш функции
+        :return: None
+        """
         fig, ax = plt.subplots()
-        ax.set_title(hash_name)
+        if self.bits != self.mask:
+            title = hash_name.split('(')[0] + '(with 32 bits xor-fold-mask)'
+            ax.set_title(title)
+        else:
+            ax.set_title(hash_name)
         plt.xlabel('Число хешируемых данных')
         plt.ylabel('Число коллизий')
         count_words, collisions = self.__fill_plot_lines(hash_name)
 
-        plt.plot(count_words, collisions, color='black')
-        plt.scatter(count_words, collisions, color='black', marker='o')
+        plt.plot(count_words, collisions, color='orange')
+        plt.scatter(count_words, collisions, color='orange', marker='o')
+        if self.bits >= 32:
+            plt.ylim([1, 1 << 20])
 
         self.__plot_log_scale(ax)
-
         ax.grid(which='major', color='gray', linestyle=':')
-        if self.bits != self.mask:
-            file_name = f'{hash_name} {self.bits} bits (mask {self.mask} bits) (log).png'
-        else:
-            file_name = f'{hash_name} {self.bits} bits (log).png'
 
-        file_path = os.path.join(self.plot_path, file_name)
+        file_path = os.path.join(self.plot_path, f'{hash_name}.png')
         fig.savefig(file_path)
         plt.cla()
         plt.clf()
         plt.close()
 
-    # Построение графиков коллизий для всех хеш-функций
     def plot(self):
+        """
+        Построение графиков коллизий для всех хеш функций.
+        :return: None
+        """
         for hash_name in self.collisions:
             self.__plot_hash_collisions(hash_name)
 
-    # Формирует списки для печати таблицы с информацией о коллизиях
     def get_collisions(self):
+        """
+        Формирует списки для печати таблицы с информацией о коллизиях.
+        :return: списки для печати таблицы
+        """
         keys = list(self.collisions)
         collisions = [list(self.collisions[keys[0]])]
         collisions[0].insert(0, 'Название функции')
@@ -84,8 +107,16 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
         return collisions
 
 
-# Чтение json-файлов и на их основе построение гистограмм и таблиц
 def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report, save_path: str):
+    """
+    Чтение json-файлов и на их основе построение гистограмм и таблиц
+    :param sub_dir_path: путь к папке с json-файлами
+    :param sub_dir_name: название папки с json-файлами
+    :param file_name: название json-файла с результатами тестов
+    :param report: docx-документ, в который будут сохранены таблицы с результатами тестов
+    :param save_path: путь к папке, в которую будут сохранены графики.
+    :return: None
+    """
     path_to_file = os.path.join(sub_dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
@@ -99,17 +130,26 @@ def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report, save_
         docx_report.add_table_to_report(heading, data_collisions, report)
 
 
-# Проход по вложенному каталогу результатов теста коллизий
 def open_sub_dir(root_path: str, sub_dir_name, report, save_path: str):
+    """
+    Проход по вложенному каталогу результатов теста коллизий
+    :param root_path: путь к папке с результатами тестов
+    :param sub_dir_name: название папки с результатами тестов
+    :param report: docx-документ, в который будут сохранены таблицы с результатами тестов
+    :param save_path: путь к папке, в которую будут сохранены графики.
+    :return: None
+    """
     sub_dir_path = os.path.join(root_path, sub_dir_name)
     list_of_files = os.listdir(sub_dir_path)
     for file_name in list_of_files:
         plot_graphics(sub_dir_path, sub_dir_name, file_name, report, save_path)
 
 
-# Обработки данных тестирования устойчивости к коллизиям
-# при хешировании случайных блоков данных
 def process_collision_statistics(tests_dir_name):
+    """Обработки данных тестирования устойчивости к коллизиям при хешировании случайных блоков данных
+    :param tests_dir_name:
+    :return: None
+    """
     report_heading = 'Таблицы коллизий'
     path_to_test_dir = get_cpp_report_path(tests_dir_name)
     test_name = "Generated blocks tests"

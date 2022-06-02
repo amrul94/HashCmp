@@ -15,14 +15,51 @@
 
 namespace tests {
     namespace out {
-        // Формирует json-файл, в который будет сохранена информация с теста хеш функции
-        // на устойчивости к коллизиям
+        /*
+         *  Формирует json-файл, в который будет сохранена информация с теста хеш функции
+         *  на устойчивости к коллизиям
+         *  Входные параметры:
+         *      1. parameters - параметры тестирования:
+         *          - битность хеша (16, 32 или 64)
+         *          - число потоков (зависит от системы)
+         *      2. logger - записывает лог в файл и выводит его на консоль
+         */
         OutputJson GetImagesTestJson(const TestParameters& parameters, out::Logger& logger);
     }
 
+    /*
+     *  Тестирование устойчивости к коллизиям одной хеш функции. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hash - хеш-функция
+     *      2. parameters - параметры тестирования:
+     *          - битность хеша (16, 24, 32, 48 или 64)
+     *          - число потоков (зависит от системы)
+     *      3. logger - записывает лог в файл и выводит его на консоль
+     *  Выходное значение: число коллизий
+     */
+    template <hfl::UnsignedIntegral UintT>
+    uint64_t HashTestWithImages(const hfl::Hash<UintT>& hash, const TestParameters& parameters, out::Logger& logger);
+
+    /*
+     *  Тестирование устойчивости к коллизиям хеш функций. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hashes - массив со всеми хеш-функциями одной битности
+     *      3. parameters - параметры тестирования:
+     *          - битность хеша (16, 24, 32, 48 или 64)
+     *          - число потоков (зависит от системы)
+     *      4. logger - записывает лог в файл и выводит его на консоль
+     */
+    template <hfl::UnsignedIntegral UintT>
+    void TestWithImages(const std::vector<hfl::Hash<UintT>>& hashes, const TestParameters& parameters,
+                        out::Logger& logger);
+
+// =======================================================================================
+
     // Тестирование устойчивости к коллизиям одной хеш функции
     template <hfl::UnsignedIntegral UintT>
-    uint64_t HashTestWithImages(const hfl::Hash<UintT>& hash, const TestParameters& tp, out::Logger& logger) {
+    uint64_t HashTestWithImages(const hfl::Hash<UintT>& hash, const TestParameters& parameters, out::Logger& logger) {
         namespace fs = std::filesystem;
         using HashMap = std::map<uint64_t, uint64_t>;
 
@@ -33,7 +70,7 @@ namespace tests {
         std::atomic_uint8_t dir_number;
 
         // Функция, запускаемая в отдельном потоке
-        auto thread_task = [&hash, &tp, &dir_number, general_images_dir](uint64_t, uint64_t) {
+        auto thread_task = [&hash, &parameters, &dir_number, general_images_dir](uint64_t, uint64_t) {
             fs::path current_images_dir = general_images_dir / std::to_string(dir_number++);
             HashMap hash_values;
             std::vector<fs::path> removed_path;
@@ -59,7 +96,7 @@ namespace tests {
         };
 
         // Запуск теста в разных потоках
-        ThreadTasks<HashMap> tasks(thread_task, merge_results, tp.num_threads, tp.num_threads);
+        ThreadTasks<HashMap> tasks(thread_task, merge_results, parameters.num_threads, parameters.num_threads);
         const auto hashes = tasks.GetResult();
 
         // Вычисление числа коллизий
@@ -71,7 +108,8 @@ namespace tests {
 
     // Тестирование устойчивости к коллизиям хеш функций
     template <hfl::UnsignedIntegral UintT>
-    void TestWithImages(const std::vector<hfl::Hash<UintT>>& hashes, const TestParameters& parameters, out::Logger& logger) {
+    void TestWithImages(const std::vector<hfl::Hash<UintT>>& hashes, const TestParameters& parameters,
+                        out::Logger& logger) {
         out::StartAndEndLogBitsTest printer(logger, parameters.hash_bits);
 
         auto out_json = out::GetImagesTestJson(parameters, logger);

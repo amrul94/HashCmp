@@ -109,7 +109,7 @@ void RunTests(const std::vector<int>& test_numbers, tests::out::Logger& logger) 
 }
 
 int main() {
-    const std::vector test_numbers{3, 5, 7};
+    const std::vector test_numbers{7};
     auto logger = tests::out::CreateLogger();
     RunTests(test_numbers, logger);
 }

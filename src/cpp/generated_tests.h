@@ -23,19 +23,58 @@
 
 namespace tests {
     namespace out {
-        // Формирует json-файл, в который будет сохранена информация с теста хеш функции
-        // на устойчивости к коллизиям
-        OutputJson GetGenTestJson(const GenBlocksParameters& gbp, out::Logger& logger);
+        /*
+         *  Формирует json-файл, в который будет сохранена информация с теста хеш функции
+         *  на устойчивости к коллизиям
+         *  Входные параметры:
+         *      1. parameters - параметры тестирования:
+         *          - битность хеша (16, 24, 32, 48 или 64)
+         *          - битность маски (16, 24 или 32)
+         *          - число потоков (зависит от системы)
+         *          - число хешируемых блоков (целое положительное число)
+         *          - размер блока
+         *          - флаг тестирования (NORMAL или MASK)
+         *      2. logger - записывает лог в файл и выводит его на консоль
+         */
+        OutputJson GetGenTestJson(const GenBlocksParameters& parameters, out::Logger& logger);
     }
 
-    // Тестирование устойчивости к коллизиям одной хеш функции. Реализация описана ниже
+    /*
+     *  Тестирование устойчивости к коллизиям одной хеш функции. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hash - хеш-функция
+     *      2. parameters - параметры тестирования:
+     *          - битность хеша (16, 24, 32, 48 или 64)
+     *          - битность маски (16, 24 или 32)
+     *          - число потоков (зависит от системы)
+     *          - число хешируемых блоков (целое положительное число)
+     *          - размер блока
+     *          - флаг тестирования (NORMAL или MASK)
+     *      3. logger - записывает лог в файл и выводит его на консоль
+     *  Выходное значение: пара название хеш функции и число коллизий
+     */
     template<hfl::UnsignedIntegral UintT>
-    auto HashTestWithGenBlocks(std::vector<pcg64>& generators, const hfl::Hash<UintT>& hs,
+    auto HashTestWithGenBlocks(const hfl::Hash<UintT>& hash,
                                const GenBlocksParameters& parameters, out::Logger& logger);
 
-    // Тестирование устойчивости к коллизиям хеш функций. Реализация описана ниже
+    /*
+     *  Тестирование устойчивости к коллизиям хеш функций. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hashes - массив со всеми хеш-функциями одной битности
+     *      2. words - массив хешируемых слов
+     *      3. parameters - параметры тестирования:
+     *          - битность хеша (16, 24, 32, 48 или 64)
+     *          - битность маски (16, 24 или 32)
+     *          - число потоков (зависит от системы)
+     *          - число хешируемых блоков (целое положительное число)
+     *          - размер блока
+     *          - флаг тестирования (NORMAL или MASK)
+     *      4. logger - записывает лог в файл и выводит его на консоль
+     */
     template<hfl::UnsignedIntegral UintT>
-    void TestWithGeneratedBlocks(std::vector<pcg64>& generators, const std::vector<hfl::Hash<UintT>>& hashes,
+    void TestWithGeneratedBlocks(const std::vector<hfl::Hash<UintT>>& hashes,
                                  const GenBlocksParameters& parameters, out::Logger& logger);
 
     // Запуск тестирования устойчивости к коллизиям хеш функций
@@ -43,7 +82,7 @@ namespace tests {
 
     // ===============================================================================
 
-    // Эту функцию думаю в будущем разбить на части
+    // Тестирование устойчивости к коллизиям одной хеш функции
     template<hfl::UnsignedIntegral UintT>
     auto HashTestWithGenBlocks(const hfl::Hash<UintT>& hash, const GenBlocksParameters& parameters,
                                out::Logger& logger) {
@@ -114,7 +153,8 @@ namespace tests {
         return std::pair{std::move(hash_name), std::move(collisions)};
     }
 
-    // Возможно стоит поделить эту функции на части, так как она очень большая
+
+    // Тестирование устойчивости к коллизиям хеш функций
     template<hfl::UnsignedIntegral UintT>
     void TestWithGeneratedBlocks(const std::vector<hfl::Hash<UintT>>& hashes, const GenBlocksParameters& parameters,
                                  out::Logger& logger) {
@@ -124,8 +164,8 @@ namespace tests {
         boost::json::object collisions;
 
         // В цикле запускаются тесты (HashTestWithGenBlocks) для каждой хеш функции
-        for (const auto& hasher : hashes) {
-            auto [hash_name, counters] = HashTestWithGenBlocks(hasher, parameters, logger);
+        for (const auto& hash : hashes) {
+            auto [hash_name, counters] = HashTestWithGenBlocks(hash, parameters, logger);
             collisions[hash_name] = std::move(counters);
         }
 

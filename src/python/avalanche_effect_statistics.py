@@ -5,10 +5,14 @@ from base_statistics import *
 from reports_dir import *
 
 
-# Класс для визуализации статистики лавинного эффекта
 class AvalancheEffectStatistics:
-    # Конструктор класса
+    """Класс для визуализации статистики лавинного эффекта"""
+
     def __init__(self, js: dict, tests_dir_path: str | bytes):
+        """
+        :param js: json-структура с результатами тестов;
+        :param tests_dir_path: путь к папке, в которую сохраняются результаты выполнения программы
+        """
         self.test_name = js['Test name']
         self.bits = js["Bits"]
         self.hist_path = tests_dir_path
@@ -31,8 +35,11 @@ class AvalancheEffectStatistics:
         # заполнение списков параметров
         self.__fill_statistics(js["Avalanche effect"])
 
-    # Метод для заполнения списков параметров
     def __fill_statistics(self, avalanche_statistics: dict):
+        """
+        Метод для заполнения списков параметров.
+        :param avalanche_statistics: результаты тестирования лавинного эффекта
+        """
         for hash_name, hash_statistics in avalanche_statistics.items():
             self.hash_names.append(hash_name)
             y_min = hash_statistics['Worst case']
@@ -55,8 +62,12 @@ class AvalancheEffectStatistics:
             self.modified_number.append(modified_pair['Number'])
             self.modified_hash.append(modified_pair['Hash'])
 
-    # Построение гистограммы
     def create_histogram(self, file_name: str):
+        """
+        Построение гистограммы.
+        :param file_name: название файла с графиком
+        """
+
         # Названия на гистограмме
         title = f'Лавинный эффект ({self.bits}-битные хеш функции)'
         legend_labels = ['Медианное расстояние Хемминга', 'Среднее расстояние Хемминга']
@@ -72,9 +83,11 @@ class AvalancheEffectStatistics:
         my_histogram.histogram_with_errors(self.hash_names, self.average_distance, self.error_distances, labels,
                                            file_path, locators, limits, self.median_distances)
 
-    # заполняет списки для построения таблицы
-    # Расстояния Хемминга d docx
     def get_hamming_distance_table(self):
+        """
+        Заполняет списки для построения таблицы расстояния Хемминга в docx
+        :return: list[list[str] | list] - списки для построения таблицы
+        """
         table = [['Название функции',
                   'Минимальное расстояние Хемминга',
                   'Частота минимального расстояния',
@@ -89,8 +102,14 @@ class AvalancheEffectStatistics:
         return table
 
 
-# Чтение json-файлов и на их основе построение гистограмм и таблиц
 def create_histogram(dir_path: str, file_name: str, save_path: str):
+    """
+    Чтение json-файлов и на их основе построение гистограмм и таблиц.
+    :param dir_path: путь к папке с результатами тестов;
+    :param file_name: название json-файла с результатами тестов;
+    :param save_path: путь к папке, в которую будут сохранены графики.
+    :return: list[list[str] | list] - списки для построения таблицы
+    """
     path_to_file = os.path.join(dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
@@ -99,8 +118,12 @@ def create_histogram(dir_path: str, file_name: str, save_path: str):
         return ds.get_hamming_distance_table()
 
 
-# Обработки данных тестирования лавинного эффекта
 def process_avalanche_effect_statistics(tests_dir_name: str):
+    """
+    Обработки данных тестирования лавинного эффекта.
+    :param tests_dir_name: название папки с результатами тестов.
+    :return: None
+    """
     report_heading = 'Таблицы лавинного эффекта'
     path_to_test_dir = get_cpp_report_path(tests_dir_name)
     test_name = "Avalanche effect tests"
@@ -116,9 +139,4 @@ def process_avalanche_effect_statistics(tests_dir_name: str):
         heading = file_name.split('.')[0]
         docx_report.add_table_to_report(heading, dict_tables, report)
     docx_report.save_document(report, save_path, 'report.docx')
-
-
-
-
-
 

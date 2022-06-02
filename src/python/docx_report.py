@@ -6,21 +6,35 @@ from docx import Document
 NUM_FOR_ROUND = 5
 
 
-# Создает документ в формате docx
 def create_document(heading: str):
+    """
+    Создает документ в формате docx
+    :param heading: заголовок документа
+    :return: документ в формате docx
+    """
     document = Document()
     document.add_heading(heading, 1)
     return document
 
 
-# Создает документ в формате docx
 def save_document(document: Document, path: str, name: str):
+    """
+    Сохраняет документ в формате docx
+    :param document: документ
+    :param path: путь к папке, в которую будут сохранен документ
+    :param name: название документа
+    :return: None
+    """
     report_path = os.path.join(path, name)
     document.save(report_path)
 
 
-# Приводит строку к числу
 def num_to_str(num) -> str:
+    """
+    Приводит строку к числу
+    :param num: число
+    :return: строка
+    """
     if isinstance(num, str):
         return num
     return str(np.round(num, NUM_FOR_ROUND))

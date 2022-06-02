@@ -4,25 +4,25 @@ namespace tests {
     namespace out {
         // Формирует json-файл, в который будет сохранена информация с теста хеш функции
         // на устойчивости к коллизиям
-        OutputJson GetGenTestJson(const GenBlocksParameters& gbp, out::Logger& logger) {
+        OutputJson GetGenTestJson(const GenBlocksParameters& parameters, out::Logger& logger) {
             using namespace std::literals;
             const std::filesystem::path gen_tests_dir = "Generated blocks tests";
-            const std::filesystem::path block_size_dir = std::to_string(gbp.words_length);
+            const std::filesystem::path block_size_dir = std::to_string(parameters.words_length);
             const auto block_size_path = logger.GetLogDirPath() / gen_tests_dir / block_size_dir;
             std::filesystem::create_directories(block_size_path);
 
-            const std::filesystem::path report_name = std::to_string(gbp.hash_bits) + " bits (" + TestFlagToString(gbp.mode)
-                                                      + " "s + std::to_string(gbp.mask_bits) + " bits).json"s;
+            const std::filesystem::path report_name = std::to_string(parameters.hash_bits) + " bits (" + TestFlagToString(parameters.mode)
+                                                      + " "s + std::to_string(parameters.mask_bits) + " bits).json"s;
             const std::filesystem::path report_path = block_size_path / report_name;
 
             std::ofstream out(report_path);
             assert(out);
             boost::json::object obj;
             obj["Test name"] = "Test With Random Words";
-            obj["Mode"] = TestFlagToString(gbp.mode);
-            obj["Bits"] = gbp.hash_bits;
-            obj["Mask"] = gbp.mask_bits;
-            obj["Number of keys"] = gbp.num_keys;
+            obj["Mode"] = TestFlagToString(parameters.mode);
+            obj["Bits"] = parameters.hash_bits;
+            obj["Mask"] = parameters.mask_bits;
+            obj["Number of keys"] = parameters.num_keys;
             return OutputJson{std::move(obj), std::move(out)};
         }
     }

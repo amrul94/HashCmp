@@ -21,19 +21,19 @@ namespace hfl {
         // Метод для хеширования строки
         uint64_t operator()(const std::string& str) const {
             UintT hash = hash_impl_->Hash(str);
-            return this->NumberToUint64(hash);
+            return NumberToUint64(hash);
         }
 
         // Метод для хеширования бинарного файла
         uint64_t operator()(std::ifstream& file) const {
             UintT hash = hash_impl_->Hash(file);
-            return this->NumberToUint64(hash);
+            return NumberToUint64(hash);
         }
 
         // Метод для хеширования чисел
         uint64_t operator()(std::integral auto number) const {
             UintT hash = hash_impl_->Hash(number);
-            return this->NumberToUint64(hash);
+            return NumberToUint64(hash);
         }
 
         [[nodiscard]] std::string GetName() const {
@@ -53,7 +53,8 @@ namespace hfl {
     };
 
     //----------- BuildHashes ----------
-    // Функции для конструирования хеш функций
+    // Функции для конструирования хеш функций.
+    // Возвращают вектор из хеш-функций
     std::vector<Hash<uint16_t>> Build16bitsHashes();
     std::vector<Hash<uint24_t>> Build24bitsHashes();
     std::vector<Hash<uint32_t>> Build32bitsHashes();
@@ -62,8 +63,8 @@ namespace hfl {
 
     template<class> inline constexpr bool always_false_v = false;
 
-    // Универсальная функция для конструирования хеш функций
-    // заданной битности
+    // Универсальная функция для конструирования хеш функций заданной битности.
+    // Возвращает вектор из хеш-функций
     template<UnsignedIntegral UintT>
     std::vector<Hash<UintT>> BuildHashes() {
         if constexpr (std::is_same_v<UintT, uint16_t>)

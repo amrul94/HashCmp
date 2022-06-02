@@ -21,7 +21,19 @@ namespace tests {
     using Bucket = std::uint16_t;
 
     namespace out {
-        // Сохраняет результаты тестов в json файл
+        /*
+         * Сохраняет результаты тестов в json файл
+         *  Входные параметры:
+         *      1. buckets - массив счетчиков хеш-значений
+         *      2. parameters - параметры тестирования:
+         *          - битность хеша (16, 32 или 64)
+         *          - число потоков (зависит от системы)
+         *          - число ключей (целое положительное число)
+         *          - размер массива buckets
+         *          - флаг тестирования: NORMAL или BINS
+         *      3. hash_name - название хеш функции
+         *      4. logger - записывает лог в файл и выводит его на консоль
+         */
         void SaveReport(const std::vector<std::atomic<Bucket>>& buckets, const DistTestParameters& parameters,
                         const std::string& hash_name, out::Logger& logger);
     }
@@ -32,26 +44,51 @@ namespace tests {
         static constexpr Bucket max_bucket = std::numeric_limits<Bucket>::max();
 
         explicit DistributionHashes(size_t num_buckets);
+
         // Добавляет хеш-значение
         void AddHash(uint64_t hash_value);
+
         // Возвращает вектор хеш-значений
         [[nodiscard]] const std::vector<std::atomic<Bucket>>& GetBuckets() const;
 
     private:
-        std::vector<std::atomic<Bucket>> buckets_; // Вектор хеш-значений
+        std::vector<std::atomic<Bucket>> buckets_; // Массив счетчиков хеш-значений
     };
 
 
-    // Тестирование распределительных свойств одной хеш функции. Реализация описана ниже
+    /*
+     * Тестирование распределительных свойств одной хеш функции. Реализация описана ниже
+     *      1. hash - хеш-функция
+     *      2. parameters - параметры тестирования:
+     *          - битность хеша (16, 32 или 64)
+     *          - число ключей (целое положительное число)
+     *          - число потоков (зависит от системы)
+     *          - размер массива счетчиков хеш-значений
+     *          - флаг тестирования: NORMAL или BINS
+     *      3. logger - записывает лог в файл и выводит его на консоль
+     */
     template<hfl::UnsignedIntegral UintT>
     void HashDistributionTest(const hfl::Hash<UintT>& hash, const DistTestParameters& parameters, out::Logger& logger);
 
-    // Тестирование распределительных свойств хеш функций. Реализация описана ниже
+    /*
+     * Тестирование распределительных свойств хеш функций. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hashes - массив со всеми хеш-функциями одной битности
+     *      2. parameters - параметры тестирования:
+     *          - битность хеша (16, 32 или 64)
+     *          - число потоков (зависит от системы)
+     *          - число ключей (целое положительное число)
+     *          - размер массива счетчиков хеш-значений
+     *          - флаг тестирования: NORMAL или BINS
+     *      3. logger - записывает лог в файл и выводит его на консоль
+     */
     template<hfl::UnsignedIntegral UintT>
     void DistributionTest(const std::vector<hfl::Hash<UintT>>& hashes, const DistTestParameters& parameters,
                           out::Logger& logger);
 
-    // Запускает тестирование распределительных свойств всех хеш функций
+    //  Запускает тестирование распределительных свойств всех хеш функций
+    //  Входной параметр: logger - записывает лог в файл и выводит его на консоль
     void RunDistributionTests(out::Logger& logger);
 
 // ==================================================

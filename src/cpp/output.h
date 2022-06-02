@@ -89,7 +89,4 @@ namespace tests::out {
     };
 }
 
-
-
-
 #endif //THESIS_WORK_OUTPUT_H

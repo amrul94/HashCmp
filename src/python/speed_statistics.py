@@ -2,16 +2,19 @@ import json
 import os.path
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 
 import my_histogram
 from reports_dir import *
 
 
-# частично этот класс совпадает с классом коллизий
 class SpeedStatistics:
+    """Класс для визуализации статистики скорости хеш-функций"""
+
     def __init__(self, tests_data: dict, tests_dir_name: str):
+        """
+        :param tests_data: json-структура с результатами тестов;
+        :param tests_dir_name: название папки, в которую будут сохранены графики
+        """
         self.graphics_path = 'graphics'
         self.bits = tests_data['Bits']
         self.speeds = tests_data["Speed"]
@@ -23,31 +26,21 @@ class SpeedStatistics:
 
     @staticmethod
     def __auto_label(ax, rects):
+        """
+        Статический метод, который устанавливает скорость хеширования на гистограммах.
+        :param ax: оси графиков;
+        :param rects: контейнер со всеми гистограммами.
+        :return: None
+        """
         for rect in rects:
             height = np.around(rect.get_height(), 1)
             ax.text(rect.get_x() + rect.get_width() / 2., height + 0.3, height, ha='center', va='bottom')
 
-    def __bar(self, ax, fig):
-        ax.set_title(f'Скорость хеширования ({self.bits}-битные хеш функции)', fontsize=18)
-        plt.xlabel('Хеш функции', fontsize=16)
-        plt.ylabel('Время хеширования (в секундах)', fontsize=16)
-
-        fig.set_figwidth(12)
-        fig.set_figheight(8)
-
-        x = self.speeds.keys()
-        height = self.speeds.values()
-        rects = plt.bar(x, height, color='grey', edgecolor='black', linewidth=1, alpha=0.5)
-        plt.xticks(rotation='vertical')
-        self.__auto_label(ax, rects)
-
-        max_height = max([int(np.around(rect.get_height() + 1, -1)) for rect in rects])
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(max_height / 5))
-        ax.yaxis.set_minor_locator(ticker.MultipleLocator(max_height / 25))
-        plt.grid(ls=':')
-        plt.ylim(top=max_height * 1.2)
-
     def create_histogram(self):
+        """
+        Построение гистограммы.
+        :return: None
+        """
         title = f'Скорость хеширования ({self.bits}-битные хеш функции)'
         legend_labels = []
         labels = my_histogram.Labels(title, 'Хеш функции', 'Число Время хеширования (в секундах)', legend_labels)
@@ -56,6 +49,13 @@ class SpeedStatistics:
 
 
 def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes):
+    """
+    Чтение json-файлов и на их основе построение гистограмм
+    :param tests_dir_name: название папки с тестами
+    :param dir_path: путь к папке с тестами
+    :param file_name: название json-файла с результатами тестов
+    :return: None
+    """
     path_to_file = os.path.join(dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
@@ -64,6 +64,11 @@ def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes)
 
 
 def process_speed_statistics(tests_dir_name):
+    """
+    Обработки данных тестирования скорости хешировании
+    :param tests_dir_name: название папки с результатами тестов
+    :return: None
+    """
     path_to_test_dir = get_cpp_report_path(tests_dir_name)
     path_to_eg_dir = os.path.join(path_to_test_dir, "Speed tests")
     list_of_files = os.listdir(path_to_eg_dir)

@@ -25,9 +25,25 @@ namespace tests {
     class AvalancheInfo;
 
     namespace out {
-        // Формирует json-файл, в который будет сохранена информация с теста хеш функции на лавинный эффект
+        /*
+         *  Формирует json-файл, в который будет сохранена информация с теста хеш функции на лавинный эффект
+         *  Входные параметры:
+         *      1. parameters - параметры тестирования:
+         *          - битность хеша (16, 32 или 64)
+         *          - число ключей (целое положительное число)
+         *          - число потоков (зависит от системы)
+         *      2. logger - записывает лог в файл и выводит его на консоль
+         */
         OutputJson GetAvalancheTestJson(const AvalancheTestParameters& parameters, out::Logger& loger);
-        // Сохраняет информацию с теста хеш функции на лавинный эффект в json
+
+        /*
+         *  Сохраняет информацию с теста хеш функции на лавинный эффект в json
+         *  Входные параметры:
+         *      1. avalanche_info - содержит информацию о результатах теста: расстояние Хемминга,
+         *                                                                   пары число-хеш для худшего случая
+         *  Выходное значение: json-структура, в которой сохранена вся информация о тесте, необходимая для отрисовки
+         *                     графиков и таблиц
+         */
         boost::json::object AvalancheInfoToJson(const AvalancheInfo& avalanche_info);
     }
 
@@ -95,38 +111,90 @@ namespace tests {
     // Оператор вывода структуры AvalancheInfo
     std::ostream& operator<<(std::ostream &os, const AvalancheInfo& avalanche_info);
 
-    // Сравнивает минимальное расстояние Хемминга с текущим
+    /*  Сравнивает минимальное расстояние Хемминга с текущим. Если текущее значение меньше максимального, то:
+     *      - присваивает текущее значение к минимальному;
+     *      - устанавливает значение частоты равное 1
+     *  Входные параметры:
+     *      1. avalanche_info - общая информация о результатах теста. Содержит минимальное расстояние
+     *      2. dist_and_freq - расстояние Хемминга на текущем шаге тестирования
+     *      3. original - пара оригинальное число и его хеш на текущем шаге тестирования
+     *      4. modified - пара измененное число и его хеш на текущем шаге тестирования
+     */
     void CompareAndChangeMinHammingDistance(AvalancheInfo& avalanche_info, const DistanceAndFrequency& dist_and_freq,
                                          const NumberAndHash& original, const NumberAndHash& modified);
 
-    // Сравнивает максимальное расстояние Хемминга с текущим. Если значение больше максимального, то:
-    // - присваивает текущее значение к максимальному;
-    // - устанавливает значение частоты равное 1
+    /*
+     *  Сравнивает максимальное расстояние Хемминга с текущим. Если текущее значение больше максимального, то:
+     *      - присваивает текущее значение к максимальному;
+     *      - устанавливает значение частоты равное 1
+     *  Входные параметры:
+     *      1. avalanche_info - общая информация о результатах теста. Содержит максимальное расстояние
+     *      2. dist_and_freq - расстояние Хемминга на текущем шаге тестирования
+     */
     void CompareAndChangeMaxHammingDistance(AvalancheInfo& avalanche_info, const DistanceAndFrequency& dist_and_freq);
 
-    // Рекуррентно вычисляет среднее расстояние Хемминга
+    /*
+     *  Рекуррентно вычисляет среднее расстояние Хемминга
+     *  Входные параметры:
+     *      1. prev_avg - среднее значение расстояния Хемминга на прошлом шаге
+     *      2. current_value - текущее значение расстояния Хемминга
+     *      3. step - текущий шаг
+     *  Выходное значение: среднее значение расстояния Хемминга на текущем шаге
+     */
     static inline long double CalculateArithmeticMean(long double prev_avg, long double current_value, long double step) {
         long double multiplier1 = 1l / (step + 1l);
         long double multiplier2 = step * prev_avg + current_value;
         return multiplier1 * multiplier2;
     }
 
-    // Вычисляет расстояние хемминга. Реализация описана ниже
+    /*
+     *  Вычисляет расстояние хемминга. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. avalanche_info - информация о лавинном эффекте: расстояние Хемминга и пары число-хеш для худшего случая
+     *      2. hash - хеш-функция
+     *      3. parameters - параметры тестирования:
+     *          - битность хеша (16, 32 или 64)
+     *          - число ключей (целое положительное число)
+     *          - число потоков (зависит от системы)
+     *      4. original_number - оригинальное число, в котором будут изменяться биты для вычисления расстояния Хемминга
+     */
     template<hfl::UnsignedIntegral UintT>
     void CalculateHammingDistance(AvalancheInfo& avalanche_info, const hfl::Hash<UintT>& hash,
-                                  const AvalancheTestParameters& tp, uint64_t original_number, uint64_t iteration_step);
+                                  const AvalancheTestParameters& parameters, uint64_t original_number,
+                                  uint64_t iteration_step);
 
-    // Тестирование лавинного эффекта для одной хеш функции. Реализация описана ниже
+    /*
+     *  Тестирование лавинного эффекта для одной хеш функции. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hash - хеш-функция
+     *      2. parameters - параметры тестирования:
+     *          - битность хеша (16, 32 или 64)
+     *          - число ключей (целое положительное число)
+     *          - число потоков (зависит от системы)
+     *      3. logger - записывает лог в файл и выводит его на консоль
+     */
     template<hfl::UnsignedIntegral UintT>
-    AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& tp,
+    AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& parameters,
                                     out::Logger& logger);
 
-    // Тестирование лавинного эффекта всех функций. Реализация описана ниже
+    /*  Тестирование лавинного эффекта всех функций. Реализация описана ниже
+     *  Параметр шаблона: целое беззнаковое число - тип хеш-значения
+     *  Входные параметры:
+     *      1. hashes - массив со всеми хеш-функциями одной битности
+     *      2. parameters - параметры тестирования:
+     *          - битность хеша (16, 32 или 64)
+     *          - число потоков (зависит от системы)
+     *          - число ключей (целое положительное число)
+     *      3. logger - записывает лог в файл и выводит его на консоль
+     */
     template<hfl::UnsignedIntegral UintT>
-    void AvalancheTest(const std::vector<hfl::Hash<UintT>>& hashes, const AvalancheTestParameters& tp,
+    void AvalancheTest(const std::vector<hfl::Hash<UintT>>& hashes, const AvalancheTestParameters& parameters,
                        out::Logger& logger);
 
-    // Запускает тестирование лавинного эффекта всех функций
+    //  Запускает тестирование лавинного эффекта всех функций
+    //  Входной параметр: logger - записывает лог в файл и выводит его на консоль
     void RunAvalancheTests(out::Logger& loger);
 
 
@@ -135,7 +203,7 @@ namespace tests {
     // Вычисляет расстояние хемминга.
     template<hfl::UnsignedIntegral UintT>
     void CalculateHammingDistance(AvalancheInfo& avalanche_info, const hfl::Hash<UintT>& hash,
-                                  const AvalancheTestParameters& tp, uint64_t original_number,
+                                  const AvalancheTestParameters& parameters, uint64_t original_number,
                                   uint64_t iteration_step) {
         // число бит хэшируемого числа
         constexpr uint8_t number_size = 64;
@@ -163,22 +231,22 @@ namespace tests {
 
     // Тестирование лавинного эффекта для одной хеш функции
     template<hfl::UnsignedIntegral UintT>
-    AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& tp,
+    AvalancheInfo HashAvalancheTest(const hfl::Hash<UintT>& hash, const AvalancheTestParameters& parameters,
                                     out::Logger& logger) {
         logger << boost::format("\t%1%: \n") % hash.GetName();
 
         // Выдает генераторы, число которых равно числу запускаемых потоков
-        auto generators = GetGenerators(tp.num_threads, tp.num_keys);
+        auto generators = GetGenerators(parameters.num_threads, parameters.num_keys);
 
         std::atomic_uint16_t gen_index = 0;
         // Функция, запускаемая в отдельном потоке.
         // Вычисляет расстояния хемминга для last - first чисел
-        auto thread_task = [&hash, &tp, &generators, &gen_index] (uint64_t first, uint64_t last) {
+        auto thread_task = [&hash, &parameters, &generators, &gen_index] (uint64_t first, uint64_t last) {
             pcg64 rng = generators[gen_index++];
             AvalancheInfo avalanche_info;
             while (first < last) {
                 uint64_t number = rng();
-                CalculateHammingDistance(avalanche_info, hash, tp, number, ++first);
+                CalculateHammingDistance(avalanche_info, hash, parameters, number, ++first);
             }
             return avalanche_info;
         };
@@ -197,7 +265,7 @@ namespace tests {
         };
 
         // Запускает вычисление лавинного эффекта в нескольких потоках
-        ThreadTasks<AvalancheInfo> tasks(thread_task, merge_results, tp.num_threads, tp.num_keys);
+        ThreadTasks<AvalancheInfo> tasks(thread_task, merge_results, parameters.num_threads, parameters.num_keys);
         const auto result = tasks.GetResult();
 
         // Логирование информации о лавинном эффекте
@@ -210,17 +278,17 @@ namespace tests {
 
     // Тестирование лавинного эффекта всех функций
     template<hfl::UnsignedIntegral UintT>
-    void AvalancheTest(const std::vector<hfl::Hash<UintT>>& hashes, const AvalancheTestParameters& tp,
+    void AvalancheTest(const std::vector<hfl::Hash<UintT>>& hashes, const AvalancheTestParameters& parameters,
                        out::Logger& logger) {
-        out::StartAndEndLogBitsTest log(logger, tp.hash_bits);
+        out::StartAndEndLogBitsTest log(logger, parameters.hash_bits);
 
-        auto out_json = out::GetAvalancheTestJson(tp, logger);
+        auto out_json = out::GetAvalancheTestJson(parameters, logger);
         boost::json::object avalanche_statistics;
 
         // В цикле запускаются тесты (HashAvalancheTest) для каждой хеш функции
         for (const auto& hash : hashes) {
             out::LogDuration log_duration("\t\ttime", logger);
-            AvalancheInfo avalanche_info = HashAvalancheTest(hash, tp, logger);
+            AvalancheInfo avalanche_info = HashAvalancheTest(hash, parameters, logger);
             auto hash_avalanche_statistics = out::AvalancheInfoToJson(avalanche_info);
             logger << "\t\tmedian hamming distance: " << hash_avalanche_statistics["Median case"] << std::endl;
             avalanche_statistics[hash.GetName()] = std::move(out::AvalancheInfoToJson(avalanche_info));

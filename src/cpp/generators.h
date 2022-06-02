@@ -7,8 +7,14 @@
 
 #include <pcg_random.hpp>
 
-// Генерирует сиды (seeds) для хеш-функций
-// - UintT - тип хеш-значения
+/*
+ *  Генерирует сиды (seeds) для хеш-функций
+ *  Параметры шаблона:
+ *      1. UintT - целое беззнаковое число (тип сида)
+ *      2. Generator - тип ГСПЧ
+ *  Входной параметр: generator - ГСПЧ
+ *  Выходное значение: массив сидов
+*/
 template<std::unsigned_integral UintT, size_t num_seeds, typename Generator>
 static inline std::array<UintT, num_seeds> GenerateSeedsImpl(Generator& generator) {
     std::array<UintT, num_seeds> seeds{};
@@ -18,21 +24,33 @@ static inline std::array<UintT, num_seeds> GenerateSeedsImpl(Generator& generato
     return seeds;
 }
 
-// Генерирует 8-битные сиды (seeds)
+/*
+ * Генерирует 8-битные сиды (seeds)
+ *  Параметры шаблона: num_seeds - число сидов
+ *  Выходное значение: массив сидов
+ */
 template<size_t num_seeds>
 static inline std::array<uint8_t, num_seeds> Generate8BitsSeeds() {
     pcg8_oneseq_once_insecure rng;
     return GenerateSeedsImpl<uint8_t, num_seeds>(rng);
 }
 
-// Генерирует 32-битные сиды (seeds)
+/*
+ *  Генерирует 32-битные сиды (seeds)
+ *  Параметры шаблона: num_seeds - число сидов
+ *  Выходное значение: массив сидов
+ */
 template<size_t num_seeds>
 static inline std::array<uint32_t, num_seeds> Generate32BitsSeeds() {
     pcg32 rng;
     return GenerateSeedsImpl<uint32_t, num_seeds>(rng);
 }
 
-// Генерирует 64-битные сиды (seeds)
+/*
+ *  Генерирует 64-битные сиды (seeds)
+ *  Параметры шаблона: num_seeds - число сидов
+ *  Выходное значение: массив сидов
+ */
 template<size_t num_seeds>
 static inline std::array<uint64_t, num_seeds>  Generate64BitsSeeds() {
     pcg64 rng;
@@ -54,13 +72,31 @@ const auto [SEED_32] = Generate32BitsSeeds<1>();
 // 64-битные сиды (seeds)
 const auto [SEED_64_1, SEED_64_2, SEED_64_3, SEED_64_4] = Generate64BitsSeeds<NUM_64_BITS_SEEDS>();
 
-// Конструирует num_generators хешей с шагом заданным шагом
+/*
+ *  Конструирует вектор генераторов с заданным шагом
+ *  Входные параметры:
+ *      1. num_generators - число генераторов
+ *      2. num_generate_numbers - число генерируемых чисел
+ *  Выходное значение: вектор генераторов
+ */
 std::vector<pcg64> GetGenerators(size_t num_generators, size_t num_generate_numbers);
 
-// Генерирует случайный блок данных заданной длины (length)
+/*  Генерирует случайный блок данных заданной длины
+ *  Входные параметры:
+ *      1. rng - генератор PCG-64
+ *      2. length - размер блока данных
+ *  Выходное значение: блок данных
+ */
 std::string GenerateRandomDataBlock(pcg64& rng, uint32_t length);
 
-// Генерирует вектор из случайных блоков данных заданной длины (length)
+/*
+ *  Генерирует вектор из случайных блоков данных заданной длины
+ *  Входные параметры:
+ *      1. rng - генератор PCG-64
+ *      2. num_blocks - число блоков
+ *      3. block_length - размер блока данных
+ *  Выходное значение: массив блоков данных
+ */
 std::vector<std::string> GenerateRandomDataBlocks(pcg64& rng, uint64_t num_blocks, uint32_t block_length);
 
 #endif //THESIS_WORK_GENERATORS_H

@@ -4,6 +4,7 @@
 #include <execution>
 #include <iostream>
 
+// Функция для проверки выполнения условий равенства
 template <typename T, typename U>
 void AssertEqualImpl(const T& t, const U& u, const std::string& t_str, const std::string& u_str, const std::string& file,
                      const std::string& func, unsigned line, const std::string& hint) {
@@ -22,8 +23,8 @@ void AssertEqualImpl(const T& t, const U& u, const std::string& t_str, const std
     }
 }
 
+// Макросы для проверки выполнения условий равенства
 #define ASSERT_EQUAL(a, b) AssertEqualImpl((a), (b), #a, #b, __FILE__, __FUNCTION__, __LINE__, "")
-
 #define ASSERT_EQUAL_HINT(a, b, hint) AssertEqualImpl((a), (b), #a, #b, __FILE__, __FUNCTION__, __LINE__, (hint))
 
 #endif //THESIS_WORK_MY_ASSERT_H

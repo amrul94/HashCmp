@@ -6,11 +6,14 @@ from base_statistics import *
 from reports_dir import *
 
 
-# Класс для визуализации статистики коллизий при хешировании
-# изображений и английских слов
 class DataCollisionsStatistics(CollisionsStatistics):
-    # Конструктор класса
+    """Класс для визуализации статистики коллизий при хешировании изображений и английских слов."""
+
     def __init__(self, tests_data: dict, tests_dir_name: str):
+        """
+        :param tests_data: json-структура с результатами тестов;
+        :param tests_dir_name: путь к папке, в которую сохраняются результаты выполнения программы
+        """
         CollisionsStatistics.__init__(self, tests_data)
         self.tests_dir_path = get_python_report_path(tests_dir_name)
         self.test_name = tests_data["Test name"]
@@ -18,16 +21,25 @@ class DataCollisionsStatistics(CollisionsStatistics):
         make_dir(self.tests_dir_path)
         make_dir(self.hist_path)
 
-    # Статический метод, который устанавливает число коллизий на гистограммах
     @staticmethod
     def __auto_label(ax, rects):
+        """
+        Статический метод, который устанавливает число коллизий на гистограммах.
+        :param ax: оси графиков;
+        :param rects: контейнер со всеми гистограммами.
+        :return: None
+        """
         for rect in rects:
             height = rect.get_height()
             ax.text(rect.get_x() + rect.get_width() / 2., 1.01 * height,
                     height, ha='center', va='bottom')
 
-    # Построение гистограммы
     def create_histogram(self):
+        """
+        Построение гистограммы.
+        :return: None
+        """
+
         # Названия на гистограмме
         title = f'Гистограмма коллизий ({self.bits}-битные хеш функции)'
         legend_labels = []
@@ -42,6 +54,13 @@ class DataCollisionsStatistics(CollisionsStatistics):
 
 # Чтение json-файлов и на их основе построение гистограмм и таблиц
 def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes):
+    """
+    Чтение json-файлов и на их основе построение гистограмм
+    :param tests_dir_name: название папки с тестами
+    :param dir_path: путь к папке с тестами
+    :param file_name: название json-файла с результатами тестов
+    :return: None
+    """
     path_to_file = os.path.join(dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
@@ -49,9 +68,13 @@ def create_histogram(tests_dir_name: str, dir_path: str, file_name: str | bytes)
         ews.create_histogram()
 
 
-# Обработки данных тестирования устойчивости к коллизиям
-# при хешировании изображений и английских слов
 def process_collision_statistics(tests_dir_name: str, test_name: str):
+    """
+    Обработки данных тестирования устойчивости к коллизиям при хешировании изображений и английских слов.
+    :param tests_dir_name: название папки с результатами тестов;
+    :param test_name: название теста.
+    :return: None
+    """
     path_to_tests_dir = get_cpp_report_path(tests_dir_name)
     path_to_cur_test_dir = os.path.join(path_to_tests_dir, test_name)
     list_of_files = os.listdir(path_to_cur_test_dir)

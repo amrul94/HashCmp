@@ -4,7 +4,7 @@ namespace tests {
     static constexpr uint8_t NUM_HASH_BITS = 64;
     namespace out {
         // Формирует json-файл, в который будет сохранена информация с теста хеш функции на лавинный эффект
-        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& tp, out::Logger& logger) {
+        OutputJson GetAvalancheTestJson(const AvalancheTestParameters& parameters, out::Logger& logger) {
             // Создает папку, в которую будет сохранен json
             const std::string test_name = "Avalanche effect tests";
             const std::filesystem::path report_test_dir = test_name;
@@ -12,7 +12,7 @@ namespace tests {
             std::filesystem::create_directories(report_test_path);
 
             // Создает файл, в который будет сохранен json
-            const std::filesystem::path report_name = std::to_string(tp.hash_bits) + " bits.json";
+            const std::filesystem::path report_name = std::to_string(parameters.hash_bits) + " bits.json";
             const std::filesystem::path out_path = report_test_path / report_name;
             std::ofstream out(out_path);
             BOOST_ASSERT_MSG(out, "Failed to create json file");
@@ -20,7 +20,7 @@ namespace tests {
             // Формирует json
             boost::json::object obj;
             obj["Test name"] = test_name;
-            obj["Bits"] = tp.hash_bits;
+            obj["Bits"] = parameters.hash_bits;
             return OutputJson{std::move(obj), std::move(out)};
         }
 
