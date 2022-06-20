@@ -1,4 +1,5 @@
 import json
+from statistics import mean
 
 import my_histogram
 from base_statistics import *
@@ -76,17 +77,18 @@ class AvalancheEffectStatistics:
         # путь по которому будет построена гистограмма
         file_path = os.path.join(self.hist_path, file_name + '.png')
         # пределы по оси Y
-        limits = my_histogram.Limits(self.bits * 1.125, -1)
+        limits = my_histogram.Limits(self.bits * 1.2, -1)
         # Шаг сетки
         locators = my_histogram.Locators(self.bits >> 2, self.bits >> 4)
         # построение гистограммы
         my_histogram.histogram_with_errors(self.hash_names, self.average_distance, self.error_distances, labels,
                                            file_path, locators, limits, self.median_distances)
 
-    def get_hamming_distance_table(self):
+    def get_hamming_distances(self):
         """
         Заполняет списки для построения таблицы расстояния Хемминга в docx
         :return: list[list[str] | list] - списки для построения таблицы
+                 dict - словарь, в который записываются лавинный эффект 32 и 64 битных функций
         """
         table = [['Название функции',
                   'Минимальное расстояние Хемминга',
@@ -95,11 +97,13 @@ class AvalancheEffectStatistics:
                   'Частота максимального расстояния',
                   'Среднее расстояние Хемминга',
                   'Медианное расстояние Хемминга']]
+        mean_distances = dict()
         for name, min_dist, min_freq, max_dist, max_freq, avg, median in \
                 zip(self.hash_names, self.minimum_distances, self.minimum_frequencies, self.maximum_distances,
                     self.maximum_frequencies, self.average_distance, self.median_distances):
             table.append([name, min_dist, min_freq, max_dist, max_freq, avg, median])
-        return table
+            mean_distances[name] = mean([min_dist, max_dist, median, avg])
+        return table, mean_distances
 
 
 def create_histogram(dir_path: str, file_name: str, save_path: str):
@@ -109,20 +113,21 @@ def create_histogram(dir_path: str, file_name: str, save_path: str):
     :param file_name: название json-файла с результатами тестов;
     :param save_path: путь к папке, в которую будут сохранены графики.
     :return: list[list[str] | list] - списки для построения таблицы
+             dict - словарь, в который записываются лавинный эффект 32 и 64 битных функций
     """
     path_to_file = os.path.join(dir_path, file_name)
     with open(path_to_file, 'r') as file:
         js = json.load(file)
         ds = AvalancheEffectStatistics(js, save_path)
         ds.create_histogram(file_name.split('.')[0])
-        return ds.get_hamming_distance_table()
+        return ds.get_hamming_distances()
 
 
 def process_avalanche_effect_statistics(tests_dir_name: str):
     """
     Обработки данных тестирования лавинного эффекта.
     :param tests_dir_name: название папки с результатами тестов.
-    :return: None
+    :return: словарь, в который записываются лавинный эффект 32 и 64 битных функций
     """
     report_heading = 'Таблицы лавинного эффекта'
     path_to_test_dir = get_cpp_report_path(tests_dir_name)
@@ -134,9 +139,13 @@ def process_avalanche_effect_statistics(tests_dir_name: str):
     make_dir(save_path)
     list_of_files = os.listdir(path_to_cur_test_dir)
     report = docx_report.create_document(report_heading)
+    all_mean_distances = dict()
     for file_name in list_of_files:
-        dict_tables = create_histogram(path_to_cur_test_dir, file_name, save_path)
+        dict_tables, mean_distances = create_histogram(path_to_cur_test_dir, file_name, save_path)
         heading = file_name.split('.')[0]
         docx_report.add_table_to_report(heading, dict_tables, report)
+        num_bits = int(file_name.split()[0])
+        if num_bits == 32 or num_bits == 64:
+            all_mean_distances[num_bits] = mean_distances
     docx_report.save_document(report, save_path, 'report.docx')
-
+    return all_mean_distances

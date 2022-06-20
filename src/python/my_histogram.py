@@ -47,9 +47,9 @@ def get_subplots(labels: Labels):
     :return: фигуру и оси графика.
     """
     fig, ax = plt.subplots()
-    ax.set_title(labels.title, fontsize=18)
-    plt.xlabel(labels.x_label, fontsize=16)
-    plt.ylabel(labels.y_label, fontsize=16)
+    ax.set_title(labels.title, fontsize=24)
+    plt.xlabel(labels.x_label, fontsize=20)
+    plt.ylabel(labels.y_label, fontsize=20)
 
     fig.set_figwidth(12)
     fig.set_figheight(8)
@@ -77,9 +77,9 @@ def histogram_with_errors(x, height, errors, labels, file_path, locators=None, l
     ax.bar(x, height, yerr=errors, edgecolor='red', ecolor='darkblue', capsize=6, bottom=0, color='orange', linewidth=1)
 
     if labels.legend_labels is not None:
-        ax.legend(labels=labels.legend_labels, fontsize=10)
+        ax.legend(labels=labels.legend_labels, fontsize=16)
 
-    plt.xticks(rotation='vertical')
+    plt.xticks(rotation='vertical', fontsize=14)
     if locators is not None:
         ax.yaxis.set_major_locator(ticker.MultipleLocator(locators.major))
         ax.yaxis.set_minor_locator(ticker.MultipleLocator(locators.minor))
@@ -108,7 +108,7 @@ def histogram(bars, labels, file_path, auto_label, is_log_scale=False):
     x = bars.keys()
     height = bars.values()
     rects = plt.bar(x, height, color='orange', edgecolor='red', linewidth=1)
-    plt.xticks(rotation='vertical')
+    plt.xticks(rotation='vertical', fontsize=13)
     auto_label(ax, rects)
 
     if is_log_scale:

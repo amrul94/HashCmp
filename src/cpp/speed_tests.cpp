@@ -229,7 +229,7 @@ namespace tests {
         // Тестирование хеш-функций FastHash, меньше 32-бит
         template<hfl::UnsignedIntegral UintT>
         void FastHash1To31Test(const std::vector<std::string>& words, out::Logger& logger, boost::json::object& obj) {
-            std::string hash_name = "FastHash";
+            std::string hash_name = "Fast-Hash";
 
             auto lambda = [](std::string_view str) {
                 constexpr uint16_t shift = 16;
@@ -340,7 +340,7 @@ namespace tests {
             HashTest(DJB2Hash<UintT>, args::char_key_uint_len, "DJB2 Hash"s, words, logger, obj);
             HashTest(SDBMHash<UintT>, args::char_key_uint_len, "SDBM Hash"s, words, logger, obj);
             HashTest(PJWHash<UintT>, args::char_key_uint_len, "PJW Hash"s, words, logger, obj);
-            HashTest(one_at_a_time_hash<UintT>, args::uchar_key_uint_len, "One at a time"s, words, logger, obj);
+            HashTest(one_at_a_time_hash<UintT>, args::uchar_key_uint_len, "One at a time hash"s, words, logger, obj);
             SpookyHashTest<UintT>(words, logger, obj);
         }
     }

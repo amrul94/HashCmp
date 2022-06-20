@@ -25,7 +25,6 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
         self.plot_path = os.path.join(blocks_dir_path, str(self.bits))
         make_dir(self.plot_path)
 
-
     @staticmethod
     def __plot_log_scale(ax):
         """
@@ -93,7 +92,7 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
         for hash_name in self.collisions:
             self.__plot_hash_collisions(hash_name)
 
-    def get_collisions(self):
+    def get_all_collisions(self):
         """
         Формирует списки для печати таблицы с информацией о коллизиях.
         :return: списки для печати таблицы
@@ -106,8 +105,16 @@ class GeneratedBlocksStatistics(CollisionsStatistics):
             collisions[-1].extend(self.collisions[hash_name].values())
         return collisions
 
+    def get_max_collisions(self):
+        max_collisions = dict()
+        for key, values in self.collisions.items():
+            hash_name = key.split(' (')[0]
+            collisions = [x for x in values.values()]
+            max_collisions[hash_name] = collisions[-1]
+        return max_collisions
 
-def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report, save_path: str):
+
+def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report, save_path: str, collisions: dict):
     """
     Чтение json-файлов и на их основе построение гистограмм и таблиц
     :param sub_dir_path: путь к папке с json-файлами
@@ -115,6 +122,7 @@ def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report, save_
     :param file_name: название json-файла с результатами тестов
     :param report: docx-документ, в который будут сохранены таблицы с результатами тестов
     :param save_path: путь к папке, в которую будут сохранены графики.
+    :param collisions: словарь, в который записываются коллизии 32 и 64 битных функций
     :return: None
     """
     path_to_file = os.path.join(sub_dir_path, file_name)
@@ -124,8 +132,9 @@ def plot_graphics(sub_dir_path: str, sub_dir_name, file_name: str, report, save_
         js["Blocks size"] = sub_dir_name
         cs = GeneratedBlocksStatistics(js, save_path)
         cs.plot()
-        cs.get_collisions()
-        data_collisions = cs.get_collisions()
+        data_collisions = cs.get_all_collisions()
+        if cs.bits == 32 or cs.bits == 64:
+            collisions[cs.bits] = cs.get_max_collisions()
         heading = f'{cs.bits} bits ({cs.mask} bits) with {cs.blocks_size} bytes block size'
         docx_report.add_table_to_report(heading, data_collisions, report)
 
@@ -137,18 +146,37 @@ def open_sub_dir(root_path: str, sub_dir_name, report, save_path: str):
     :param sub_dir_name: название папки с результатами тестов
     :param report: docx-документ, в который будут сохранены таблицы с результатами тестов
     :param save_path: путь к папке, в которую будут сохранены графики.
-    :return: None
+    :return: словарь, в который записываются коллизии 32 и 64 битных функций
     """
     sub_dir_path = os.path.join(root_path, sub_dir_name)
     list_of_files = os.listdir(sub_dir_path)
+    collisions = dict()
     for file_name in list_of_files:
-        plot_graphics(sub_dir_path, sub_dir_name, file_name, report, save_path)
+        plot_graphics(sub_dir_path, sub_dir_name, file_name, report, save_path, collisions)
+    return collisions
+
+
+def process_statistics(report_heading: str, root_path: str, save_path):
+    """
+    Проходит по вложенным каталогам результатов теста.
+    :param report_heading: заголовок документа docx
+    :param root_path: путь к папке с результатами тестов;
+    :param save_path: путь к папке, в которую будут сохранены графики и документ.
+    :return: словарь, в который записываются коллизии 32 и 64 битных функций
+    """
+    report = docx_report.create_document(report_heading)
+    dir_list = os.listdir(root_path)
+    collisions = None
+    for sub_dir_name in dir_list:
+        collisions = open_sub_dir(root_path, sub_dir_name, report, save_path)
+    docx_report.save_document(report, save_path, 'report.docx')
+    return collisions
 
 
 def process_collision_statistics(tests_dir_name):
-    """Обработки данных тестирования устойчивости к коллизиям при хешировании случайных блоков данных
-    :param tests_dir_name:
-    :return: None
+    """Обработка данных тестирования устойчивости к коллизиям при хешировании случайных блоков данных.
+    :param tests_dir_name: название папки с результатами тестов.
+    :return: словарь, в который записываются коллизии 32 и 64 битных функций
     """
     report_heading = 'Таблицы коллизий'
     path_to_test_dir = get_cpp_report_path(tests_dir_name)
@@ -158,4 +186,4 @@ def process_collision_statistics(tests_dir_name):
     make_dir(save_path)
     save_path = os.path.join(save_path, test_name)
     make_dir(save_path)
-    process_statistics(open_sub_dir, report_heading, path_to_gen_dir, save_path)
+    return process_statistics(report_heading, path_to_gen_dir, save_path)

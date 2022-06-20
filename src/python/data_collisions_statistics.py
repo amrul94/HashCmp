@@ -32,7 +32,7 @@ class DataCollisionsStatistics(CollisionsStatistics):
         for rect in rects:
             height = rect.get_height()
             ax.text(rect.get_x() + rect.get_width() / 2., 1.01 * height,
-                    height, ha='center', va='bottom')
+                    height, ha='center', va='bottom', fontsize=14)
 
     def create_histogram(self):
         """
